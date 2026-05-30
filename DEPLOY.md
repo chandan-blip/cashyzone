@@ -10,16 +10,19 @@ localhost — only Nginx is exposed publicly.
 ---
 
 ## 0. DNS — point the subdomain at the VPS
+
 In your DNS provider add an **A record**:
 
 ```
 Type: A    Name: cashyzone    Value: <your VPS public IP>    TTL: auto
 ```
+
 (`cashyzone.YOURDOMAIN.com` → VPS IP). Wait a few minutes for it to resolve.
 
 ---
 
 ## 1. Copy the project to the VPS
+
 From your **local machine** (in `/home/dev/Documents/cashyzone`):
 
 ```bash
@@ -33,6 +36,7 @@ rsync -avz --exclude node_modules --exclude .vagrant \
 ---
 
 ## 2. Create the database on the existing MySQL
+
 SSH into the VPS, then:
 
 ```bash
@@ -46,6 +50,7 @@ Use the **same password** in the `.env` below.
 ---
 
 ## 3. Configure the app
+
 ```bash
 cd /var/www/cashyzone
 cp /path/to/.env.production.example .env   # or create .env manually
@@ -70,6 +75,7 @@ Migration prints the admin login (default `admin@cashyzone.com` / `admin123`).
 ---
 
 ## 4. Start with PM2
+
 ```bash
 cd /var/www/cashyzone
 pm2 start ecosystem.config.js
@@ -79,6 +85,7 @@ pm2 logs cashyzone       # verify it says: cashyzone listening on http://0.0.0.0
 ```
 
 Quick local check on the VPS:
+
 ```bash
 curl localhost:3100/health     # -> {"status":"ok","db":"up"}
 ```
@@ -86,6 +93,7 @@ curl localhost:3100/health     # -> {"status":"ok","db":"up"}
 ---
 
 ## 5. Nginx subdomain + reverse proxy
+
 ```bash
 sudo cp deploy/nginx-cashyzone.conf /etc/nginx/sites-available/cashyzone.conf
 sudo sed -i 's/cashyzone.YOURDOMAIN.com/cashyzone.realdomain.com/' \
@@ -100,9 +108,11 @@ by `server_name`, so both sites coexist on ports 80/443.
 ---
 
 ## 6. HTTPS (Let's Encrypt)
+
 ```bash
 sudo certbot --nginx -d cashyzone.realdomain.com
 ```
+
 Certbot edits the server block to add the 443/SSL section and auto-renews.
 
 Open **https://cashyzone.realdomain.com** — done.
@@ -110,6 +120,7 @@ Open **https://cashyzone.realdomain.com** — done.
 ---
 
 ## After deploy
+
 - **Change the admin password**: log in as the admin, or update it directly:
   ```bash
   # generate a bcrypt hash then set it:
@@ -121,6 +132,7 @@ Open **https://cashyzone.realdomain.com** — done.
 - The hardcoded UPI/Telegram defaults live in `src/settings.js` only as fallbacks.
 
 ## Updating later (new code)
+
 ```bash
 # local:
 rsync -avz --exclude node_modules --exclude .vagrant ./app/ youruser@VPS:/var/www/cashyzone/
@@ -129,7 +141,72 @@ cd /var/www/cashyzone && npm ci --omit=dev && npm run migrate && pm2 restart cas
 ```
 
 ## Switching to your own domain later
+
 1. Add an A record for the new domain → VPS IP.
 2. `sudo certbot --nginx -d newdomain.com` (or add `-d` to the existing block).
 3. Update `server_name` in the nginx config and `sudo systemctl reload nginx`.
-No app changes needed — it doesn't hardcode the domain.
+   No app changes needed — it doesn't hardcode the domain.
+
+● Your stack: Nginx + existing MySQL + PM2. I've created deployment files and a full DEPLOY.md. Here's the condensed walkthrough — full details are in
+DEPLOY.md.
+
+I chose port 3100 for the app (instead of 3000) to avoid clashing with your existing project. The app binds to localhost; only Nginx is public.
+
+Files created
+
+- DEPLOY.md — complete step-by-step guide
+- app/ecosystem.config.js — PM2 config (reads .env for secrets)
+- deploy/nginx-cashyzone.conf — Nginx subdomain → proxy to 127.0.0.1:3100
+- deploy/.env.production.example — env template
+
+The 7 steps
+
+1. DNS — add an A record: cashyzone → your VPS IP (gives cashyzone.YOURDOMAIN.com).
+
+2. Copy code (from your local machine):
+   rsync -avz --exclude node_modules --exclude .vagrant \
+    ./app/ youruser@YOUR_VPS_IP:/var/www/cashyzone/
+
+3. Create DB on existing MySQL (on VPS):
+   sudo mysql -e "CREATE DATABASE IF NOT EXISTS cashyzone CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; \
+   CREATE USER IF NOT EXISTS 'cashy'@'localhost' IDENTIFIED BY 'STRONGPASS'; \
+   GRANT ALL PRIVILEGES ON cashyzone.\* TO 'cashy'@'localhost'; FLUSH PRIVILEGES;"
+
+4. Configure + install (on VPS, in /var/www/cashyzone):
+   cp deploy/.env.production.example .env # if you copied deploy/ too; else create .env
+   nano .env # set DB_PASSWORD (match step 3), JWT_SECRET=$(openssl rand -hex 32), PORT=3100
+   npm ci --omit=dev
+   npm run migrate
+
+5. Start with PM2:
+   pm2 start ecosystem.config.js
+   pm2 save && pm2 startup # run the line it prints
+   curl localhost:3100/health # {"status":"ok","db":"up"}
+
+6. Nginx subdomain (coexists with your other site — separate server_name):
+   sudo cp deploy/nginx-cashyzone.conf /etc/nginx/sites-available/cashyzone.conf
+   sudo nano /etc/nginx/sites-available/cashyzone.conf # set your real subdomain
+   sudo ln -s /etc/nginx/sites-available/cashyzone.conf /etc/nginx/sites-enabled/
+   sudo nginx -t && sudo systemctl reload nginx
+
+7. HTTPS:
+   sudo certbot --nginx -d cashyzone.YOURDOMAIN.com
+
+Open https://cashyzone.YOURDOMAIN.com.
+
+After deploy
+
+- Change admin password (default admin@cashyzone.com / admin123) — command in DEPLOY.md.
+- Set real UPI ID / Telegram link / fees in Admin → Settings (no redeploy).
+
+Later: your own domain
+
+Add A record → certbot --nginx -d newdomain.com → update server_name → reload. No app changes — nothing hardcodes the domain.
+
+---
+
+Two things to confirm before you start:
+
+1. Node version on the VPS — run node -v. The app needs Node 18+ (uses --watch-free runtime, optional chaining, etc.). If it's older, tell me and I'll
+   add the NodeSource install step.
+2. rsync vs git — is this project in a git repo on the VPS side, or should you rsync? If you prefer git, I can adjust step 2.
