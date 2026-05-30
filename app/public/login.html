@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login — CashyZone</title>
+  <script src="/assets/head.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+  <div id="nav"></div>
+
+  <main class="max-w-md mx-auto px-5 py-16">
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-xl p-7">
+      <h1 id="title" class="text-2xl font-black">Welcome back</h1>
+      <p id="subtitle" class="text-slate-500 text-sm mt-1">Login to your CashyZone wallet.</p>
+
+      <form id="form" class="mt-6 space-y-3">
+        <div id="nameField" hidden>
+          <input id="fName" placeholder="Full name" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
+        </div>
+        <input id="fEmail" type="email" placeholder="Email address" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
+
+        <!-- register-only fields -->
+        <div id="regFields" hidden class="space-y-3">
+          <input id="fPhone" type="tel" placeholder="Phone number" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Date of birth</label>
+            <input id="fDob" type="date" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
+          </div>
+          <input id="fState" placeholder="State" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
+          <select id="fCountry" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none text-slate-600">
+            <option value="">Select country</option>
+            <option value="India" selected>India</option>
+            <option value="United States">United States</option>
+            <option value="United Kingdom">United Kingdom</option>
+            <option value="Canada">Canada</option>
+            <option value="Australia">Australia</option>
+            <option value="United Arab Emirates">United Arab Emirates</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <input id="fPassword" type="password" placeholder="Password (min 6 chars)" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
+        <p id="error" hidden class="text-sm text-red-600"></p>
+        <button id="submit" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-semibold py-3 rounded-xl transition">Login</button>
+      </form>
+
+      <p class="text-center text-sm text-slate-500 mt-4">
+        <span id="switchText">New here?</span>
+        <button id="switchBtn" class="font-semibold text-brand-600 hover:underline">Create an account</button>
+      </p>
+
+    </div>
+  </main>
+
+  <script src="/assets/app.js"></script>
+  <script>
+    CZ.renderNav(null);
+    const params = new URLSearchParams(location.search);
+    const next = params.get('next') || '/tasks.html';
+    let mode = params.get('mode') === 'register' ? 'register' : 'login';
+
+    const $ = (id) => document.getElementById(id);
+    function apply() {
+      const reg = mode === 'register';
+      $('title').textContent = reg ? 'Create your account' : 'Welcome back';
+      $('subtitle').textContent = reg ? 'Sign up and get your INR wallet.' : 'Login to your CashyZone wallet.';
+      $('submit').textContent = reg ? 'Create account' : 'Login';
+      $('nameField').hidden = !reg;
+      $('regFields').hidden = !reg;
+      $('switchText').textContent = reg ? 'Already have an account?' : 'New here?';
+      $('switchBtn').textContent = reg ? 'Login instead' : 'Create an account';
+    }
+    $('switchBtn').addEventListener('click', () => { mode = mode === 'login' ? 'register' : 'login'; apply(); });
+    apply();
+
+    if (CZ.token) location.href = next;
+
+    $('form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      $('error').hidden = true;
+      const payload = { email: $('fEmail').value, password: $('fPassword').value };
+      if (mode === 'register') {
+        payload.name = $('fName').value;
+        payload.phone = $('fPhone').value;
+        payload.dob = $('fDob').value;
+        payload.state = $('fState').value;
+        payload.country = $('fCountry').value;
+      }
+      try {
+        const path = mode === 'register' ? '/api/auth/register' : '/api/auth/login';
+        const data = await CZ.api(path, { method: 'POST', body: JSON.stringify(payload) });
+        CZ.setSession(data.token, data.user);
+        location.href = data.user.is_admin ? '/admin.html' : next;
+      } catch (err) {
+        $('error').textContent = err.message; $('error').hidden = false;
+      }
+    });
+  </script>
+</body>
+</html>

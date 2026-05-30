@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wallet — CashyZone</title>
+  <script src="/assets/head.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+  <div id="nav"></div>
+
+  <main class="max-w-6xl mx-auto px-5 py-10">
+    <!-- Header -->
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h1 class="text-3xl font-black">My Wallet</h1>
+        <p class="text-slate-500 mt-1">Account balance &amp; payouts — all amounts in Indian Rupees (INR).</p>
+      </div>
+      <div class="flex gap-2">
+        <a id="kycBtn" href="/kyc.html" hidden class="bg-white border border-slate-200 hover:border-brand-300 font-semibold px-4 py-3 rounded-xl transition">KYC</a>
+        <a href="/deposit.html" class="bg-brand-500 hover:bg-brand-600 text-white font-semibold px-5 py-3 rounded-xl transition" style="box-shadow:0 18px 40px -18px rgba(22,196,95,.6)">+ Add Money</a>
+      </div>
+    </div>
+
+    <!-- BLOCK 1: Balance cards -->
+    <section class="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Total income (primary) -->
+      <div class="col-span-2 lg:col-span-1 bg-gradient-to-br from-brand-600 to-emerald-500 text-white rounded-3xl p-6">
+        <div class="flex items-center justify-between">
+          <p class="text-sm/none opacity-90">Total Income</p>
+          <span class="text-xs font-semibold bg-white/20 px-2 py-1 rounded-full">INR</span>
+        </div>
+        <p class="mt-3 text-4xl font-black" id="cTotal">₹0.00</p>
+        <p class="mt-1 text-xs opacity-80">Lifetime earnings + deposits</p>
+      </div>
+
+      <!-- Available balance -->
+      <div class="bg-white rounded-3xl border border-slate-200 p-6">
+        <p class="text-sm text-slate-500">Available Balance</p>
+        <p class="mt-3 text-3xl font-black text-slate-800" id="cAvailable">₹0.00</p>
+        <p class="mt-1 text-xs text-slate-400">Ready for withdrawal</p>
+      </div>
+
+      <!-- Bonus money -->
+      <div class="bg-white rounded-3xl border border-slate-200 p-6">
+        <p class="text-sm text-slate-500">Bonus Money</p>
+        <p class="mt-3 text-3xl font-black text-amber-500" id="cBonus">₹0.00</p>
+        <p class="mt-1 text-xs text-slate-400">Reward bonuses earned</p>
+      </div>
+
+      <!-- Withdrawn -->
+      <div class="bg-white rounded-3xl border border-slate-200 p-6">
+        <p class="text-sm text-slate-500">Withdrawn</p>
+        <p class="mt-3 text-3xl font-black text-slate-800" id="cWithdrawn">₹0.00</p>
+        <p class="mt-1 text-xs text-slate-400">Total earnings withdrawn</p>
+      </div>
+    </section>
+
+    <!-- Mini stats row -->
+    <section class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-white rounded-2xl border border-slate-200 px-5 py-4"><p class="text-2xl font-black text-brand-600" id="sTasks">0</p><p class="text-xs text-slate-500">Tasks completed</p></div>
+      <div class="bg-white rounded-2xl border border-slate-200 px-5 py-4"><p class="text-2xl font-black" id="sEarned">₹0</p><p class="text-xs text-slate-500">Task earnings</p></div>
+      <div class="bg-white rounded-2xl border border-slate-200 px-5 py-4"><p class="text-2xl font-black" id="sPendWd">0</p><p class="text-xs text-slate-500">Pending withdrawals</p></div>
+      <div class="bg-white rounded-2xl border border-slate-200 px-5 py-4"><p class="text-2xl font-black" id="sTxns">0</p><p class="text-xs text-slate-500">Transactions</p></div>
+    </section>
+
+    <div class="mt-8 grid lg:grid-cols-5 gap-6">
+      <!-- BLOCK 2: Withdraw Funds (tabbed methods) -->
+      <section class="lg:col-span-2 bg-white rounded-3xl border border-slate-200 p-6">
+        <h2 class="text-xl font-black">Withdraw Funds</h2>
+        <p class="text-slate-500 text-sm mt-1">Choose a method and request a payout. Admin approves it.</p>
+
+        <!-- KYC gate notice -->
+        <div id="kycGate" hidden class="mt-4 rounded-xl p-3 text-sm border"></div>
+
+        <!-- method tabs -->
+        <div class="mt-5 flex gap-2 text-sm">
+          <button data-m="upi"   class="m-tab flex-1 py-2 rounded-xl bg-brand-500 text-white font-semibold">UPI</button>
+          <button data-m="bank"  class="m-tab flex-1 py-2 rounded-xl bg-slate-100 font-semibold">Bank</button>
+          <button data-m="paypal" class="m-tab flex-1 py-2 rounded-xl bg-slate-100 font-semibold">PayPal</button>
+        </div>
+
+        <form id="withdrawForm" class="mt-5 space-y-3">
+          <!-- UPI fields -->
+          <div data-fields="upi" class="space-y-3">
+            <div class="flex gap-2 flex-wrap text-xs">
+              <span class="px-2.5 py-1 rounded-lg bg-slate-100">Google Pay</span>
+              <span class="px-2.5 py-1 rounded-lg bg-slate-100">PhonePe</span>
+              <span class="px-2.5 py-1 rounded-lg bg-slate-100">Paytm</span>
+              <span class="px-2.5 py-1 rounded-lg bg-slate-100">Amazon Pay</span>
+            </div>
+            <input id="upiId" placeholder="Enter your UPI ID (e.g. name@upi)"
+              class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
+          </div>
+
+          <!-- Bank fields -->
+          <div data-fields="bank" class="space-y-3" hidden>
+            <input id="bankName" placeholder="Enter bank name" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
+            <input id="bankAcct" placeholder="Enter account number" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
+            <input id="bankIfsc" placeholder="Enter IFSC code" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
+          </div>
+
+          <!-- PayPal fields -->
+          <div data-fields="paypal" class="space-y-3" hidden>
+            <input id="ppEmail" type="email" placeholder="Enter your PayPal email" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
+          </div>
+
+          <!-- amount (shared) -->
+          <input id="wdAmount" type="number" min="1" step="0.01" placeholder="Enter amount"
+            class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
+
+          <p id="wdMsg" hidden class="text-sm"></p>
+          <button id="wdBtn" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 rounded-xl transition">Withdraw via UPI</button>
+        </form>
+      </section>
+
+      <!-- BLOCK 3: Payment History (collapsible items) -->
+      <section class="lg:col-span-3 bg-white rounded-3xl border border-slate-200 overflow-hidden">
+        <div class="p-6 pb-3 flex items-center justify-between">
+          <h2 class="text-xl font-black">Payment History</h2>
+          <span class="hidden sm:flex gap-6 pr-9 text-xs font-semibold text-slate-400 uppercase tracking-wide">
+            <span>Amount</span><span>Status</span>
+          </span>
+        </div>
+        <div id="historyList" class="divide-y divide-slate-100">
+          <p class="px-6 py-10 text-center text-slate-400">No Transactions</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="/assets/app.js"></script>
+  <script>
+    if (!CZ.requireAuth()) { /* redirected */ }
+    CZ.renderNav('wallet');
+
+    let method = 'upi';
+    const btnLabel = { upi: 'Withdraw via UPI', bank: 'Withdraw to Bank', paypal: 'Continue to PayPal' };
+
+    document.querySelectorAll('.m-tab').forEach((b) => b.addEventListener('click', () => {
+      method = b.dataset.m;
+      document.querySelectorAll('.m-tab').forEach((x) => x.className = 'm-tab flex-1 py-2 rounded-xl bg-slate-100 font-semibold');
+      b.className = 'm-tab flex-1 py-2 rounded-xl bg-brand-500 text-white font-semibold';
+      document.querySelectorAll('[data-fields]').forEach((f) => f.hidden = f.dataset.fields !== method);
+      document.getElementById('wdBtn').textContent = btnLabel[method];
+    }));
+
+    const badge = (s) => {
+      const map = { pending: 'bg-amber-100 text-amber-700', approved: 'bg-brand-100 text-brand-700', completed: 'bg-brand-100 text-brand-700', rejected: 'bg-red-100 text-red-700' };
+      return `<span class="text-xs font-semibold px-2.5 py-1 rounded-full ${map[s] || 'bg-slate-100 text-slate-600'}">${s}</span>`;
+    };
+    const when = (d) => new Date(d).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+
+    const typeLabel = { deposit: 'Deposit', withdraw: 'Withdrawal', earning: 'Task reward' };
+
+    function detailRows(r) {
+      // Build the key/value pairs shown when an item is expanded.
+      const pairs = [['Type', r.kind]];
+      if (r.desc) pairs.push(['Description', r.desc]);
+      if (r.utr) pairs.push(['UTR / Reference', r.utr]);
+      if (r.dest) pairs.push(['Payout to', r.dest]);
+      pairs.push(['Amount', `${r.sign}${CZ.money(r.amount)}`]);
+      pairs.push(['Status', r.status]);
+      pairs.push(['Date & time', when(r.date)]);
+      return pairs.map(([k, v]) =>
+        `<div class="flex justify-between gap-4 py-1.5 border-b border-slate-100 last:border-0">
+           <span class="text-slate-400">${k}</span><span class="font-medium text-right">${v}</span></div>`
+      ).join('');
+    }
+
+    function renderHistory(data) {
+      // Combine ledger transactions + deposit/withdrawal requests into one dated list.
+      const rows = [];
+      data.transactions.forEach((t) => rows.push({
+        date: t.created_at, kind: typeLabel[t.type] || t.type, desc: t.description || '',
+        sign: t.type === 'withdraw' ? '-' : '+',
+        color: t.type === 'withdraw' ? 'text-red-600' : 'text-brand-600',
+        amount: t.amount, status: 'completed',
+      }));
+      data.deposits.filter((d) => d.status !== 'approved').forEach((d) => rows.push({
+        date: d.created_at, kind: 'Deposit request', desc: d.note || 'Add money to wallet', utr: d.utr,
+        sign: '+', color: 'text-slate-500', amount: d.amount, status: d.status,
+      }));
+      data.withdrawals.filter((w) => w.status === 'pending').forEach((w) => rows.push({
+        date: w.created_at, kind: 'Withdrawal request', dest: w.upi_id,
+        sign: '-', color: 'text-slate-500', amount: w.amount, status: w.status,
+      }));
+      rows.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      const list = document.getElementById('historyList');
+      if (!rows.length) { list.innerHTML = '<p class="px-6 py-10 text-center text-slate-400">No Transactions</p>'; return; }
+
+      list.innerHTML = rows.map((r) => `
+        <details class="group">
+          <summary class="list-none cursor-pointer px-6 py-3 flex items-center gap-3 hover:bg-slate-50 transition">
+            <svg class="w-4 h-4 text-slate-400 transition-transform group-open:rotate-90 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+            <div class="flex-1 min-w-0">
+              <p class="font-semibold truncate">${r.kind}</p>
+              <p class="text-xs text-slate-400">${when(r.date)}</p>
+            </div>
+            <span class="font-bold ${r.color} whitespace-nowrap">${r.sign}${CZ.money(r.amount)}</span>
+            <span class="w-24 text-right">${badge(r.status)}</span>
+          </summary>
+          <div class="px-6 pb-4 pl-13 text-sm">
+            <div class="bg-slate-50 rounded-xl p-4">${detailRows(r)}</div>
+          </div>
+        </details>`).join('');
+    }
+
+    // Show the KYC requirement on the withdraw card and enable/disable the form.
+    // Skipped entirely for users who have not made any approved deposit yet.
+    async function loadKycGate(hasApprovedDeposit) {
+      const gate = document.getElementById('kycGate');
+      const form = document.getElementById('withdrawForm');
+      const disable = (on) => { form.querySelectorAll('input,button').forEach((el) => el.disabled = on); };
+
+      if (!hasApprovedDeposit) { gate.hidden = true; disable(false); return; }
+
+      let k;
+      try { k = await CZ.api('/api/kyc'); } catch { return; }
+
+      if (k.status === 'verified') { gate.hidden = true; disable(false); return; }
+
+      gate.hidden = false; disable(true);
+      gate.className = 'mt-4 rounded-xl p-3 text-sm border bg-amber-50 border-amber-200 text-amber-800';
+      if (k.status === 'pending') {
+        gate.innerHTML = '⏳ Your KYC is under review. Withdrawals unlock once verified.';
+      } else if (k.status === 'awaiting_payment') {
+        gate.innerHTML = `Pay the ${CZ.money(k.fee)} KYC fee to enable withdrawals. <a href="/deposit.html?purpose=kyc" class="font-semibold underline">Pay now</a>`;
+      } else {
+        gate.innerHTML = `Complete KYC verification to withdraw. <a href="/kyc.html" class="font-semibold underline">Start KYC</a>`;
+      }
+    }
+
+    async function load() {
+      const data = await CZ.api('/api/wallet');
+      const s = data.stats;
+      document.getElementById('cTotal').textContent = CZ.money(s.totalIncome);
+      document.getElementById('cAvailable').textContent = CZ.money(data.balance);
+      document.getElementById('cBonus').textContent = CZ.money(s.bonusIncome);
+      document.getElementById('cWithdrawn').textContent = CZ.money(s.withdrawn);
+      document.getElementById('sTasks').textContent = s.tasksCompleted;
+      document.getElementById('sEarned').textContent = CZ.money(s.taskIncome);
+      document.getElementById('sPendWd').textContent = data.withdrawals.filter((w) => w.status === 'pending').length;
+      document.getElementById('sTxns').textContent = data.transactions.length;
+      const pill = document.getElementById('navBalance'); if (pill) pill.textContent = CZ.money(data.balance);
+      CZ.setSession(CZ.token, { ...CZ.user, balance: data.balance });
+
+      // Only show the KYC button + withdraw gate once the user has an approved deposit.
+      const hasApprovedDeposit = data.deposits.some((d) => d.status === 'approved');
+      document.getElementById('kycBtn').hidden = !hasApprovedDeposit;
+      loadKycGate(hasApprovedDeposit);
+
+      renderHistory(data);
+    }
+
+    document.getElementById('withdrawForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('wdMsg');
+      msg.hidden = true;
+
+      // Build a payout-destination string from the active method's fields.
+      let dest = '';
+      if (method === 'upi') dest = (document.getElementById('upiId').value || '').trim();
+      else if (method === 'bank') {
+        const n = document.getElementById('bankName').value.trim();
+        const a = document.getElementById('bankAcct').value.trim();
+        const i = document.getElementById('bankIfsc').value.trim();
+        if (n && a && i) dest = `Bank: ${n}, A/C ${a}, IFSC ${i}`;
+      } else if (method === 'paypal') {
+        const em = document.getElementById('ppEmail').value.trim();
+        if (em) dest = `PayPal: ${em}`;
+      }
+      if (!dest) { msg.className = 'text-sm text-red-600'; msg.textContent = 'Please fill the payout details.'; msg.hidden = false; return; }
+
+      try {
+        await CZ.api('/api/wallet/withdraw', {
+          method: 'POST',
+          body: JSON.stringify({ amount: document.getElementById('wdAmount').value, upi_id: dest }),
+        });
+        e.target.reset();
+        msg.className = 'text-sm text-brand-600 font-semibold';
+        msg.textContent = 'Withdrawal requested ✓ Pending admin approval.';
+        msg.hidden = false;
+        CZ.toast('Withdrawal requested');
+        load();
+      } catch (err) { msg.className = 'text-sm text-red-600'; msg.textContent = err.message; msg.hidden = false; }
+    });
+
+    load();
+  </script>
+</body>
+</html>

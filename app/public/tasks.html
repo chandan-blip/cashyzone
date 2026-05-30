@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tasks — CashyZone</title>
+  <script src="/assets/head.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+  <div id="nav"></div>
+
+  <main class="max-w-6xl mx-auto px-5 py-5">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-black">Available tasks</h1>
+        <p class="text-slate-500 mt-1">Buy a task, type the paragraph correctly, and earn <b>3×</b> your buy price.</p>
+      </div>
+      <div class="flex gap-2 text-sm">
+        <button data-filter="all" class="filter px-3 py-2 rounded-xl bg-brand-500 text-white font-semibold">All</button>
+        <button data-filter="open" class="filter px-3 py-2 rounded-xl bg-white border border-slate-200 font-semibold">Not bought</button>
+        <button data-filter="mine" class="filter px-3 py-2 rounded-xl bg-white border border-slate-200 font-semibold">My tasks</button>
+        <button data-filter="done" class="filter px-3 py-2 rounded-xl bg-white border border-slate-200 font-semibold">Completed</button>
+      </div>
+    </div>
+
+    <div id="grid" class="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <p class="text-slate-400">Loading tasks…</p>
+    </div>
+  </main>
+
+  <script src="/assets/app.js"></script>
+  <script>
+    CZ.renderNav('tasks');
+    let allTasks = [];
+    let filter = 'all';
+
+    function render() {
+      const grid = document.getElementById('grid');
+      const list = allTasks.filter((t) =>
+        filter === 'all' ? true
+        : filter === 'done' ? t.status === 'completed'
+        : filter === 'mine' ? t.status !== 'none'
+        : /* open */ t.status === 'none'
+      );
+      if (!list.length) { grid.innerHTML = '<p class="text-slate-400">No tasks here.</p>'; return; }
+      grid.innerHTML = list.map((t) => {
+        const border = t.status === 'completed' ? 'border-brand-200 bg-brand-50/40'
+                     : t.status === 'purchased' ? 'border-sky-200 bg-sky-50/40' : 'border-slate-200';
+        let action;
+        if (t.status === 'completed') {
+          action = '<button disabled class="w-full bg-brand-100 text-brand-700 text-sm font-semibold py-2 rounded-xl">✓ Completed</button>';
+        } else if (t.status === 'purchased') {
+          action = `<a href="/attempt.html?id=${t.id}" class="block text-center w-full bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold py-2 rounded-xl transition">Attempt now</a>`;
+        } else {
+          action = `<button data-buy="${t.id}" class="buy w-full bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold py-2 rounded-xl transition">Buy for ${CZ.money(t.price)}</button>`;
+        }
+        return `
+        <div class="bg-white rounded-2xl border ${border} p-5 flex flex-col hover:shadow-lg transition">
+          <div class="flex items-start justify-between">
+            <span class="text-xs font-semibold bg-brand-50 text-brand-700 px-2.5 py-1 rounded-full">${t.category}</span>
+            <span class="text-right">
+              <span class="block text-[11px] text-slate-400 leading-none">Buy ${CZ.money(t.price)}</span>
+              <span class="block text-lg font-black text-brand-600">Earn ${CZ.money(t.reward)}</span>
+            </span>
+          </div>
+          <h3 class="mt-3 font-bold leading-snug">${t.title}</h3>
+          <p class="mt-1 text-sm text-slate-400">Task #${t.id} • ${t.length} characters • 3× return</p>
+          <div class="mt-4 pt-4 border-t border-slate-100">${action}</div>
+        </div>`;
+      }).join('');
+    }
+
+    document.querySelectorAll('.filter').forEach((b) => b.addEventListener('click', () => {
+      filter = b.dataset.filter;
+      document.querySelectorAll('.filter').forEach((x) => x.className = 'filter px-3 py-2 rounded-xl bg-white border border-slate-200 font-semibold');
+      b.className = 'filter px-3 py-2 rounded-xl bg-brand-500 text-white font-semibold';
+      render();
+    }));
+
+    document.getElementById('grid').addEventListener('click', async (e) => {
+      const btn = e.target.closest('.buy');
+      if (!btn) return;
+      if (!CZ.token) { location.href = '/login.html?next=/tasks.html'; return; }
+      const id = btn.dataset.buy;
+      btn.disabled = true; btn.textContent = 'Buying…';
+      try {
+        await CZ.api('/api/tasks/' + id + '/buy', { method: 'POST' });
+        CZ.toast('Task purchased ✓');
+        location.href = '/attempt.html?id=' + id;
+      } catch (err) {
+        CZ.toast(err.message);
+        render(); // restore button
+      }
+    });
+
+    async function load() {
+      allTasks = await CZ.api('/api/tasks').catch(() => []);
+      render();
+    }
+    load();
+  </script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Add Money — CashyZone</title>
+  <script src="/assets/head.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@gh-pages/qrcode.min.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+  <div id="nav"></div>
+
+  <main class="max-w-2xl mx-auto px-5 py-5">
+    <a href="/wallet.html" class="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-brand-600">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      Back to wallet
+    </a>
+    <h1 id="pageTitle" class="mt-4 text-3xl font-black">Add money to wallet</h1>
+    <p id="pageSub" class="text-slate-500 mt-1">Choose an amount, scan the UPI QR, then submit your UTR for approval. All amounts in INR.</p>
+
+    <!-- Steps indicator -->
+    <div class="mt-6 flex items-center gap-2 text-sm font-semibold">
+      <span id="dot1" class="flex items-center gap-2 text-brand-600"><span class="w-6 h-6 grid place-items-center rounded-full bg-brand-500 text-white">1</span> Amount</span>
+      <span class="flex-1 h-px bg-slate-200"></span>
+      <span id="dot2" class="flex items-center gap-2 text-slate-400"><span id="dot2num" class="w-6 h-6 grid place-items-center rounded-full bg-slate-200 text-slate-500">2</span> Pay &amp; confirm</span>
+    </div>
+
+    <!-- STEP 1: choose amount -->
+    <section id="step1" class="mt-6 bg-white rounded-3xl border border-slate-200 p-6">
+      <h3 class="font-bold text-lg" id="step1Title">Enter amount</h3>
+
+      <!-- KYC notice (only in kyc mode) -->
+      <div id="kycNote" hidden class="mt-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-3 text-sm">
+        This is your one-time <b>KYC verification fee</b>. The amount is fixed. Pay it to complete verification and unlock withdrawals.
+      </div>
+
+      <!-- fixed amount pills -->
+      <div id="pills" class="mt-4 grid grid-cols-3 sm:grid-cols-4 gap-2">
+        <button type="button" data-amt="100" class="pill px-3 py-3 rounded-xl border border-slate-200 font-bold hover:border-brand-400 transition">₹100</button>
+        <button type="button" data-amt="200" class="pill px-3 py-3 rounded-xl border border-slate-200 font-bold hover:border-brand-400 transition">₹200</button>
+        <button type="button" data-amt="500" class="pill px-3 py-3 rounded-xl border border-slate-200 font-bold hover:border-brand-400 transition">₹500</button>
+        <button type="button" data-amt="1000" class="pill px-3 py-3 rounded-xl border border-slate-200 font-bold hover:border-brand-400 transition">₹1000</button>
+        <button type="button" data-amt="2000" class="pill px-3 py-3 rounded-xl border border-slate-200 font-bold hover:border-brand-400 transition">₹2000</button>
+        <button type="button" data-amt="5000" class="pill px-3 py-3 rounded-xl border border-slate-200 font-bold hover:border-brand-400 transition">₹5000</button>
+      </div>
+
+      <!-- custom amount -->
+      <div class="mt-4">
+        <label class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Or enter a custom amount (₹)</label>
+        <input id="amount" type="number" min="1" step="1" placeholder="Enter amount"
+          class="mt-1 w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none text-lg font-semibold" />
+      </div>
+
+      <p id="amtErr" hidden class="mt-3 text-sm text-red-600"></p>
+      <button id="genBtn" class="mt-5 w-full inline-flex items-center justify-center gap-1.5 bg-brand-500 hover:bg-brand-600 text-white font-semibold py-3 rounded-xl transition">
+        Generate QR
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+      </button>
+    </section>
+
+    <!-- STEP 2: QR + UTR -->
+    <section id="step2" hidden class="mt-6 grid md:grid-cols-2 gap-6">
+      <div class="bg-white rounded-3xl border border-slate-200 p-6 text-center">
+        <p class="text-sm font-semibold text-slate-400 uppercase tracking-wide">Scan to pay</p>
+        <p class="mt-2 text-3xl font-black text-brand-600" id="payAmount">₹0</p>
+        <div id="qr" class="mt-4 inline-block p-3 bg-white rounded-2xl border border-slate-200"></div>
+        <div class="mt-4 text-sm">
+          <p class="text-slate-500">Paying to</p>
+          <p class="font-bold text-lg" id="upiName">CashyZone</p>
+          <p class="font-mono text-brand-700" id="upiId">cashyzone@upi</p>
+        </div>
+        <p class="mt-3 text-xs text-slate-400">Scan with any UPI app (GPay, PhonePe, Paytm).</p>
+        <button id="editAmt" class="mt-3 inline-flex items-center gap-1.5 text-sm text-brand-600 font-semibold hover:underline">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+          Change amount
+        </button>
+      </div>
+
+      <div class="bg-white rounded-3xl border border-slate-200 p-6">
+        <h3 class="font-bold text-lg">Confirm your payment</h3>
+        <p class="text-slate-500 text-sm mt-1">After paying, enter the UTR / reference number from your UPI app.</p>
+        <form id="form" class="mt-4 space-y-4">
+          <div>
+            <label class="text-xs font-semibold text-slate-400 uppercase tracking-wide">UTR / Reference number</label>
+            <input id="utr" placeholder="12-digit UPI reference no."
+              class="mt-1 w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
+            <p class="mt-1 text-xs text-slate-400">Find this in your UPI app after paying (Transaction ID / UTR).</p>
+          </div>
+          <p id="msg" hidden class="text-sm"></p>
+          <button class="w-full bg-brand-500 hover:bg-brand-600 text-white font-semibold py-3 rounded-xl transition">Submit for approval</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script src="/assets/app.js"></script>
+  <script>
+    if (!CZ.requireAuth()) { /* redirected */ }
+    CZ.renderNav('wallet');
+
+    const isKyc = new URLSearchParams(location.search).get('purpose') === 'kyc';
+    let upi = { id: 'cashyzone@upi', name: 'CashyZone' };
+    let amount = 0;
+    let kycFee = 999;
+
+    const $ = (id) => document.getElementById(id);
+
+    function selectPill(el) {
+      document.querySelectorAll('.pill').forEach((p) => p.className = 'pill px-3 py-3 rounded-xl border border-slate-200 font-bold hover:border-brand-400 transition');
+      if (el) el.className = 'pill px-3 py-3 rounded-xl border-2 border-brand-500 bg-brand-50 text-brand-700 font-bold transition';
+    }
+    document.querySelectorAll('.pill').forEach((p) => p.addEventListener('click', () => {
+      $('amount').value = p.dataset.amt; selectPill(p); $('amtErr').hidden = true;
+    }));
+    $('amount').addEventListener('input', () => {
+      const v = $('amount').value;
+      const match = [...document.querySelectorAll('.pill')].find((p) => p.dataset.amt === v);
+      selectPill(match || null);
+    });
+
+    $('genBtn').addEventListener('click', () => {
+      amount = Number($('amount').value);
+      if (!(amount > 0)) { $('amtErr').textContent = 'Please enter or pick an amount greater than ₹0.'; $('amtErr').hidden = false; return; }
+      if (isKyc && amount !== kycFee) { $('amtErr').textContent = `KYC fee is fixed at ${CZ.money(kycFee)}.`; $('amtErr').hidden = false; return; }
+      $('amtErr').hidden = true;
+      showStep2();
+    });
+
+    function upiString() {
+      const params = new URLSearchParams({ pa: upi.id, pn: upi.name, cu: 'INR', am: amount });
+      return 'upi://pay?' + params.toString();
+    }
+    function renderQR() { const el = $('qr'); el.innerHTML = ''; new QRCode(el, { text: upiString(), width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M }); }
+    function showStep2() {
+      $('payAmount').textContent = CZ.money(amount);
+      renderQR();
+      $('step1').hidden = true; $('step2').hidden = false;
+      $('dot2num').className = 'w-6 h-6 grid place-items-center rounded-full bg-brand-500 text-white';
+      $('dot2').className = 'flex items-center gap-2 text-brand-600';
+    }
+    $('editAmt').addEventListener('click', () => {
+      if (isKyc) return; // amount is fixed in KYC mode
+      $('step2').hidden = true; $('step1').hidden = false;
+      $('dot2num').className = 'w-6 h-6 grid place-items-center rounded-full bg-slate-200 text-slate-500';
+      $('dot2').className = 'flex items-center gap-2 text-slate-400';
+    });
+
+    $('form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = $('msg');
+      try {
+        await CZ.api('/api/wallet/deposit', {
+          method: 'POST',
+          body: JSON.stringify({ amount, utr: $('utr').value, purpose: isKyc ? 'kyc' : 'wallet' }),
+        });
+        msg.className = 'text-sm text-brand-600 font-semibold';
+        msg.textContent = isKyc
+          ? 'KYC fee submitted ✓ Your verification is under review. Redirecting…'
+          : 'Submitted ✓ Your deposit is pending admin approval. Redirecting to wallet…';
+        msg.hidden = false;
+        // Remove the persistent KYC bar immediately on success.
+        const bar = document.getElementById('cz-kyc-bar'); if (bar && isKyc) bar.remove();
+        setTimeout(() => (location.href = '/wallet.html'), 1800);
+      } catch (err) { msg.className = 'text-sm text-red-600'; msg.textContent = err.message; msg.hidden = false; }
+    });
+
+    async function init() {
+      try { const data = await CZ.api('/api/wallet/upi'); upi = data.upi; } catch { /* defaults */ }
+      $('upiName').textContent = upi.name;
+      $('upiId').textContent = upi.id;
+
+      if (isKyc) {
+        // Fetch the fee and lock the page to KYC mode.
+        try { const k = await CZ.api('/api/kyc'); kycFee = k.fee; } catch { /* default 999 */ }
+        $('pageTitle').textContent = 'Pay KYC verification fee';
+        $('pageSub').textContent = 'Complete your one-time KYC payment to unlock withdrawals. The amount is fixed.';
+        $('step1Title').textContent = `KYC fee: ${CZ.money(kycFee)}`;
+        $('kycNote').hidden = false;
+        $('pills').style.display = 'none';
+        $('amount').value = kycFee;
+        $('amount').readOnly = true;
+        $('amount').classList.add('bg-slate-100', 'cursor-not-allowed');
+        amount = kycFee;
+      }
+    }
+    init();
+  </script>
+</body>
+</html>

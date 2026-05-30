@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KYC Verification — CashyZone</title>
+  <script src="/assets/head.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+  <div id="nav"></div>
+
+  <main class="max-w-2xl mx-auto px-5 py-5">
+    <a href="/wallet.html" class="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-brand-600">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      Back to wallet
+    </a>
+    <h1 class="mt-4 text-3xl font-black">KYC Verification</h1>
+    <p class="text-slate-500 mt-1">Verify your identity to enable withdrawals. A one-time fee of <b id="feeText">₹999</b> applies.</p>
+
+    <!-- Status card -->
+    <div id="statusCard" hidden class="mt-6 rounded-2xl p-5 border"></div>
+
+    <!-- Form -->
+    <section id="formCard" class="mt-6 bg-white rounded-3xl border border-slate-200 p-6">
+      <h3 class="font-bold text-lg">Your details</h3>
+      <form id="form" class="mt-4 space-y-3">
+        <input id="full_name" placeholder="Full name (as on PAN/Aadhaar)" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
+        <div class="grid sm:grid-cols-2 gap-3">
+          <input id="pan" placeholder="PAN number" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none uppercase" />
+          <input id="aadhaar" placeholder="Aadhaar number" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
+        </div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <input id="bank_account" placeholder="Bank account number" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
+          <input id="ifsc" placeholder="IFSC code" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none uppercase" />
+        </div>
+        <textarea id="address" rows="2" placeholder="Address" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none resize-y"></textarea>
+        <p class="text-xs text-slate-400">Provide at least PAN or Aadhaar.</p>
+        <p id="msg" hidden class="text-sm"></p>
+        <button class="w-full bg-brand-500 hover:bg-brand-600 text-white font-semibold py-3 rounded-xl transition">Submit & continue to payment</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="/assets/app.js"></script>
+  <script>
+    if (!CZ.requireAuth()) { /* redirected */ }
+    CZ.renderNav('wallet');
+
+    const $ = (id) => document.getElementById(id);
+    let fee = 999;
+
+    function showStatus(html, cls) {
+      const c = $('statusCard');
+      c.className = 'mt-6 rounded-2xl p-5 border ' + cls;
+      c.innerHTML = html;
+      c.hidden = false;
+    }
+
+    async function load() {
+      let data;
+      try { data = await CZ.api('/api/kyc'); } catch { return; }
+      fee = data.fee;
+      $('feeText').textContent = CZ.money(fee);
+
+      const s = data.status;
+      if (s === 'verified') {
+        showStatus('<p class="font-bold text-brand-700">✓ KYC Verified</p><p class="text-sm text-brand-700/80 mt-1">You can withdraw from your wallet.</p>', 'bg-brand-50 border-brand-200');
+        $('formCard').hidden = true;
+      } else if (s === 'pending') {
+        showStatus('<p class="font-bold text-amber-700">⏳ Under review</p><p class="text-sm text-amber-700/80 mt-1">Your KYC and fee payment are being verified by our team.</p>', 'bg-amber-50 border-amber-200');
+        $('formCard').hidden = true;
+      } else if (s === 'awaiting_payment') {
+        showStatus(`<div class="flex flex-wrap items-center justify-between gap-3">
+            <div><p class="font-bold text-amber-700">Payment required</p><p class="text-sm text-amber-700/80 mt-1">Your details are saved. Pay the ${CZ.money(fee)} KYC fee to proceed.</p></div>
+            <a href="/deposit.html?purpose=kyc" class="bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition">Pay ${CZ.money(fee)} now</a>
+          </div>`, 'bg-amber-50 border-amber-200');
+        $('formCard').hidden = true;
+      } else if (s === 'rejected') {
+        showStatus('<p class="font-bold text-red-700">✗ KYC Rejected</p><p class="text-sm text-red-700/80 mt-1">Please re-submit your details below.</p>', 'bg-red-50 border-red-200');
+      }
+    }
+
+    $('form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = $('msg');
+      const payload = {
+        full_name: $('full_name').value,
+        pan: $('pan').value,
+        aadhaar: $('aadhaar').value,
+        bank_account: $('bank_account').value,
+        ifsc: $('ifsc').value,
+        address: $('address').value,
+      };
+      try {
+        await CZ.api('/api/kyc', { method: 'POST', body: JSON.stringify(payload) });
+        // Per spec: after submitting the form, go straight to the ₹999 KYC QR.
+        location.href = '/deposit.html?purpose=kyc';
+      } catch (err) { msg.className = 'text-sm text-red-600'; msg.textContent = err.message; msg.hidden = false; }
+    });
+
+    load();
+  </script>
+</body>
+</html>
