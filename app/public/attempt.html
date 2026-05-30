@@ -9,7 +9,7 @@
 <body class="bg-slate-50 text-slate-800 antialiased">
   <div id="nav"></div>
 
-  <main class="max-w-3xl mx-auto px-5 py-5">
+  <main class="max-w-5xl mx-auto px-5 py-5">
     <a href="/tasks.html" class="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-brand-600">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
       Back to tasks
@@ -20,32 +20,29 @@
         <h1 id="title" class="text-2xl font-black">Loading…</h1>
         <span id="reward" class="text-xl font-black text-brand-600"></span>
       </div>
-      <p class="text-slate-500 text-sm mt-1">Retype the text below exactly. The <b>Claim</b> button unlocks when it matches.</p>
 
-      <!-- Source text -->
-      <div class="mt-6">
-        <label class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Text to type</label>
-        <div id="source" class="mt-2 select-none bg-white border border-slate-200 rounded-2xl p-4 leading-relaxed text-slate-700"></div>
+      <!-- Company card -->
+      <div id="company" hidden class="mt-3 bg-white border border-slate-200 rounded-2xl p-4 text-sm"></div>
+
+      <!-- Instructions -->
+      <div id="instructions" class="mt-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl p-4 text-sm"></div>
+
+      <!-- Step progress -->
+      <div class="mt-5 flex items-center justify-between gap-3 flex-wrap">
+        <p id="stepLabel" class="text-sm font-bold text-slate-700">Step 1 of 5</p>
+        <div id="dots" class="flex gap-1.5"></div>
       </div>
 
-      <!-- Input -->
-      <div class="mt-5">
-        <label class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Your typing</label>
-        <textarea id="input" rows="6" oninput="onType()" onpaste="return false" placeholder="Start typing here…"
-          class="mt-2 w-full bg-white border border-slate-200 rounded-2xl p-4 leading-relaxed focus:border-brand-400 outline-none resize-y"></textarea>
-        <div class="mt-3 flex items-center justify-between gap-3 flex-wrap">
-          <div class="flex-1 min-w-[200px]">
-            <div class="h-2 rounded-full bg-slate-200 overflow-hidden">
-              <div id="bar" class="h-full bg-brand-500 transition-all" style="width:0%"></div>
-            </div>
-          </div>
-          <span id="acc" class="text-sm font-semibold text-slate-500">0% match</span>
-        </div>
-      </div>
+      <!-- Per-step task UI -->
+      <div id="taskHost" class="mt-4 overflow-x-auto"></div>
 
+      <button id="nextBtn" disabled onclick="onNext()"
+        class="mt-5 w-full bg-slate-900 text-white font-semibold py-3 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-800">
+        Continue
+      </button>
       <button id="claim" disabled onclick="claim()"
-        class="mt-6 w-full bg-brand-500 text-white font-semibold py-3 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed hover:bg-brand-600">
-        Claim reward
+        class="mt-3 w-full bg-brand-500 text-white font-semibold py-3 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed hover:bg-brand-600">
+        Complete all steps to claim
       </button>
       <p id="msg" hidden class="mt-3 text-sm"></p>
     </div>
@@ -56,37 +53,208 @@
     if (!CZ.requireAuth()) { /* redirected */ }
     CZ.renderNav('tasks');
 
-    const NEED = 0.97; // must match backend MIN_TYPING_ACCURACY
     const id = new URLSearchParams(location.search).get('id');
     let task = null;
+    let type = 'excel';
+    let STEPS = 5;
+    let current = 0;
+    let done = [];
+    let answers = [];     // excel: per-step rows[][]; form: per-record {key:value}
 
-    function accuracy(a, b) {
-      a = (a || '').trim(); b = (b || '').trim();
-      if (!a.length) return 0;
-      let m = 0; const len = Math.min(a.length, b.length);
-      for (let i = 0; i < len; i++) if (a[i] === b[i]) m++;
-      return m / Math.max(a.length, b.length);
+    const $ = (x) => document.getElementById(x);
+    // Must mirror the backend normalisation exactly.
+    const norm = (v) => String(v == null ? '' : v).toLowerCase().replace(/,/g, '').replace(/\s+/g, ' ').trim();
+
+    // Persist the in-progress attempt to the server so it survives refresh /
+    // logout (restored from task.progress on the next load).
+    let saveTimer = null;
+    function pushProgress() {
+      return CZ.api('/api/tasks/' + id + '/progress', {
+        method: 'POST',
+        body: JSON.stringify({ answers, current, done }),
+      }).catch(() => {});
+    }
+    function saveProgress() { clearTimeout(saveTimer); saveTimer = setTimeout(pushProgress, 600); }
+    function saveProgressNow() { clearTimeout(saveTimer); pushProgress(); }
+
+    function renderDots() {
+      let html = '';
+      for (let i = 0; i < STEPS; i++) {
+        const cls = done[i] ? 'bg-brand-500' : i === current ? 'bg-slate-400' : 'bg-slate-200';
+        html += `<span class="w-2.5 h-2.5 rounded-full ${cls}"></span>`;
+      }
+      $('dots').innerHTML = html;
     }
 
-    window.onType = function () {
-      const score = accuracy(task.text, document.getElementById('input').value);
-      const pct = Math.round(score * 100);
-      document.getElementById('bar').style.width = pct + '%';
-      document.getElementById('acc').textContent = pct + '% match';
-      const ok = score >= NEED;
-      document.getElementById('bar').classList.toggle('bg-brand-500', ok);
-      document.getElementById('bar').classList.toggle('bg-amber-400', !ok);
-      document.getElementById('claim').disabled = !ok;
+    // ---------- EXCEL ----------
+    function matchesFor(step) {
+      return step.rows.filter((r) => norm(r[task.filter.column]) === norm(task.filter.value));
+    }
+
+    function renderExcelStep() {
+      const step = task.steps[current];
+      const matches = matchesFor(step);
+      const src = `
+        <div>
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">${step.label} — <span class="inline-flex items-center gap-1 normal-case font-medium text-amber-700"><span class="inline-block w-3 h-3 rounded bg-amber-100 border border-amber-300"></span>${task.filter.value} highlighted</span></p>
+          <div class="overflow-auto max-h-[440px] border border-slate-200 rounded-xl">
+            <table class="min-w-[560px] w-full text-xs">
+              <thead class="bg-slate-50 sticky top-0"><tr>
+                ${task.sourceColumns.map((c) => `<th class="px-2 py-2 text-left font-semibold text-slate-500 whitespace-nowrap">${c.label}</th>`).join('')}
+              </tr></thead>
+              <tbody>
+                ${step.rows.map((r) => {
+                  const hit = norm(r[task.filter.column]) === norm(task.filter.value);
+                  return `<tr class="border-t border-slate-100 ${hit ? 'bg-amber-50' : ''}">${task.sourceColumns.map((c) => {
+                    const cellHit = hit && c.key === task.filter.column;
+                    return `<td class="px-2 py-1.5 whitespace-nowrap ${cellHit ? 'font-bold text-amber-700' : ''}">${r[c.key]}</td>`;
+                  }).join('')}</tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>`;
+      const out = `
+        <div>
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Enter the ${matches.length} <b>${task.filter.value}</b> employees</p>
+          <div class="border border-slate-200 rounded-xl overflow-x-auto">
+            <table class="min-w-[420px] w-full text-xs">
+              <thead class="bg-slate-50"><tr>
+                ${task.outputColumns.map((c) => `<th class="px-2 py-2 text-left font-semibold text-slate-500">${c.label}</th>`).join('')}
+              </tr></thead>
+              <tbody id="outBody">
+                ${matches.map((_, ri) => `<tr class="border-t border-slate-100" data-row="${ri}">${task.outputColumns.map((c, ci) => `<td class="p-1"><input data-r="${ri}" data-c="${ci}" oninput="onExcelInput()" placeholder="${c.label}" class="cell w-full px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" /></td>`).join('')}</tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+          <p id="excelStatus" class="mt-2 text-xs font-semibold text-slate-500">0 / ${matches.length} rows correct</p>
+        </div>`;
+      $('taskHost').innerHTML = `<div class="grid lg:grid-cols-2 gap-4">${src}${out}</div>`;
+
+      // Restore any previously entered answers for this step.
+      const saved = answers[current];
+      if (Array.isArray(saved)) {
+        $('taskHost').querySelectorAll('#outBody input').forEach((inp) => {
+          const r = Number(inp.dataset.r), c = Number(inp.dataset.c);
+          if (saved[r] && saved[r][c] != null) inp.value = saved[r][c];
+        });
+      }
+      onExcelInput();
+    }
+
+    window.onExcelInput = function () {
+      const step = task.steps[current];
+      const matches = matchesFor(step);
+      const cols = task.outputColumns.map((c) => c.key);
+
+      // Read the grid into answers[current].
+      const rows = [];
+      $('taskHost').querySelectorAll('#outBody tr').forEach((tr) => {
+        const cells = [];
+        tr.querySelectorAll('input').forEach((inp) => cells.push(inp.value));
+        rows.push(cells);
+      });
+      answers[current] = rows;
+
+      // Greedy set-match against expected rows (order-independent, handles dups).
+      const pool = matches.map((r) => cols.map((k) => norm(r[k])).join('|'));
+      let correct = 0;
+      $('taskHost').querySelectorAll('#outBody tr').forEach((tr, ri) => {
+        const ser = rows[ri].map((x) => norm(x)).join('|');
+        const nonEmpty = ser.replace(/\|/g, '').length > 0;
+        const idx = nonEmpty ? pool.indexOf(ser) : -1;
+        const good = idx >= 0;
+        if (good) { pool[idx] = '__used' + ri; correct++; }
+        tr.classList.toggle('bg-brand-50', good);
+      });
+
+      $('excelStatus').textContent = `${correct} / ${matches.length} rows correct`;
+      $('nextBtn').disabled = correct !== matches.length;
+      saveProgress();
+    };
+
+    // ---------- FORM ----------
+    function renderFormStep() {
+      const rec = task.records[current];
+      const card = `
+        <div>
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Student ${current + 1} of ${STEPS}</p>
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 space-y-2 text-sm">
+            ${task.fields.map((f) => `<div class="flex justify-between gap-3 border-b border-slate-100 last:border-0 pb-1.5 last:pb-0"><span class="text-slate-400">${f.label}</span><span class="font-semibold text-right break-all">${rec[f.key]}</span></div>`).join('')}
+          </div>
+        </div>`;
+      const form = `
+        <div>
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Fill the enrollment form</p>
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
+            ${task.fields.map((f) => `<div><label class="text-xs text-slate-400">${f.label}</label><input data-k="${f.key}" type="${f.type || 'text'}" oninput="onFormInput()" placeholder="Enter ${f.label.toLowerCase()}" class="mt-1 w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" /></div>`).join('')}
+          </div>
+          <p id="formStatus" class="mt-2 text-xs font-semibold text-slate-500">0 / ${task.fields.length} fields correct</p>
+        </div>`;
+      $('taskHost').innerHTML = `<div class="grid md:grid-cols-2 gap-4">${card}${form}</div>`;
+
+      const saved = answers[current];
+      if (saved) {
+        $('taskHost').querySelectorAll('input[data-k]').forEach((inp) => {
+          if (saved[inp.dataset.k] != null) inp.value = saved[inp.dataset.k];
+        });
+      }
+      onFormInput();
+    }
+
+    window.onFormInput = function () {
+      const rec = task.records[current];
+      const obj = {};
+      let correct = 0;
+      $('taskHost').querySelectorAll('input[data-k]').forEach((inp) => {
+        const k = inp.dataset.k;
+        obj[k] = inp.value;
+        const good = inp.value.trim() !== '' && norm(inp.value) === norm(rec[k]);
+        inp.classList.toggle('border-brand-400', good);
+        inp.classList.toggle('bg-brand-50', good);
+        if (good) correct++;
+      });
+      answers[current] = obj;
+      $('formStatus').textContent = `${correct} / ${task.fields.length} fields correct`;
+      $('nextBtn').disabled = correct !== task.fields.length;
+      saveProgress();
+    };
+
+    // ---------- SHARED ----------
+    function renderStep() {
+      $('stepLabel').textContent = `Step ${current + 1} of ${STEPS}`;
+      $('nextBtn').textContent = current < STEPS - 1 ? 'Continue' : 'Finish';
+      renderDots();
+      if (type === 'form') renderFormStep();
+      else renderExcelStep();
+    }
+
+    window.onNext = function () {
+      done[current] = true;
+      if (current < STEPS - 1) {
+        current++;
+        renderStep();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        // All steps complete → unlock Claim.
+        renderDots();
+        $('nextBtn').classList.add('hidden');
+        $('claim').disabled = false;
+        $('claim').textContent = 'Claim reward';
+        $('claim').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      saveProgressNow();
     };
 
     window.claim = async function () {
-      const btn = document.getElementById('claim');
+      if (done.filter(Boolean).length < STEPS) return;
+      const btn = $('claim');
       btn.disabled = true; btn.textContent = 'Claiming…';
-      const msg = document.getElementById('msg');
+      const msg = $('msg');
       try {
         const data = await CZ.api('/api/tasks/' + id + '/claim', {
           method: 'POST',
-          body: JSON.stringify({ typed: document.getElementById('input').value }),
+          body: JSON.stringify({ answers }),
         });
         CZ.setSession(CZ.token, { ...CZ.user, balance: data.balance });
         const pill = document.getElementById('navBalance'); if (pill) pill.textContent = CZ.money(data.balance);
@@ -100,17 +268,35 @@
       }
     };
 
+    function renderCompany() {
+      const c = task.company;
+      if (!c) return;
+      $('company').hidden = false;
+      $('company').innerHTML = `
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <p class="font-bold text-base">${c.name}</p>
+            <p class="text-slate-500 mt-0.5">${c.address || ''}</p>
+          </div>
+          <div class="text-xs text-slate-400 text-right">
+            ${c.gstin ? `<p>GSTIN: <span class="font-mono">${c.gstin}</span></p>` : ''}
+            ${c.email ? `<p>${c.email}</p>` : ''}
+            ${c.website ? `<p>${c.website}</p>` : ''}
+          </div>
+        </div>`;
+    }
+
     async function load() {
       try {
         task = await CZ.api('/api/tasks/' + id);
       } catch (err) {
-        document.getElementById('wrap').innerHTML = '<p class="text-red-600 mt-6">' + err.message + '</p>';
+        $('wrap').innerHTML = '<p class="text-red-600 mt-6">' + err.message + '</p>';
         return;
       }
 
       // Must have bought the task before attempting it.
       if (task.status === 'none') {
-        document.getElementById('wrap').innerHTML = `
+        $('wrap').innerHTML = `
           <div class="mt-6 bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl p-6 text-center">
             <p class="font-bold text-lg">🔒 Buy this task to start</p>
             <p class="mt-2 text-sm">Buy <b>${task.title}</b> for ${CZ.money(task.price)} and earn ${CZ.money(task.reward)} (3×) on completion.</p>
@@ -131,13 +317,43 @@
         return;
       }
 
-      document.getElementById('title').textContent = task.title;
-      document.getElementById('reward').textContent = CZ.money(task.reward);
-      document.getElementById('source').textContent = task.text;
+      type = task.type || 'excel';
+      STEPS = type === 'form' ? task.records.length : task.steps.length;
+      answers = Array(STEPS).fill(null);
+      done = Array(STEPS).fill(false);
+      current = 0;
+
+      $('title').textContent = task.title;
+      $('reward').textContent = CZ.money(task.reward);
+      $('instructions').innerHTML = `<b>Instructions:</b> ${task.instructions || ''}`;
+      renderCompany();
+
       if (task.completed) {
-        document.getElementById('input').disabled = true;
-        const btn = document.getElementById('claim');
-        btn.textContent = '✓ Already completed'; btn.disabled = true;
+        done = Array(STEPS).fill(true);
+        $('stepLabel').textContent = 'All steps completed';
+        $('taskHost').innerHTML = '<div class="bg-white border border-slate-200 rounded-2xl p-6 text-center text-slate-500">You have already completed this task.</div>';
+        $('nextBtn').classList.add('hidden');
+        $('claim').textContent = '✓ Already completed';
+        $('claim').disabled = true;
+        renderDots();
+        return;
+      }
+
+      // Restore a saved in-progress attempt (survives refresh / logout).
+      const p = task.progress;
+      if (p && Array.isArray(p.answers) && p.answers.length === STEPS) {
+        answers = p.answers;
+        if (Array.isArray(p.done) && p.done.length === STEPS) done = p.done.map(Boolean);
+        if (Number.isInteger(p.current)) current = Math.min(Math.max(p.current, 0), STEPS - 1);
+      }
+
+      const allDone = done.filter(Boolean).length === STEPS;
+      if (allDone) current = STEPS - 1;
+      renderStep();
+      if (allDone) {
+        $('nextBtn').classList.add('hidden');
+        $('claim').disabled = false;
+        $('claim').textContent = 'Claim reward';
       }
     }
     load();

@@ -4,6 +4,7 @@ const express = require('express');
 const pool = require('../db');
 const { adminRequired } = require('../auth');
 const settings = require('../settings');
+const { creditFirstDepositBonus } = require('../bonus');
 
 const router = express.Router();
 router.use(adminRequired);
@@ -94,6 +95,11 @@ router.post('/deposits/:id/approve', async (req, res, next) => {
       'INSERT INTO transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)',
       [dep.user_id, 'deposit', dep.amount, `Deposit approved (UTR ${dep.utr})`]
     );
+    // First-deposit welcome bonus — only on real wallet deposits (KYC/GST fees
+    // carry a `note`, so they are excluded).
+    if (!dep.note) {
+      await creditFirstDepositBonus(conn, dep.user_id);
+    }
     await conn.commit();
     res.json({ ok: true });
   } catch (err) {

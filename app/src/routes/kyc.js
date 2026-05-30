@@ -44,16 +44,13 @@ router.get('/', async (req, res, next) => {
 router.post('/', async (req, res, next) => {
   try {
     const full_name = (req.body.full_name || '').trim();
-    const pan = (req.body.pan || '').trim();
-    const aadhaar = (req.body.aadhaar || '').trim();
+    const pan = '';
+    const aadhaar = '';
     const bank_account = (req.body.bank_account || '').trim();
     const ifsc = (req.body.ifsc || '').trim();
     const address = (req.body.address || '').trim();
 
     if (!full_name) return res.status(400).json({ error: 'Full name is required' });
-    if (!pan && !aadhaar) {
-      return res.status(400).json({ error: 'Please provide PAN or Aadhaar' });
-    }
 
     const [existing] = await pool.query('SELECT * FROM kyc WHERE user_id = ?', [req.user.id]);
     if (existing.length > 0) {

@@ -8,7 +8,7 @@ const { signToken, authRequired } = require('../auth');
 const router = express.Router();
 
 function publicUser(u) {
-  return { id: u.id, name: u.name, email: u.email, balance: u.balance, is_admin: !!u.is_admin };
+  return { id: u.id, name: u.name, email: u.email, balance: u.balance, is_admin: !!u.is_admin, created_at: u.created_at };
 }
 
 // Register a new account.

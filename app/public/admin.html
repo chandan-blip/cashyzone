@@ -26,7 +26,6 @@
     <div class="mt-8 flex gap-2 text-sm">
       <button data-tab="deposits" class="tab px-4 py-2 rounded-xl bg-brand-500 text-white font-semibold">Deposits</button>
       <button data-tab="withdrawals" class="tab px-4 py-2 rounded-xl bg-white border border-slate-200 font-semibold">Withdrawals</button>
-      <button data-tab="kyc" class="tab px-4 py-2 rounded-xl bg-white border border-slate-200 font-semibold">KYC</button>
       <button data-tab="users" class="tab px-4 py-2 rounded-xl bg-white border border-slate-200 font-semibold">Users</button>
       <button data-tab="settings" class="tab px-4 py-2 rounded-xl bg-white border border-slate-200 font-semibold">Settings</button>
     </div>
@@ -94,11 +93,11 @@
 
     async function loadStats() {
       const s = await CZ.api('/api/admin/stats');
-      document.getElementById('sUsers').textContent = s.users;
-      document.getElementById('sDep').textContent = s.pendingDeposits;
-      document.getElementById('sWd').textContent = s.pendingWithdrawals;
-      document.getElementById('sKyc').textContent = s.pendingKyc;
-      document.getElementById('sPaid').textContent = CZ.money(s.totalPaidOut);
+      CZ.countUp(document.getElementById('sUsers'), s.users);
+      CZ.countUp(document.getElementById('sDep'), s.pendingDeposits);
+      CZ.countUp(document.getElementById('sWd'), s.pendingWithdrawals);
+      CZ.countUp(document.getElementById('sKyc'), s.pendingKyc);
+      CZ.countUp(document.getElementById('sPaid'), s.totalPaidOut, { money: true });
     }
 
     async function renderSettings() {

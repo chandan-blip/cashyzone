@@ -10,6 +10,18 @@
   document.head.appendChild(hideStyle);
   document.documentElement.classList.add('cz-loading');
 
+  // Load Motion One (vanilla spring animations) and expose it as window.Motion
+  // for app.js. Async ES module from CDN — countUp falls back gracefully until
+  // it's ready (or if the CDN is blocked).
+  (function loadMotion() {
+    const s = document.createElement('script');
+    s.type = 'module';
+    s.textContent =
+      'import { animate, inView, stagger } from "https://cdn.jsdelivr.net/npm/motion@11/+esm";' +
+      'window.Motion = { animate, inView, stagger };';
+    document.head.appendChild(s);
+  })();
+
   let revealed = false;
   function reveal() {
     if (revealed) return;

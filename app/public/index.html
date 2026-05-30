@@ -73,7 +73,7 @@
         </p>
         <div class="mt-8 flex flex-wrap gap-3">
           <a href="/tasks.html" class="bg-brand-500 hover:bg-brand-600 text-white font-semibold px-6 py-3 rounded-xl transition" style="box-shadow:0 20px 60px -20px rgba(22,196,95,.45)">Browse Tasks</a>
-          <a href="/login.html?mode=register" class="bg-white border border-slate-200 hover:border-brand-300 font-semibold px-6 py-3 rounded-xl transition">Create account</a>
+          <a id="heroRegisterBtn" href="/login.html?mode=register" class="bg-white border border-slate-200 hover:border-brand-300 font-semibold px-6 py-3 rounded-xl transition">Create account</a>
         </div>
         <div class="mt-8 flex items-center gap-6 text-sm text-slate-500">
           <div><span class="font-bold text-slate-800 text-lg">3×</span><br/>returns</div>
@@ -185,7 +185,7 @@
   </section>
 
   <!-- CTA -->
-  <section class="max-w-6xl mx-auto px-5 py-16">
+  <section id="ctaRegister" class="max-w-6xl mx-auto px-5 py-16">
     <div class="rounded-3xl bg-gradient-to-br from-brand-600 to-emerald-500 text-white p-10 md:p-14 text-center">
       <h2 class="text-3xl md:text-4xl font-black">Ready to start your earning journey?</h2>
       <p class="mt-3 text-white/90 max-w-2xl mx-auto">Join thousands of users already making money from home with CashyZone. No experience required — just basic typing skills.</p>
@@ -260,10 +260,15 @@
   <script src="/assets/app.js"></script>
   <script>
     CZ.renderNav('home');
+    // Hide the "create account" calls-to-action once the user is logged in.
+    if (CZ.token) {
+      const reg = document.getElementById('heroRegisterBtn'); if (reg) reg.style.display = 'none';
+      const cta = document.getElementById('ctaRegister'); if (cta) cta.style.display = 'none';
+    }
     if (CZ.user) {
-      document.getElementById('heroBalance').textContent = CZ.money(CZ.user.balance);
+      CZ.countUp(document.getElementById('heroBalance'), CZ.user.balance, { money: true });
       document.getElementById('heroSub').textContent = 'Welcome back! Pick a task to earn.';
-      CZ.refreshBalance().then(() => { document.getElementById('heroBalance').textContent = CZ.money(CZ.user.balance); });
+      CZ.refreshBalance().then(() => CZ.countUp(document.getElementById('heroBalance'), CZ.user.balance, { money: true }));
     }
 
     // Dynamic Telegram support link from admin settings.

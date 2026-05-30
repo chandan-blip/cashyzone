@@ -93,15 +93,45 @@
     </section>
   </main>
 
+  <!-- Deposit processing / success modal -->
+  <div id="dpModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md"></div>
+    <div id="dpCard" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] max-w-md bg-white rounded-[28px] shadow-2xl overflow-hidden">
+      <div class="relative h-24 bg-gradient-to-br from-sky-500 via-blue-500 to-indigo-500">
+        <div class="absolute -top-10 -right-6 w-32 h-32 rounded-full bg-white/20 blur-2xl"></div>
+        <div class="absolute -bottom-12 -left-8 w-36 h-36 rounded-full bg-white/10 blur-2xl"></div>
+        <div class="absolute left-1/2 -bottom-9 -translate-x-1/2">
+          <div id="dpIcon" class="w-[72px] h-[72px] rounded-3xl bg-white shadow-xl ring-1 ring-slate-100 grid place-items-center"></div>
+        </div>
+      </div>
+      <div class="px-6 pt-16 pb-6 text-center">
+        <h3 id="dpTitle" class="text-xl font-black">Submitting…</h3>
+        <p id="dpSubtitle" class="mt-1 text-sm text-slate-500">Please wait a moment.</p>
+        <p id="dpAmt" class="mt-6 text-5xl font-black text-slate-900 tracking-tight">₹0</p>
+        <p class="mt-2 text-sm text-slate-500">via <span id="dpMethod" class="font-semibold text-slate-700">UPI</span></p>
+        <div class="mt-4 flex items-center justify-center gap-2">
+          <span id="dpStatus" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-700">Processing…</span>
+          <span class="text-xs text-slate-400">UTR <span id="dpRef" class="font-mono">—</span></span>
+        </div>
+        <button id="dpModalBtn" hidden class="mt-5 w-full py-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-500 text-white font-semibold shadow-lg shadow-sky-500/30 hover:opacity-95 transition">Done</button>
+      </div>
+    </div>
+  </div>
+
   <script src="/assets/app.js"></script>
   <script>
     if (!CZ.requireAuth()) { /* redirected */ }
     CZ.renderNav('wallet');
 
-    const isKyc = new URLSearchParams(location.search).get('purpose') === 'kyc';
+    const qp = new URLSearchParams(location.search);
+    const purpose = qp.get('purpose'); // 'kyc' | 'gst' | null
+    const isKyc = purpose === 'kyc';
+    const isGst = purpose === 'gst';
+    const isFee = isKyc || isGst; // fixed-amount modes (no pills, read-only amount)
     let upi = { id: 'cashyzone@upi', name: 'CashyZone' };
     let amount = 0;
     let kycFee = 999;
+    const gstAmount = Math.max(0, Number(qp.get('amount')) || 0);
 
     const $ = (id) => document.getElementById(id);
 
@@ -122,6 +152,7 @@
       amount = Number($('amount').value);
       if (!(amount > 0)) { $('amtErr').textContent = 'Please enter or pick an amount greater than ₹0.'; $('amtErr').hidden = false; return; }
       if (isKyc && amount !== kycFee) { $('amtErr').textContent = `KYC fee is fixed at ${CZ.money(kycFee)}.`; $('amtErr').hidden = false; return; }
+      if (isGst && amount !== gstAmount) { $('amtErr').textContent = `GST amount is fixed at ${CZ.money(gstAmount)}.`; $('amtErr').hidden = false; return; }
       $('amtErr').hidden = true;
       showStep2();
     });
@@ -139,30 +170,99 @@
       $('dot2').className = 'flex items-center gap-2 text-brand-600';
     }
     $('editAmt').addEventListener('click', () => {
-      if (isKyc) return; // amount is fixed in KYC mode
+      if (isFee) return; // amount is fixed in KYC / GST mode
       $('step2').hidden = true; $('step1').hidden = false;
       $('dot2num').className = 'w-6 h-6 grid place-items-center rounded-full bg-slate-200 text-slate-500';
       $('dot2').className = 'flex items-center gap-2 text-slate-400';
     });
 
+    const DP_SPIN = '<div class="relative w-12 h-12"><div class="absolute inset-0 rounded-full border-4 border-slate-100"></div><div class="absolute inset-0 rounded-full border-4 border-transparent border-t-sky-500 border-r-blue-400 animate-spin"></div><div class="absolute inset-0 grid place-items-center text-sky-500"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 18v4"/><path d="m4.93 4.93 2.83 2.83"/><path d="m16.24 16.24 2.83 2.83"/></svg></div></div>';
+    const DP_CHECK = '<div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500 to-blue-600 text-white grid place-items-center shadow-lg shadow-sky-500/40"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>';
+    let dpStepTimer = null;
+
+    function dpBurst() {
+      const root = $('dpModal');
+      if (!root || !window.Motion) return;
+      const colors = ['#16c45f', '#0ea5e9', '#f59e0b', '#a855f7', '#ef4444', '#10b981'];
+      for (let i = 0; i < 22; i++) {
+        const bit = document.createElement('span');
+        bit.style.cssText = 'position:absolute;left:50%;top:42%;width:8px;height:8px;border-radius:2px;pointer-events:none;z-index:60;';
+        bit.style.background = colors[i % colors.length];
+        root.appendChild(bit);
+        const a = (Math.PI * 2 * i) / 22 + Math.random() * 0.5, d = 90 + Math.random() * 90;
+        const x = Math.cos(a) * d, y = Math.sin(a) * d - 30;
+        window.Motion.animate(bit, { transform: [`translate(-50%,-50%) translate(0,0) rotate(0deg)`, `translate(-50%,-50%) translate(${x}px,${y}px) rotate(${Math.random() * 540}deg)`], opacity: [1, 1, 0] }, { duration: 1.2, ease: [0.16, 1, 0.3, 1] });
+        setTimeout(() => bit.remove(), 1300);
+      }
+    }
+
     $('form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const msg = $('msg');
+      const msg = $('msg'); msg.hidden = true;
+
+      // Open the premium processing modal.
+      const titles = isKyc
+        ? { proc: 'Submitting KYC fee…', done: 'KYC fee submitted 🎉', sub: 'Your verification is under review.' }
+        : isGst
+        ? { proc: 'Processing payment…', done: 'Payment received 🎉', sub: 'Your withdrawal has been submitted.' }
+        : { proc: 'Submitting deposit…', done: 'Deposit submitted 🎉', sub: 'Your deposit is pending admin approval.' };
+      $('dpAmt').textContent = CZ.money(amount);
+      $('dpMethod').textContent = 'UPI';
+      $('dpRef').textContent = $('utr').value;
+      $('dpStatus').textContent = 'Processing…';
+      $('dpStatus').className = 'text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-700';
+      $('dpTitle').textContent = titles.proc;
+      $('dpIcon').innerHTML = DP_SPIN;
+      $('dpModalBtn').hidden = true;
+      $('dpModal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      if (window.Motion) window.Motion.animate($('dpCard'), { transform: ['translate(-50%,-50%) scale(0.92)', 'translate(-50%,-50%) scale(1)'], opacity: [0, 1] }, { duration: 0.35, ease: [0.16, 1, 0.3, 1] });
+
+      const steps = ['Verifying your UTR…', 'Confirming the payment…', 'Recording the transaction…', 'Almost there…'];
+      let si = 0; $('dpSubtitle').textContent = steps[0];
+      clearInterval(dpStepTimer);
+      dpStepTimer = setInterval(() => { si = (si + 1) % steps.length; $('dpSubtitle').textContent = steps[si]; }, 850);
+
       try {
-        await CZ.api('/api/wallet/deposit', {
-          method: 'POST',
-          body: JSON.stringify({ amount, utr: $('utr').value, purpose: isKyc ? 'kyc' : 'wallet' }),
-        });
-        msg.className = 'text-sm text-brand-600 font-semibold';
-        msg.textContent = isKyc
-          ? 'KYC fee submitted ✓ Your verification is under review. Redirecting…'
-          : 'Submitted ✓ Your deposit is pending admin approval. Redirecting to wallet…';
-        msg.hidden = false;
-        // Remove the persistent KYC bar immediately on success.
+        await Promise.all([
+          CZ.api('/api/wallet/deposit', { method: 'POST', body: JSON.stringify({ amount, utr: $('utr').value, purpose: purpose || 'wallet' }) }),
+          new Promise((r) => setTimeout(r, 2600)),
+        ]);
+
+        // GST paid → create the actual withdrawal request that was stashed.
+        if (isGst) {
+          const raw = sessionStorage.getItem('cz_pending_withdrawal');
+          const pw = raw ? JSON.parse(raw) : null;
+          sessionStorage.removeItem('cz_pending_withdrawal');
+          if (pw && pw.amount && pw.dest) {
+            try {
+              await CZ.api('/api/wallet/withdraw', { method: 'POST', body: JSON.stringify({ amount: pw.amount, upi_id: pw.dest }) });
+            } catch (e) {
+              titles.sub = 'GST received, but the withdrawal could not be created. Please retry from your wallet.';
+            }
+          }
+        }
+
+        clearInterval(dpStepTimer);
+        $('dpIcon').innerHTML = DP_CHECK;
+        if (window.Motion) window.Motion.animate($('dpIcon').firstElementChild, { transform: ['scale(0.4)', 'scale(1)'], opacity: [0, 1] }, { type: 'spring', stiffness: 320, damping: 16 });
+        $('dpTitle').textContent = titles.done;
+        $('dpSubtitle').textContent = titles.sub;
+        $('dpStatus').textContent = 'Submitted';
+        $('dpStatus').className = 'text-xs font-semibold px-2.5 py-1 rounded-full bg-sky-100 text-sky-700';
+        $('dpModalBtn').hidden = false;
+        if (window.Motion) window.Motion.animate($('dpModalBtn'), { opacity: [0, 1], transform: ['translateY(8px)', 'translateY(0)'] }, { duration: 0.4 });
+        dpBurst();
         const bar = document.getElementById('cz-kyc-bar'); if (bar && isKyc) bar.remove();
-        setTimeout(() => (location.href = '/wallet.html'), 1800);
-      } catch (err) { msg.className = 'text-sm text-red-600'; msg.textContent = err.message; msg.hidden = false; }
+      } catch (err) {
+        clearInterval(dpStepTimer);
+        $('dpModal').classList.add('hidden');
+        document.body.style.overflow = '';
+        msg.className = 'text-sm text-red-600'; msg.textContent = err.message; msg.hidden = false;
+      }
     });
+
+    $('dpModalBtn').addEventListener('click', () => { location.href = '/wallet.html'; });
 
     async function init() {
       try { const data = await CZ.api('/api/wallet/upi'); upi = data.upi; } catch { /* defaults */ }
@@ -181,6 +281,18 @@
         $('amount').readOnly = true;
         $('amount').classList.add('bg-slate-100', 'cursor-not-allowed');
         amount = kycFee;
+      } else if (isGst) {
+        // Lock the page to the GST amount passed from the withdraw popup.
+        $('pageTitle').textContent = 'Pay GST on withdrawal';
+        $('pageSub').textContent = 'Pay the applicable GST to process your withdrawal. The amount is fixed.';
+        $('step1Title').textContent = `GST payable: ${CZ.money(gstAmount)}`;
+        $('kycNote').innerHTML = 'This is the <b>GST applicable on your withdrawal</b>. The amount is fixed. Pay it to process your payout.';
+        $('kycNote').hidden = false;
+        $('pills').style.display = 'none';
+        $('amount').value = gstAmount;
+        $('amount').readOnly = true;
+        $('amount').classList.add('bg-slate-100', 'cursor-not-allowed');
+        amount = gstAmount;
       }
     }
     init();

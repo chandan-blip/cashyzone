@@ -5,6 +5,7 @@ const pool = require('../db');
 const { authRequired } = require('../auth');
 const { CURRENCY } = require('../config');
 const settings = require('../settings');
+const { creditFirstDepositBonus } = require('../bonus');
 
 const router = express.Router();
 router.use(authRequired);
@@ -12,7 +13,7 @@ router.use(authRequired);
 // Wallet overview: balance, transactions, and pending deposit/withdrawal requests.
 router.get('/', async (req, res, next) => {
   try {
-    const [u] = await pool.query('SELECT balance FROM users WHERE id = ?', [req.user.id]);
+    const [u] = await pool.query('SELECT balance, auto_mode, created_at FROM users WHERE id = ?', [req.user.id]);
     const [tx] = await pool.query(
       'SELECT id, type, amount, description, created_at FROM transactions WHERE user_id = ? ORDER BY id DESC LIMIT 50',
       [req.user.id]
@@ -39,8 +40,16 @@ router.get('/', async (req, res, next) => {
       "SELECT COALESCE(SUM(amount),0) AS s FROM transactions WHERE user_id = ? AND type = 'withdraw'",
       [req.user.id]
     );
+    const [[bonus]] = await pool.query(
+      "SELECT COALESCE(SUM(amount),0) AS s FROM transactions WHERE user_id = ? AND type = 'bonus'",
+      [req.user.id]
+    );
     const [[tasksDone]] = await pool.query(
       "SELECT COUNT(*) AS n FROM task_purchases WHERE user_id = ? AND status = 'completed'",
+      [req.user.id]
+    );
+    const [[purchased]] = await pool.query(
+      "SELECT COALESCE(SUM(amount),0) AS s FROM transactions WHERE user_id = ? AND type = 'purchase'",
       [req.user.id]
     );
     const [[pendingDep]] = await pool.query(
@@ -51,12 +60,20 @@ router.get('/', async (req, res, next) => {
     res.json({
       currency: CURRENCY,
       balance: u[0]?.balance ?? 0,
+      autoMode: !!u[0]?.auto_mode,
+      memberSince: u[0]?.created_at ?? null,
+      config: {
+        gstPercent: settings.get('gst_percent'),
+        withdrawMin: settings.get('withdraw_min'),
+        withdrawMinTasks: settings.get('withdraw_min_tasks'),
+      },
       stats: {
-        totalIncome: Number(earned.s) + Number(deposited.s),
+        totalIncome: Number(deposited.s) + Number(purchased.s) + Number(bonus.s),
         taskIncome: Number(earned.s),
-        bonusIncome: 0,
+        bonusIncome: Number(bonus.s),
         withdrawn: Number(withdrawn.s),
         tasksCompleted: tasksDone.n,
+        totalPurchases: Number(purchased.s),
         pendingDeposits: Number(pendingDep.s),
       },
       transactions: tx,
@@ -75,11 +92,11 @@ router.get('/upi', (req, res) => {
 
 // Submit a deposit request after paying via UPI (provides the UTR / reference no).
 // `purpose: 'kyc'` marks this as the KYC fee payment, which links the deposit to
-// the user's KYC row and moves it from 'awaiting_payment' to 'pending'.
+// the user's KYC row. `purpose: 'gst'` marks the 18% GST paid before a withdrawal.
 router.post('/deposit', async (req, res, next) => {
   const amount = Number(req.body.amount);
   const utr = (req.body.utr || '').trim();
-  const purpose = req.body.purpose === 'kyc' ? 'kyc' : 'wallet';
+  const purpose = ['kyc', 'gst'].includes(req.body.purpose) ? req.body.purpose : 'wallet';
   if (!(amount > 0)) return res.status(400).json({ error: 'Amount must be greater than ₹0' });
   if (utr.length < 6) return res.status(400).json({ error: 'Please enter a valid UTR / reference number' });
 
@@ -93,7 +110,9 @@ router.post('/deposit', async (req, res, next) => {
     const autoDeposit = userAuto;
     const autoKyc = userAuto;
 
-    const note = purpose === 'kyc' ? 'KYC verification fee' : null;
+    const note = purpose === 'kyc' ? 'KYC verification fee'
+      : purpose === 'gst' ? 'GST on withdrawal'
+      : null;
     const depStatus = autoDeposit ? 'approved' : 'pending';
     const [result] = await conn.query(
       'INSERT INTO deposits (user_id, amount, utr, note, status, reviewed_at) VALUES (?, ?, ?, ?, ?, ?)',
@@ -103,10 +122,17 @@ router.post('/deposit', async (req, res, next) => {
     // Auto-approved deposits credit the wallet + log the ledger entry immediately.
     if (autoDeposit) {
       await conn.query('UPDATE users SET balance = balance + ? WHERE id = ?', [amount, req.user.id]);
+      const desc = purpose === 'kyc' ? `KYC fee (UTR ${utr})`
+        : purpose === 'gst' ? `GST payment (UTR ${utr})`
+        : `Deposit approved (UTR ${utr})`;
       await conn.query(
         'INSERT INTO transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)',
-        [req.user.id, 'deposit', amount, purpose === 'kyc' ? `KYC fee (UTR ${utr})` : `Deposit approved (UTR ${utr})`]
+        [req.user.id, 'deposit', amount, desc]
       );
+      // Welcome bonus only on a real wallet top-up (not KYC/GST fees).
+      if (purpose === 'wallet') {
+        await creditFirstDepositBonus(conn, req.user.id);
+      }
     }
 
     if (purpose === 'kyc') {
@@ -141,10 +167,10 @@ router.post('/deposit', async (req, res, next) => {
 });
 
 // Request a withdrawal. The amount is held from the balance immediately.
-// Requires a verified KYC.
 router.post('/withdraw', async (req, res, next) => {
   const amount = Number(req.body.amount);
   const upiId = (req.body.upi_id || '').trim();
+  const withdrawMin = Number(settings.get('withdraw_min'));
   if (!(amount > 0)) return res.status(400).json({ error: 'Amount must be greater than ₹0' });
   if (!upiId) return res.status(400).json({ error: 'Please enter the UPI ID to receive payment' });
 
@@ -152,8 +178,6 @@ router.post('/withdraw', async (req, res, next) => {
   try {
     await conn.beginTransaction();
 
-    // Balance check first, so a user who has not deposited just sees the normal
-    // insufficient-balance error rather than a KYC prompt.
     const [rows] = await conn.query('SELECT balance, auto_mode FROM users WHERE id = ? FOR UPDATE', [req.user.id]);
     const balance = Number(rows[0]?.balance ?? 0);
     const userAuto = !!rows[0]?.auto_mode;
@@ -162,16 +186,28 @@ router.post('/withdraw', async (req, res, next) => {
       return res.status(400).json({ error: 'Insufficient balance' });
     }
 
-    // KYC gate: withdrawals are only allowed once KYC is verified.
-    const [kyc] = await conn.query('SELECT status FROM kyc WHERE user_id = ?', [req.user.id]);
-    const kycStatus = kyc[0]?.status || null;
-    if (kycStatus !== 'verified') {
-      await conn.rollback();
-      return res.status(403).json({
-        error: 'Please complete KYC verification before withdrawing.',
-        kycStatus,
-      });
+    // Policy gates (minimum amount + required completed tasks) are skipped
+    // entirely for auto-approve users — they are never blocked.
+    if (!userAuto) {
+      if (amount < withdrawMin) {
+        await conn.rollback();
+        return res.status(400).json({ error: `Minimum withdrawal is ₹${withdrawMin}` });
+      }
+      const minTasks = Number(settings.get('withdraw_min_tasks'));
+      const [[done]] = await conn.query(
+        "SELECT COUNT(*) AS n FROM task_purchases WHERE user_id = ? AND status = 'completed'",
+        [req.user.id]
+      );
+      if (Number(done.n) < minTasks) {
+        await conn.rollback();
+        return res.status(403).json({
+          error: `Complete at least ${minTasks} tasks before withdrawing (${done.n}/${minTasks} done).`,
+          tasksCompleted: Number(done.n),
+          tasksRequired: minTasks,
+        });
+      }
     }
+
     // Hold the funds now; they are refunded if the admin rejects the request.
     await conn.query('UPDATE users SET balance = balance - ? WHERE id = ?', [amount, req.user.id]);
 

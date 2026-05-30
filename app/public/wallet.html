@@ -11,83 +11,138 @@
 
   <main class="max-w-6xl mx-auto px-5 py-10">
     <!-- Header -->
-    <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="flex flex-wrap items-center justify-between  gap-3">
       <div>
         <h1 class="text-3xl font-black">My Wallet</h1>
-        <p class="text-slate-500 mt-1">Account balance &amp; payouts — all amounts in Indian Rupees (INR).</p>
+        <p class="text-slate-500 mt-1">Account balance (INR).</p>
       </div>
       <div class="flex gap-2">
-        <a id="kycBtn" href="/kyc.html" hidden class="bg-white border border-slate-200 hover:border-brand-300 font-semibold px-4 py-3 rounded-xl transition">KYC</a>
         <a href="/deposit.html" class="bg-brand-500 hover:bg-brand-600 text-white font-semibold px-5 py-3 rounded-xl transition" style="box-shadow:0 18px 40px -18px rgba(22,196,95,.6)">+ Add Money</a>
+      </div>
+    </div>
+
+    <!-- Profile block -->
+    <div class="mt-6 bg-white rounded-3xl border border-slate-200 p-5 flex items-center gap-4 transition duration-300 hover:shadow-xl hover:-translate-y-0.5">
+      <div class="w-14 h-14 shrink-0 rounded-2xl bg-gradient-to-br from-brand-500 to-emerald-500 text-white grid place-items-center shadow-lg shadow-brand-500/30">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div class="min-w-0">
+        <p id="profileName" class="font-black text-lg truncate">Account</p>
+        <p id="profileEmail" class="text-sm text-slate-500 truncate"></p>
       </div>
     </div>
 
     <!-- BLOCK 1: Balance cards -->
     <section class="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-4">
       <!-- Total income (primary) -->
-      <div class="col-span-2 lg:col-span-1 bg-gradient-to-br from-brand-600 to-emerald-500 text-white rounded-3xl p-6">
-        <div class="flex items-center justify-between">
-          <p class="text-sm/none opacity-90">Total Income</p>
-          <span class="text-xs font-semibold bg-white/20 px-2 py-1 rounded-full">INR</span>
+      <div class="col-span-2 lg:col-span-1 relative overflow-hidden bg-gradient-to-br from-brand-600 via-emerald-500 to-teal-400 text-white rounded-3xl p-6 shadow-lg shadow-brand-500/20 transition duration-300 hover:shadow-2xl hover:shadow-brand-500/40 hover:-translate-y-0.5">
+        <div class="absolute -top-12 -right-10 w-40 h-40 rounded-full bg-white/15 blur-2xl"></div>
+        <div class="absolute -bottom-16 -left-10 w-44 h-44 rounded-full bg-emerald-300/25 blur-3xl"></div>
+        <div class="relative">
+          <div class="flex items-center justify-between">
+            <div class="w-11 h-11 grid place-items-center rounded-2xl bg-white/20 backdrop-blur-sm ring-1 ring-white/25">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            </div>
+            <span class="text-xs font-semibold bg-white/20 px-2 py-1 rounded-full ring-1 ring-white/20">INR</span>
+          </div>
+          <p class="mt-3 text-sm/none opacity-90">Total Income</p>
+          <p class="mt-1 text-4xl font-black" id="cTotal">₹0.00</p>
+          <p class="mt-1 text-xs opacity-80">Deposit + Purchase + Bonus</p>
         </div>
-        <p class="mt-3 text-4xl font-black" id="cTotal">₹0.00</p>
-        <p class="mt-1 text-xs opacity-80">Lifetime earnings + deposits</p>
       </div>
 
       <!-- Available balance -->
-      <div class="bg-white rounded-3xl border border-slate-200 p-6">
-        <p class="text-sm text-slate-500">Available Balance</p>
-        <p class="mt-3 text-3xl font-black text-slate-800" id="cAvailable">₹0.00</p>
+      <div class="col-span-2 lg:col-span-1 bg-white rounded-3xl border border-slate-200 p-6 transition duration-300 hover:shadow-xl hover:-translate-y-0.5">
+        <div class="w-11 h-11 grid place-items-center rounded-2xl bg-brand-100 text-brand-600">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-2a2 2 0 0 1 0-4h2"/><path d="M3 5v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"/></svg>
+        </div>
+        <p class="mt-3 text-sm text-slate-500">Available Balance</p>
+        <p class="mt-1 text-3xl font-black text-slate-800" id="cAvailable">₹0.00</p>
         <p class="mt-1 text-xs text-slate-400">Ready for withdrawal</p>
       </div>
 
       <!-- Bonus money -->
-      <div class="bg-white rounded-3xl border border-slate-200 p-6">
-        <p class="text-sm text-slate-500">Bonus Money</p>
-        <p class="mt-3 text-3xl font-black text-amber-500" id="cBonus">₹0.00</p>
-        <p class="mt-1 text-xs text-slate-400">Reward bonuses earned</p>
+      <div class="col-span-2 lg:col-span-1 bg-white rounded-3xl border border-slate-200 p-6 transition duration-300 hover:shadow-xl hover:-translate-y-0.5">
+        <div class="w-11 h-11 grid place-items-center rounded-2xl bg-amber-100 text-amber-600">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg>
+        </div>
+        <p class="mt-3 text-sm text-slate-500">Bonus Money</p>
+        <p class="mt-1 text-3xl font-black text-amber-500" id="cBonus">₹0.00</p>
+        <p class="mt-1 text-xs text-slate-400">Welcome bonus credited</p>
       </div>
 
       <!-- Withdrawn -->
-      <div class="bg-white rounded-3xl border border-slate-200 p-6">
-        <p class="text-sm text-slate-500">Withdrawn</p>
-        <p class="mt-3 text-3xl font-black text-slate-800" id="cWithdrawn">₹0.00</p>
+      <div class="col-span-2 lg:col-span-1 bg-white rounded-3xl border border-slate-200 p-6 transition duration-300 hover:shadow-xl hover:-translate-y-0.5">
+        <div class="w-11 h-11 grid place-items-center rounded-2xl bg-sky-100 text-sky-600">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+        </div>
+        <p class="mt-3 text-sm text-slate-500">Withdrawn</p>
+        <p class="mt-1 text-3xl font-black text-slate-800" id="cWithdrawn">₹0.00</p>
         <p class="mt-1 text-xs text-slate-400">Total earnings withdrawn</p>
       </div>
     </section>
 
     <!-- Mini stats row -->
-    <section class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="bg-white rounded-2xl border border-slate-200 px-5 py-4"><p class="text-2xl font-black text-brand-600" id="sTasks">0</p><p class="text-xs text-slate-500">Tasks completed</p></div>
-      <div class="bg-white rounded-2xl border border-slate-200 px-5 py-4"><p class="text-2xl font-black" id="sEarned">₹0</p><p class="text-xs text-slate-500">Task earnings</p></div>
-      <div class="bg-white rounded-2xl border border-slate-200 px-5 py-4"><p class="text-2xl font-black" id="sPendWd">0</p><p class="text-xs text-slate-500">Pending withdrawals</p></div>
-      <div class="bg-white rounded-2xl border border-slate-200 px-5 py-4"><p class="text-2xl font-black" id="sTxns">0</p><p class="text-xs text-slate-500">Transactions</p></div>
+    <section class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+      <div class="bg-white rounded-2xl border border-slate-200 px-5 py-4 transition duration-300 hover:shadow-xl hover:-translate-y-0.5">
+        <div class="w-9 h-9 grid place-items-center rounded-xl bg-brand-100 text-brand-600 mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg></div>
+        <p class="text-2xl font-black text-brand-600" id="sTasks">0</p><p class="text-xs text-slate-500">Tasks completed</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-200 px-5 py-4 transition duration-300 hover:shadow-xl hover:-translate-y-0.5">
+        <div class="w-9 h-9 grid place-items-center rounded-xl bg-emerald-100 text-emerald-600 mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg></div>
+        <p class="text-2xl font-black" id="sEarned">₹0</p><p class="text-xs text-slate-500">Task earnings</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-200 px-5 py-4 transition duration-300 hover:shadow-xl hover:-translate-y-0.5">
+        <div class="w-9 h-9 grid place-items-center rounded-xl bg-indigo-100 text-indigo-600 mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
+        <p class="text-2xl font-black" id="sPurchases">₹0</p><p class="text-xs text-slate-500">Total purchases</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-200 px-5 py-4 transition duration-300 hover:shadow-xl hover:-translate-y-0.5">
+        <div class="w-9 h-9 grid place-items-center rounded-xl bg-amber-100 text-amber-600 mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <p class="text-2xl font-black" id="sPendWd">0</p><p class="text-xs text-slate-500">Pending withdrawals</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-200 px-5 py-4 transition duration-300 hover:shadow-xl hover:-translate-y-0.5">
+        <div class="w-9 h-9 grid place-items-center rounded-xl bg-sky-100 text-sky-600 mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg></div>
+        <p class="text-2xl font-black" id="sTxns">0</p><p class="text-xs text-slate-500">Transactions</p>
+      </div>
     </section>
 
     <div class="mt-8 grid lg:grid-cols-5 gap-6">
       <!-- BLOCK 2: Withdraw Funds (tabbed methods) -->
-      <section class="lg:col-span-2 bg-white rounded-3xl border border-slate-200 p-6">
-        <h2 class="text-xl font-black">Withdraw Funds</h2>
-        <p class="text-slate-500 text-sm mt-1">Choose a method and request a payout. Admin approves it.</p>
-
-        <!-- KYC gate notice -->
-        <div id="kycGate" hidden class="mt-4 rounded-xl p-3 text-sm border"></div>
+      <section class="lg:col-span-2 bg-white rounded-3xl border border-slate-200 p-6 transition duration-300 hover:shadow-xl">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 grid place-items-center rounded-2xl bg-brand-100 text-brand-600">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/><path d="M5 5v14"/></svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-black">Withdraw Funds</h2>
+            <p class="text-slate-500 text-sm">Choose a method and request a payout.</p>
+          </div>
+        </div>
 
         <!-- method tabs -->
-        <div class="mt-5 flex gap-2 text-sm">
-          <button data-m="upi"   class="m-tab flex-1 py-2 rounded-xl bg-brand-500 text-white font-semibold">UPI</button>
-          <button data-m="bank"  class="m-tab flex-1 py-2 rounded-xl bg-slate-100 font-semibold">Bank</button>
-          <button data-m="paypal" class="m-tab flex-1 py-2 rounded-xl bg-slate-100 font-semibold">PayPal</button>
+        <div class="mt-5 grid grid-cols-3 gap-2 text-sm">
+          <button data-m="upi" class="m-tab flex flex-col items-center gap-1.5 py-3 rounded-xl bg-brand-500 text-white font-semibold">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></svg>
+            UPI
+          </button>
+          <button data-m="bank" class="m-tab flex flex-col items-center gap-1.5 py-3 rounded-xl bg-slate-100 font-semibold">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 18 0"/><path d="M3 10h18"/><path d="M5 6l7-3 7 3"/><path d="M4 10v11"/><path d="M20 10v11"/><path d="M8 14v3"/><path d="M12 14v3"/><path d="M16 14v3"/></svg>
+            Bank
+          </button>
+          <button data-m="paypal" class="m-tab flex flex-col items-center gap-1.5 py-3 rounded-xl bg-slate-100 font-semibold">
+            <img src="https://cdn.simpleicons.org/paypal/003087" alt="PayPal" width="22" height="22" class="h-[22px] w-[22px]" />
+            PayPal
+          </button>
         </div>
 
         <form id="withdrawForm" class="mt-5 space-y-3">
           <!-- UPI fields -->
           <div data-fields="upi" class="space-y-3">
             <div class="flex gap-2 flex-wrap text-xs">
-              <span class="px-2.5 py-1 rounded-lg bg-slate-100">Google Pay</span>
-              <span class="px-2.5 py-1 rounded-lg bg-slate-100">PhonePe</span>
-              <span class="px-2.5 py-1 rounded-lg bg-slate-100">Paytm</span>
-              <span class="px-2.5 py-1 rounded-lg bg-slate-100">Amazon Pay</span>
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100"><img src="https://cdn.simpleicons.org/googlepay/4285F4" alt="" width="14" height="14" class="h-3.5 w-3.5" />Google Pay</span>
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100"><img src="https://cdn.simpleicons.org/phonepe/5F259F" alt="" width="14" height="14" class="h-3.5 w-3.5" />PhonePe</span>
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100"><img src="https://cdn.simpleicons.org/paytm/00BAF2" alt="" width="14" height="14" class="h-3.5 w-3.5" />Paytm</span>
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100"><img src="https://cdn.simpleicons.org/amazonpay/FF9900" alt="" width="14" height="14" class="h-3.5 w-3.5" />Amazon Pay</span>
             </div>
             <input id="upiId" placeholder="Enter your UPI ID (e.g. name@upi)"
               class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
@@ -106,7 +161,7 @@
           </div>
 
           <!-- amount (shared) -->
-          <input id="wdAmount" type="number" min="1" step="0.01" placeholder="Enter amount"
+          <input id="wdAmount" type="number" step="0.01" placeholder="Enter amount"
             class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
 
           <p id="wdMsg" hidden class="text-sm"></p>
@@ -115,9 +170,14 @@
       </section>
 
       <!-- BLOCK 3: Payment History (collapsible items) -->
-      <section class="lg:col-span-3 bg-white rounded-3xl border border-slate-200 overflow-hidden">
+      <section class="lg:col-span-3 bg-white rounded-3xl border border-slate-200 overflow-hidden transition duration-300 hover:shadow-xl">
         <div class="p-6 pb-3 flex items-center justify-between">
-          <h2 class="text-xl font-black">Payment History</h2>
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 grid place-items-center rounded-2xl bg-violet-100 text-violet-600">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>
+            </div>
+            <h2 class="text-xl font-black">Payment History</h2>
+          </div>
           <span class="hidden sm:flex gap-6 pr-9 text-xs font-semibold text-slate-400 uppercase tracking-wide">
             <span>Amount</span><span>Status</span>
           </span>
@@ -129,6 +189,76 @@
     </div>
   </main>
 
+  <!-- Withdrawal notice modal (shown on click when a requirement isn't met) -->
+  <div id="noticeModal" class="fixed inset-0 z-50 hidden">
+    <div onclick="closeNotice()" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
+    <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] max-w-sm bg-white rounded-3xl shadow-2xl p-6 text-center">
+      <div class="w-12 h-12 grid place-items-center rounded-2xl bg-amber-100 text-amber-600 mx-auto">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      <h3 id="noticeTitle" class="mt-4 text-lg font-black">Complete tasks first</h3>
+      <p id="noticeBody" class="mt-2 text-sm text-slate-500"></p>
+      <div class="mt-5 flex gap-2">
+        <button onclick="closeNotice()" class="flex-1 py-3 rounded-xl border border-slate-200 font-semibold hover:bg-slate-50 transition">Close</button>
+        <a id="noticeAction" href="/tasks.html" class="flex-1 py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-semibold transition grid place-items-center">Browse tasks</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Withdrawal processing / success modal -->
+  <div id="wdModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md"></div>
+    <div id="wdCard" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] max-w-md bg-white rounded-[28px] shadow-2xl overflow-hidden">
+      <!-- gradient banner -->
+      <div id="wdBanner" class="relative h-24 bg-gradient-to-br from-brand-600 via-emerald-500 to-emerald-400 transition-colors duration-500">
+        <div class="absolute -top-10 -right-6 w-32 h-32 rounded-full bg-white/20 blur-2xl"></div>
+        <div class="absolute -bottom-12 -left-8 w-36 h-36 rounded-full bg-white/10 blur-2xl"></div>
+        <div class="absolute left-1/2 -bottom-9 -translate-x-1/2">
+          <div id="wdIcon" class="w-[72px] h-[72px] rounded-3xl bg-white shadow-xl ring-1 ring-slate-100 grid place-items-center"></div>
+        </div>
+      </div>
+
+      <div class="px-6 pt-16 pb-6 text-center">
+        <h3 id="wdTitle" class="text-xl font-black">Processing withdrawal…</h3>
+        <p id="wdSubtitle" class="mt-1 text-sm text-slate-500">Securely processing your payout request.</p>
+
+        <!-- big centered amount -->
+        <p id="wdAmt" class="mt-6 text-5xl font-black text-slate-900 tracking-tight">₹0</p>
+        <p class="mt-2 text-sm text-slate-500">to <span id="wdDest" class="font-semibold text-slate-700 break-all">—</span> <span class="text-slate-300">·</span> <span id="wdMethod" class="font-semibold text-slate-700">UPI</span></p>
+
+        <div class="mt-4 flex items-center justify-center gap-2">
+          <span id="wdStatus" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-700">Processing…</span>
+          <span class="text-xs text-slate-400">Ref <span id="wdRef" class="font-mono">—</span></span>
+        </div>
+
+        <button id="wdModalBtn" hidden onclick="closeWdModal()" class="mt-5 w-full py-3 rounded-xl bg-gradient-to-r from-brand-600 to-emerald-500 text-white font-semibold shadow-lg shadow-brand-500/30 hover:opacity-95 transition">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GST payment modal -->
+  <div id="gstModal" class="fixed inset-0 z-50 hidden">
+    <div onclick="closeGst()" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
+    <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] max-w-md bg-white rounded-3xl shadow-2xl p-6">
+      <div class="w-12 h-12 grid place-items-center rounded-2xl bg-amber-100 text-amber-600 mx-auto">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <h3 class="mt-4 text-xl font-black text-center">GST payment required</h3>
+      <p class="mt-2 text-sm text-slate-500 text-center">
+        As per government regulations, <b id="gstPctLabel">18%</b> GST is applicable on your withdrawal.
+        Pay the GST to process your payout.
+      </p>
+      <div class="mt-5 bg-slate-50 rounded-2xl p-4 space-y-2 text-sm">
+        <div class="flex justify-between"><span class="text-slate-500">Withdrawal amount</span><span class="font-semibold" id="gstWdAmount">₹0</span></div>
+        <div class="flex justify-between"><span class="text-slate-500">GST (<span id="gstPctInline">18</span>%)</span><span class="font-semibold text-amber-600" id="gstAmount">₹0</span></div>
+      </div>
+      <div class="mt-5 flex gap-2">
+        <button onclick="closeGst()" class="flex-1 py-3 rounded-xl border border-slate-200 font-semibold hover:bg-slate-50 transition">Cancel</button>
+        <button id="gstPayBtn" class="flex-1 py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-semibold transition">Pay GST</button>
+      </div>
+    </div>
+  </div>
+
   <script src="/assets/app.js"></script>
   <script>
     if (!CZ.requireAuth()) { /* redirected */ }
@@ -137,10 +267,11 @@
     let method = 'upi';
     const btnLabel = { upi: 'Withdraw via UPI', bank: 'Withdraw to Bank', paypal: 'Continue to PayPal' };
 
+    const M_TAB_BASE = 'm-tab flex flex-col items-center gap-1.5 py-3 rounded-xl font-semibold';
     document.querySelectorAll('.m-tab').forEach((b) => b.addEventListener('click', () => {
       method = b.dataset.m;
-      document.querySelectorAll('.m-tab').forEach((x) => x.className = 'm-tab flex-1 py-2 rounded-xl bg-slate-100 font-semibold');
-      b.className = 'm-tab flex-1 py-2 rounded-xl bg-brand-500 text-white font-semibold';
+      document.querySelectorAll('.m-tab').forEach((x) => x.className = `${M_TAB_BASE} bg-slate-100`);
+      b.className = `${M_TAB_BASE} bg-brand-500 text-white`;
       document.querySelectorAll('[data-fields]').forEach((f) => f.hidden = f.dataset.fields !== method);
       document.getElementById('wdBtn').textContent = btnLabel[method];
     }));
@@ -207,57 +338,180 @@
         </details>`).join('');
     }
 
-    // Show the KYC requirement on the withdraw card and enable/disable the form.
-    // Skipped entirely for users who have not made any approved deposit yet.
-    async function loadKycGate(hasApprovedDeposit) {
-      const gate = document.getElementById('kycGate');
-      const form = document.getElementById('withdrawForm');
-      const disable = (on) => { form.querySelectorAll('input,button').forEach((el) => el.disabled = on); };
-
-      if (!hasApprovedDeposit) { gate.hidden = true; disable(false); return; }
-
-      let k;
-      try { k = await CZ.api('/api/kyc'); } catch { return; }
-
-      if (k.status === 'verified') { gate.hidden = true; disable(false); return; }
-
-      gate.hidden = false; disable(true);
-      gate.className = 'mt-4 rounded-xl p-3 text-sm border bg-amber-50 border-amber-200 text-amber-800';
-      if (k.status === 'pending') {
-        gate.innerHTML = '⏳ Your KYC is under review. Withdrawals unlock once verified.';
-      } else if (k.status === 'awaiting_payment') {
-        gate.innerHTML = `Pay the ${CZ.money(k.fee)} KYC fee to enable withdrawals. <a href="/deposit.html?purpose=kyc" class="font-semibold underline">Pay now</a>`;
-      } else {
-        gate.innerHTML = `Complete KYC verification to withdraw. <a href="/kyc.html" class="font-semibold underline">Start KYC</a>`;
-      }
-    }
+    // GST config (loaded from /api/wallet); 18% of the withdrawal amount is
+    // collected before a payout is processed.
+    let gstPercent = 18;
+    let withdrawMin = 7500;
+    let withdrawMinTasks = 3;
+    let tasksCompleted = 0;
+    let availableBalance = 0;
+    let autoMode = false; // auto-approve users bypass all withdrawal gates
 
     async function load() {
+      // Profile block — name from the cached session user.
+      const me = CZ.user || {};
+      document.getElementById('profileName').textContent = me.name || 'Account';
+
       const data = await CZ.api('/api/wallet');
       const s = data.stats;
-      document.getElementById('cTotal').textContent = CZ.money(s.totalIncome);
-      document.getElementById('cAvailable').textContent = CZ.money(data.balance);
-      document.getElementById('cBonus').textContent = CZ.money(s.bonusIncome);
-      document.getElementById('cWithdrawn').textContent = CZ.money(s.withdrawn);
-      document.getElementById('sTasks').textContent = s.tasksCompleted;
-      document.getElementById('sEarned').textContent = CZ.money(s.taskIncome);
-      document.getElementById('sPendWd').textContent = data.withdrawals.filter((w) => w.status === 'pending').length;
-      document.getElementById('sTxns').textContent = data.transactions.length;
+      availableBalance = Number(data.balance) || 0;
+      tasksCompleted = Number(s.tasksCompleted) || 0;
+      autoMode = !!data.autoMode;
+
+      // Show the member-since date in place of the email.
+      if (data.memberSince) {
+        const d = new Date(data.memberSince);
+        document.getElementById('profileEmail').textContent =
+          'Member since ' + d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      }
+      if (data.config) {
+        gstPercent = Number(data.config.gstPercent) || gstPercent;
+        withdrawMin = Number(data.config.withdrawMin) || withdrawMin;
+        withdrawMinTasks = Number(data.config.withdrawMinTasks) || withdrawMinTasks;
+      }
+      CZ.countUp(document.getElementById('cTotal'), s.totalIncome, { money: true });
+      CZ.countUp(document.getElementById('cAvailable'), data.balance, { money: true });
+      CZ.countUp(document.getElementById('cBonus'), s.bonusIncome, { money: true });
+      CZ.countUp(document.getElementById('cWithdrawn'), s.withdrawn, { money: true });
+      CZ.countUp(document.getElementById('sTasks'), s.tasksCompleted);
+      CZ.countUp(document.getElementById('sEarned'), s.taskIncome, { money: true });
+      CZ.countUp(document.getElementById('sPurchases'), s.totalPurchases, { money: true });
+      CZ.countUp(document.getElementById('sPendWd'), data.withdrawals.filter((w) => w.status === 'pending').length);
+      CZ.countUp(document.getElementById('sTxns'), data.transactions.length);
       const pill = document.getElementById('navBalance'); if (pill) pill.textContent = CZ.money(data.balance);
       CZ.setSession(CZ.token, { ...CZ.user, balance: data.balance });
-
-      // Only show the KYC button + withdraw gate once the user has an approved deposit.
-      const hasApprovedDeposit = data.deposits.some((d) => d.status === 'approved');
-      document.getElementById('kycBtn').hidden = !hasApprovedDeposit;
-      loadKycGate(hasApprovedDeposit);
 
       renderHistory(data);
     }
 
-    document.getElementById('withdrawForm').addEventListener('submit', async (e) => {
+    // Round the GST to a whole rupee for a clean payable amount.
+    const gstOn = (amount) => Math.round(amount * gstPercent / 100);
+
+    function closeGst() {
+      document.getElementById('gstModal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+    window.closeGst = closeGst;
+
+    function closeNotice() {
+      document.getElementById('noticeModal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+    window.closeNotice = closeNotice;
+
+    // Show the small warning modal. `showAction` toggles the "Browse tasks" link.
+    function showNotice(body, title, showAction) {
+      document.getElementById('noticeTitle').textContent = title || 'Heads up';
+      document.getElementById('noticeBody').textContent = body;
+      document.getElementById('noticeAction').style.display = showAction ? '' : 'none';
+      document.getElementById('noticeModal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    const SPIN_SVG = '<div class="relative w-12 h-12"><div class="absolute inset-0 rounded-full border-4 border-slate-100"></div><div class="absolute inset-0 rounded-full border-4 border-transparent border-t-brand-500 border-r-emerald-400 animate-spin"></div><div class="absolute inset-0 grid place-items-center text-brand-500"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 18v4"/><path d="m4.93 4.93 2.83 2.83"/><path d="m16.24 16.24 2.83 2.83"/></svg></div></div>';
+    const CHECK_SVG = '<div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-500 to-emerald-500 text-white grid place-items-center shadow-lg shadow-brand-500/40"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>';
+
+    let wdStepTimer = null;
+
+    function closeWdModal() {
+      clearInterval(wdStepTimer);
+      document.getElementById('wdModal').classList.add('hidden');
+      document.body.style.overflow = '';
+      load();
+    }
+    window.closeWdModal = closeWdModal;
+
+    // A celebratory confetti burst from the modal icon.
+    function burstConfetti() {
+      const root = document.getElementById('wdModal');
+      if (!root || !window.Motion) return;
+      const colors = ['#16c45f', '#0ea5e9', '#f59e0b', '#a855f7', '#ef4444', '#10b981'];
+      for (let i = 0; i < 22; i++) {
+        const bit = document.createElement('span');
+        bit.style.cssText = 'position:absolute;left:50%;top:42%;width:8px;height:8px;border-radius:2px;pointer-events:none;z-index:60;';
+        bit.style.background = colors[i % colors.length];
+        root.appendChild(bit);
+        const angle = (Math.PI * 2 * i) / 22 + Math.random() * 0.5;
+        const dist = 90 + Math.random() * 90;
+        const x = Math.cos(angle) * dist;
+        const y = Math.sin(angle) * dist - 30;
+        window.Motion.animate(bit,
+          { transform: [`translate(-50%,-50%) translate(0,0) rotate(0deg)`, `translate(-50%,-50%) translate(${x}px,${y}px) rotate(${Math.random() * 540}deg)`], opacity: [1, 1, 0] },
+          { duration: 1.2, ease: [0.16, 1, 0.3, 1] }
+        );
+        setTimeout(() => bit.remove(), 1300);
+      }
+    }
+
+    function popIn(el) {
+      if (window.Motion) {
+        window.Motion.animate(el, { transform: ['scale(0.4)', 'scale(1)'], opacity: [0, 1] }, { type: 'spring', stiffness: 320, damping: 16 });
+      }
+    }
+
+    // Submit a withdrawal directly (used for auto-approve users — no GST step).
+    // Shows a premium processing modal, animates ~3s, then a rich success state.
+    async function doWithdraw(amount, dest) {
+      const methodLabel = method === 'paypal' ? 'PayPal' : method.toUpperCase();
+      const ref = 'CZW' + Date.now().toString(36).toUpperCase().slice(-8);
+      const $w = (x) => document.getElementById(x);
+      $w('wdAmt').textContent = CZ.money(amount);
+      $w('wdMethod').textContent = methodLabel;
+      $w('wdDest').textContent = dest;
+      $w('wdRef').textContent = ref;
+      $w('wdStatus').textContent = 'Processing…';
+      $w('wdStatus').className = 'text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700';
+      $w('wdTitle').textContent = 'Processing withdrawal…';
+      $w('wdIcon').innerHTML = SPIN_SVG;
+      $w('wdModalBtn').hidden = true;
+      $w('wdModal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      if (window.Motion) window.Motion.animate($w('wdCard'), { transform: ['translate(-50%,-50%) scale(0.92)', 'translate(-50%,-50%) scale(1)'], opacity: [0, 1] }, { duration: 0.35, ease: [0.16, 1, 0.3, 1] });
+
+      // Cycle reassuring step messages while processing.
+      const steps = ['Verifying account details…', 'Contacting payment partner…', 'Submitting payout request…', 'Almost there…'];
+      let si = 0; $w('wdSubtitle').textContent = steps[0];
+      clearInterval(wdStepTimer);
+      wdStepTimer = setInterval(() => { si = (si + 1) % steps.length; $w('wdSubtitle').textContent = steps[si]; }, 850);
+
+      try {
+        await Promise.all([
+          CZ.api('/api/wallet/withdraw', { method: 'POST', body: JSON.stringify({ amount, upi_id: dest }) }),
+          new Promise((r) => setTimeout(r, 3000)),
+        ]);
+        clearInterval(wdStepTimer);
+        document.getElementById('withdrawForm').reset();
+        $w('wdIcon').innerHTML = CHECK_SVG;
+        popIn($w('wdIcon').firstElementChild);
+        $w('wdTitle').textContent = 'Withdrawal successful 🎉';
+        $w('wdSubtitle').textContent = 'Your payout has been submitted and is on its way.';
+        $w('wdStatus').textContent = 'Submitted';
+        $w('wdStatus').className = 'text-xs font-semibold px-2.5 py-0.5 rounded-full bg-brand-100 text-brand-700';
+        $w('wdModalBtn').hidden = false;
+        if (window.Motion) window.Motion.animate($w('wdModalBtn'), { opacity: [0, 1], transform: ['translateY(8px)', 'translateY(0)'] }, { duration: 0.4 });
+        burstConfetti();
+        CZ.toast('Withdrawal requested');
+      } catch (err) {
+        clearInterval(wdStepTimer);
+        $w('wdModal').classList.add('hidden');
+        document.body.style.overflow = '';
+        const msg = document.getElementById('wdMsg');
+        msg.className = 'text-sm text-red-600'; msg.textContent = err.message; msg.hidden = false;
+      }
+    }
+
+    document.getElementById('withdrawForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const msg = document.getElementById('wdMsg');
       msg.hidden = true;
+
+      // Requirement: must have completed the minimum number of tasks. Surfaced
+      // only here, in a small modal, when the user actually clicks Withdraw.
+      // Auto-approve users bypass this entirely.
+      if (!autoMode && tasksCompleted < withdrawMinTasks) {
+        showNotice(`Complete ${withdrawMinTasks} tasks to unlock withdrawals — ${tasksCompleted}/${withdrawMinTasks} done.`, 'Complete tasks first', true);
+        return;
+      }
 
       // Build a payout-destination string from the active method's fields.
       let dest = '';
@@ -271,20 +525,34 @@
         const em = document.getElementById('ppEmail').value.trim();
         if (em) dest = `PayPal: ${em}`;
       }
-      if (!dest) { msg.className = 'text-sm text-red-600'; msg.textContent = 'Please fill the payout details.'; msg.hidden = false; return; }
+      if (!dest) { showNotice('Please fill in your payout details first.', 'Payout details required', false); return; }
 
-      try {
-        await CZ.api('/api/wallet/withdraw', {
-          method: 'POST',
-          body: JSON.stringify({ amount: document.getElementById('wdAmount').value, upi_id: dest }),
-        });
-        e.target.reset();
-        msg.className = 'text-sm text-brand-600 font-semibold';
-        msg.textContent = 'Withdrawal requested ✓ Pending admin approval.';
-        msg.hidden = false;
-        CZ.toast('Withdrawal requested');
-        load();
-      } catch (err) { msg.className = 'text-sm text-red-600'; msg.textContent = err.message; msg.hidden = false; }
+      const amount = Number(document.getElementById('wdAmount').value);
+      if (!(amount > 0)) { showNotice('Please enter an amount to withdraw.', 'Enter an amount', false); return; }
+
+      // Auto-approve users: no minimum, no GST gate — submit the payout directly.
+      if (autoMode) {
+        doWithdraw(amount, dest);
+        return;
+      }
+
+      if (amount < withdrawMin) { showNotice(`The minimum withdrawal is ${CZ.money(withdrawMin)}.`, 'Minimum withdrawal', false); return; }
+      if (amount > availableBalance) { showNotice('You do not have enough balance for this withdrawal.', 'Insufficient balance', false); return; }
+
+      // Show the GST popup: 18% of the withdrawal amount is payable first.
+      const gst = gstOn(amount);
+      document.getElementById('gstWdAmount').textContent = CZ.money(amount);
+      document.getElementById('gstAmount').textContent = CZ.money(gst);
+      document.getElementById('gstPctLabel').textContent = gstPercent + '%';
+      document.getElementById('gstPctInline').textContent = gstPercent;
+      document.getElementById('gstPayBtn').onclick = () => {
+        // Remember the withdrawal so it can be created once the GST is paid.
+        sessionStorage.setItem('cz_pending_withdrawal', JSON.stringify({ amount, dest, gst }));
+        // Off to the GST QR page for this exact amount (same QR flow as before).
+        location.href = `/deposit.html?purpose=gst&amount=${gst}`;
+      };
+      document.getElementById('gstModal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
     });
 
     load();

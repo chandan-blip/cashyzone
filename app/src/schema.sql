@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS settings (
 CREATE TABLE IF NOT EXISTS transactions (
   id          INT AUTO_INCREMENT PRIMARY KEY,
   user_id     INT NOT NULL,
-  type        ENUM('deposit', 'withdraw', 'earning', 'purchase') NOT NULL,
+  type        ENUM('deposit', 'withdraw', 'earning', 'purchase', 'bonus') NOT NULL,
   amount      DECIMAL(12, 2) NOT NULL,
   description VARCHAR(255),
   created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS task_purchases (
   price        DECIMAL(12, 2) NOT NULL,
   reward       DECIMAL(12, 2) NOT NULL,
   status       ENUM('purchased', 'completed') NOT NULL DEFAULT 'purchased',
+  progress     TEXT NULL,                          -- saved in-progress answers (JSON)
   created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   completed_at TIMESTAMP NULL,
   UNIQUE KEY uniq_user_task (user_id, task_id),

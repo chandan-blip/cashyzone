@@ -50,10 +50,12 @@ async function main() {
     await ensureColumn(conn, 'users', 'country', 'VARCHAR(100)');
     await ensureColumn(conn, 'users', 'auto_mode', 'TINYINT(1) NOT NULL DEFAULT 0');
     await ensureColumn(conn, 'deposits', 'note', 'VARCHAR(255) NULL');
+    await ensureColumn(conn, 'task_purchases', 'progress', 'TEXT NULL');
 
-    // Ensure the transactions.type enum includes 'purchase' (for buying tasks).
+    // Ensure the transactions.type enum includes 'purchase' (buying tasks) and
+    // 'bonus' (the first-deposit welcome bonus).
     await conn.query(
-      "ALTER TABLE transactions MODIFY COLUMN type ENUM('deposit','withdraw','earning','purchase') NOT NULL"
+      "ALTER TABLE transactions MODIFY COLUMN type ENUM('deposit','withdraw','earning','purchase','bonus') NOT NULL"
     );
 
     // An older build used `item_id` here. If that legacy column exists, drop the
