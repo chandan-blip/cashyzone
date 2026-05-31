@@ -25,15 +25,26 @@ router.put('/settings', async (req, res, next) => {
   }
 });
 
-// Dashboard summary counters.
+// Dashboard summary counters. Counts cover only non-auto users (auto_mode = 0)
+// — the manually-managed accounts the admin actually reviews.
 router.get('/stats', async (req, res, next) => {
   try {
-    const [[users]] = await pool.query('SELECT COUNT(*) AS n FROM users');
-    const [[pendDep]] = await pool.query("SELECT COUNT(*) AS n FROM deposits WHERE status = 'pending'");
-    const [[pendWd]] = await pool.query("SELECT COUNT(*) AS n FROM withdrawals WHERE status = 'pending'");
-    const [[pendKyc]] = await pool.query("SELECT COUNT(*) AS n FROM kyc WHERE status = 'pending'");
-    const [[paid]] = await pool.query("SELECT COALESCE(SUM(amount),0) AS s FROM transactions WHERE type = 'withdraw'");
-    res.json({ users: users.n, pendingDeposits: pendDep.n, pendingWithdrawals: pendWd.n, pendingKyc: pendKyc.n, totalPaidOut: paid.s });
+    const [[totalUsers]] = await pool.query('SELECT COUNT(*) AS n FROM users WHERE auto_mode = 0');
+    const [[todayUsers]] = await pool.query(
+      'SELECT COUNT(*) AS n FROM users WHERE auto_mode = 0 AND DATE(created_at) = CURDATE()'
+    );
+    const [[totalDeposits]] = await pool.query(
+      'SELECT COUNT(*) AS n FROM deposits d JOIN users u ON u.id = d.user_id WHERE u.auto_mode = 0'
+    );
+    const [[todayDeposits]] = await pool.query(
+      'SELECT COUNT(*) AS n FROM deposits d JOIN users u ON u.id = d.user_id WHERE u.auto_mode = 0 AND DATE(d.created_at) = CURDATE()'
+    );
+    res.json({
+      todayUsers: todayUsers.n,
+      todayDeposits: todayDeposits.n,
+      totalUsers: totalUsers.n,
+      totalDeposits: totalDeposits.n,
+    });
   } catch (err) {
     next(err);
   }

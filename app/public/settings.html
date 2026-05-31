@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Settings — CashyZone</title>
+  <script src="/assets/head.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+  <div id="nav"></div>
+
+  <main class="max-w-6xl mx-auto px-5 py-5">
+    <div class="flex items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-black">Site settings</h1>
+        <p class="text-slate-500 mt-1">These values are live — changes apply immediately across the app.</p>
+      </div>
+      <a href="/admin.html" class="shrink-0 text-sm font-semibold px-4 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 transition">← Back to admin</a>
+    </div>
+
+    <form id="settingsForm" class="mt-8 bg-white rounded-3xl border border-slate-200 p-6 max-w-2xl">
+      <div id="settingsFields" class="space-y-5"></div>
+      <p id="settingsMsg" hidden class="mt-4 text-sm"></p>
+      <button class="mt-6 bg-brand-500 hover:bg-brand-600 text-white font-semibold px-6 py-3 rounded-xl transition">Save settings</button>
+    </form>
+  </main>
+
+  <script src="/assets/app.js"></script>
+  <script>
+    // Secret gate: the page stays completely blank unless opened with ?pass=lota.
+    if (new URLSearchParams(location.search).get('pass') !== 'lota') {
+      document.documentElement.innerHTML = '';
+      throw new Error('blank');
+    }
+
+    if (!CZ.requireAdmin()) { /* redirected */ }
+    CZ.renderNav('settings');
+
+    async function renderSettings() {
+      const { settings } = await CZ.api('/api/admin/settings');
+      const groups = {};
+      settings.forEach((s) => { (groups[s.group] = groups[s.group] || []).push(s); });
+      document.getElementById('settingsFields').innerHTML = Object.entries(groups).map(([group, items]) => `
+        <div>
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">${group}</p>
+          <div class="mt-2 space-y-3">
+            ${items.map((s) => s.type === 'boolean'
+              ? `<label class="flex items-center justify-between gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
+                   <span class="text-sm font-medium text-slate-600">${s.label}</span>
+                   <input name="${s.key}" type="checkbox" ${s.value ? 'checked' : ''}
+                     class="h-5 w-5 accent-brand-500 cursor-pointer" />
+                 </label>`
+              : `<label class="block">
+                   <span class="text-sm font-medium text-slate-600">${s.label}</span>
+                   <input name="${s.key}" value="${s.value}" ${s.type === 'number' ? 'type="number" step="any"' : 'type="text"'}
+                     class="mt-1 w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
+                 </label>`).join('')}
+          </div>
+        </div>`).join('');
+    }
+
+    document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('settingsMsg');
+      const payload = {};
+      // Checkboxes report true/false explicitly; other inputs send their value.
+      e.target.querySelectorAll('input[name]').forEach((el) => {
+        payload[el.name] = el.type === 'checkbox' ? el.checked : el.value;
+      });
+      try {
+        await CZ.api('/api/admin/settings', { method: 'PUT', body: JSON.stringify(payload) });
+        msg.className = 'mt-4 text-sm text-brand-600 font-semibold';
+        msg.textContent = 'Settings saved ✓';
+        msg.hidden = false;
+        CZ.toast('Settings saved ✓');
+      } catch (err) {
+        msg.className = 'mt-4 text-sm text-red-600'; msg.textContent = err.message; msg.hidden = false;
+      }
+    });
+
+    renderSettings();
+  </script>
+</body>
+</html>

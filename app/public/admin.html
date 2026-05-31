@@ -13,13 +13,12 @@
     <h1 class="text-3xl font-black">Admin dashboard</h1>
     <p class="text-slate-500 mt-1">Manage users, deposits and withdrawals. All amounts in INR.</p>
 
-    <!-- Stats -->
-    <div id="stats" class="mt-8 grid grid-cols-2 md:grid-cols-5 gap-4">
-      <div class="bg-white rounded-2xl border border-slate-200 p-5"><p class="text-3xl font-black" id="sUsers">–</p><p class="text-sm text-slate-500">Users</p></div>
-      <div class="bg-white rounded-2xl border border-slate-200 p-5"><p class="text-3xl font-black text-amber-600" id="sDep">–</p><p class="text-sm text-slate-500">Pending deposits</p></div>
-      <div class="bg-white rounded-2xl border border-slate-200 p-5"><p class="text-3xl font-black text-amber-600" id="sWd">–</p><p class="text-sm text-slate-500">Pending withdrawals</p></div>
-      <div class="bg-white rounded-2xl border border-slate-200 p-5"><p class="text-3xl font-black text-amber-600" id="sKyc">–</p><p class="text-sm text-slate-500">Pending KYC</p></div>
-      <div class="bg-white rounded-2xl border border-slate-200 p-5"><p class="text-3xl font-black text-brand-600" id="sPaid">–</p><p class="text-sm text-slate-500">Total paid out</p></div>
+    <!-- Stats (non-auto users only) -->
+    <div id="stats" class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-white rounded-2xl border border-slate-200 p-5"><p class="text-3xl font-black text-brand-600" id="sTodayUsers">–</p><p class="text-sm text-slate-500">Today Users</p></div>
+      <div class="bg-white rounded-2xl border border-slate-200 p-5"><p class="text-3xl font-black text-brand-600" id="sTodayDep">–</p><p class="text-sm text-slate-500">Today Deposits</p></div>
+      <div class="bg-white rounded-2xl border border-slate-200 p-5"><p class="text-3xl font-black" id="sTotalUsers">–</p><p class="text-sm text-slate-500">Total Users</p></div>
+      <div class="bg-white rounded-2xl border border-slate-200 p-5"><p class="text-3xl font-black" id="sTotalDep">–</p><p class="text-sm text-slate-500">Total Deposits</p></div>
     </div>
 
     <!-- Tabs -->
@@ -27,7 +26,6 @@
       <button data-tab="deposits" class="tab px-4 py-2 rounded-xl bg-brand-500 text-white font-semibold">Deposits</button>
       <button data-tab="withdrawals" class="tab px-4 py-2 rounded-xl bg-white border border-slate-200 font-semibold">Withdrawals</button>
       <button data-tab="users" class="tab px-4 py-2 rounded-xl bg-white border border-slate-200 font-semibold">Users</button>
-      <button data-tab="settings" class="tab px-4 py-2 rounded-xl bg-white border border-slate-200 font-semibold">Settings</button>
     </div>
 
     <!-- Table view (deposits / withdrawals / kyc / users) -->
@@ -38,17 +36,6 @@
           <tbody id="tbody"></tbody>
         </table>
       </div>
-    </div>
-
-    <!-- Settings view -->
-    <div id="settingsView" hidden class="mt-5">
-      <form id="settingsForm" class="bg-white rounded-3xl border border-slate-200 p-6 max-w-2xl">
-        <h2 class="text-xl font-black">Site settings</h2>
-        <p class="text-slate-500 text-sm mt-1">These values are live — changes apply immediately across the app.</p>
-        <div id="settingsFields" class="mt-6 space-y-5"></div>
-        <p id="settingsMsg" hidden class="mt-4 text-sm"></p>
-        <button class="mt-6 bg-brand-500 hover:bg-brand-600 text-white font-semibold px-6 py-3 rounded-xl transition">Save settings</button>
-      </form>
     </div>
   </main>
 
@@ -93,44 +80,14 @@
 
     async function loadStats() {
       const s = await CZ.api('/api/admin/stats');
-      CZ.countUp(document.getElementById('sUsers'), s.users);
-      CZ.countUp(document.getElementById('sDep'), s.pendingDeposits);
-      CZ.countUp(document.getElementById('sWd'), s.pendingWithdrawals);
-      CZ.countUp(document.getElementById('sKyc'), s.pendingKyc);
-      CZ.countUp(document.getElementById('sPaid'), s.totalPaidOut, { money: true });
-    }
-
-    async function renderSettings() {
-      const { settings } = await CZ.api('/api/admin/settings');
-      const groups = {};
-      settings.forEach((s) => { (groups[s.group] = groups[s.group] || []).push(s); });
-      document.getElementById('settingsFields').innerHTML = Object.entries(groups).map(([group, items]) => `
-        <div>
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">${group}</p>
-          <div class="mt-2 space-y-3">
-            ${items.map((s) => s.type === 'boolean'
-              ? `<label class="flex items-center justify-between gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
-                   <span class="text-sm font-medium text-slate-600">${s.label}</span>
-                   <input name="${s.key}" type="checkbox" ${s.value ? 'checked' : ''}
-                     class="h-5 w-5 accent-brand-500 cursor-pointer" />
-                 </label>`
-              : `<label class="block">
-                   <span class="text-sm font-medium text-slate-600">${s.label}</span>
-                   <input name="${s.key}" value="${s.value}" ${s.type === 'number' ? 'type="number" step="any"' : 'type="text"'}
-                     class="mt-1 w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
-                 </label>`).join('')}
-          </div>
-        </div>`).join('');
+      CZ.countUp(document.getElementById('sTodayUsers'), s.todayUsers);
+      CZ.countUp(document.getElementById('sTodayDep'), s.todayDeposits);
+      CZ.countUp(document.getElementById('sTotalUsers'), s.totalUsers);
+      CZ.countUp(document.getElementById('sTotalDep'), s.totalDeposits);
     }
 
     async function load() {
       loadStats();
-
-      // Settings is a form view, not a table.
-      const isSettings = tab === 'settings';
-      document.getElementById('tableView').hidden = isSettings;
-      document.getElementById('settingsView').hidden = !isSettings;
-      if (isSettings) { renderSettings(); return; }
 
       const thead = document.getElementById('thead');
       const tbody = document.getElementById('tbody');
@@ -209,25 +166,6 @@
       b.className = 'tab px-4 py-2 rounded-xl bg-brand-500 text-white font-semibold';
       load();
     }));
-
-    document.getElementById('settingsForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const msg = document.getElementById('settingsMsg');
-      const payload = {};
-      // Checkboxes report true/false explicitly; other inputs send their value.
-      e.target.querySelectorAll('input[name]').forEach((el) => {
-        payload[el.name] = el.type === 'checkbox' ? el.checked : el.value;
-      });
-      try {
-        await CZ.api('/api/admin/settings', { method: 'PUT', body: JSON.stringify(payload) });
-        msg.className = 'mt-4 text-sm text-brand-600 font-semibold';
-        msg.textContent = 'Settings saved ✓';
-        msg.hidden = false;
-        CZ.toast('Settings saved ✓');
-      } catch (err) {
-        msg.className = 'mt-4 text-sm text-red-600'; msg.textContent = err.message; msg.hidden = false;
-      }
-    });
 
     load();
   </script>

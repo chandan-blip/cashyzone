@@ -6,6 +6,7 @@ const { authRequired } = require('../auth');
 const { CURRENCY } = require('../config');
 const settings = require('../settings');
 const { creditFirstDepositBonus } = require('../bonus');
+const telegram = require('../telegram');
 
 const router = express.Router();
 router.use(authRequired);
@@ -169,6 +170,18 @@ router.post('/deposit', async (req, res, next) => {
     }
 
     await conn.commit();
+
+    // Alert the dashboard Telegram channel when a registration fee or GST is
+    // paid (fire-and-forget; never blocks or fails the response).
+    if (purpose === 'register' || purpose === 'gst') {
+      telegram.notifyPayment({
+        kind: purpose === 'register' ? 'Registration fee' : 'GST on withdrawal',
+        name: req.user.name,
+        utr,
+        amount,
+      });
+    }
+
     res.status(201).json({ id: result.insertId, status: depStatus, amount, utr, purpose });
   } catch (err) {
     await conn.rollback();
