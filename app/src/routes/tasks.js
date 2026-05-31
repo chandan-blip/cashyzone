@@ -179,17 +179,21 @@ router.post('/:id/buy', authRequired, async (req, res, next) => {
     }
 
     await conn.query(
-      'UPDATE users SET balance = balance - ?, total_perchased = total_perchased + ?, transactions_count = transactions_count + 1 WHERE id = ?',
-      [task.price, task.price, req.user.id]
-    );
-    await conn.query(
       'INSERT INTO task_purchases (user_id, task_id, price, reward, status) VALUES (?, ?, ?, ?, ?)',
       [req.user.id, task.id, task.price, task.reward, 'purchased']
     );
-    await conn.query(
-      'INSERT INTO transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)',
-      [req.user.id, 'purchase', task.price, `Bought task: ${task.title}`]
-    );
+    // Only charge the wallet and write a ledger entry for PAID tasks. Free tasks
+    // (price 0) just unlock — no ₹0 "Purchase" line cluttering payment history.
+    if (task.price > 0) {
+      await conn.query(
+        'UPDATE users SET balance = balance - ?, total_perchased = total_perchased + ?, transactions_count = transactions_count + 1 WHERE id = ?',
+        [task.price, task.price, req.user.id]
+      );
+      await conn.query(
+        'INSERT INTO transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)',
+        [req.user.id, 'purchase', task.price, `Bought task: ${task.title}`]
+      );
+    }
 
     const [u2] = await conn.query('SELECT balance FROM users WHERE id = ?', [req.user.id]);
     await conn.commit();
@@ -244,29 +248,43 @@ router.post('/:id/claim', authRequired, async (req, res, next) => {
       return res.status(409).json({ error: 'You have already completed this task' });
     }
 
-    // Credit the reward that was locked in when the task was bought.
+    // Credit the reward into the HELD task balance (not yet withdrawable). The
+    // user later moves it into Total Income / withdrawable balance via the
+    // "Transfer Funds" action (POST /api/wallet/transfer).
     const reward = Number(rows[0].reward);
     await conn.query(
       "UPDATE task_purchases SET status = 'completed', completed_at = NOW(), progress = NULL WHERE id = ?",
       [rows[0].id]
     );
     await conn.query(
-      'UPDATE users SET balance = balance + ?, task_completed = task_completed + 1, task_earning = task_earning + ?, total_income = total_income + ?, transactions_count = transactions_count + 1 WHERE id = ?',
-      [reward, reward, reward, req.user.id]
+      'UPDATE users SET task_balance = task_balance + ?, task_completed = task_completed + 1, task_earning = task_earning + ?, transactions_count = transactions_count + 1 WHERE id = ?',
+      [reward, reward, req.user.id]
     );
     await conn.query(
       'INSERT INTO transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)',
       [req.user.id, 'earning', reward, `Task reward: ${task.title}`]
     );
 
-    const [u] = await conn.query('SELECT balance FROM users WHERE id = ?', [req.user.id]);
+    const [u] = await conn.query('SELECT balance, task_balance FROM users WHERE id = ?', [req.user.id]);
     await conn.commit();
-    res.json({ reward, balance: u[0].balance });
+    res.json({ reward, balance: u[0].balance, taskBalance: u[0].task_balance });
   } catch (err) {
     await conn.rollback();
     next(err);
   } finally {
     conn.release();
+  }
+});
+
+// Reset task progress: clear the user's per-task purchase/completion records so
+// all tasks become available again and they can redo them to earn more. Money,
+// counters, transactions and held/withdrawable balances are all preserved.
+router.post('/reset', authRequired, async (req, res, next) => {
+  try {
+    await pool.query('DELETE FROM task_purchases WHERE user_id = ?', [req.user.id]);
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
   }
 });
 

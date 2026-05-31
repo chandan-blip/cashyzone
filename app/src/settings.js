@@ -12,12 +12,15 @@ const DEFS = {
   upi_name:           { default: 'CashyZone',     type: 'string', group: 'Payments', label: 'UPI payee name' },
   telegram_url:       { default: 'https://t.me/cashyzone', type: 'string', group: 'Support', label: 'Telegram support link', public: true },
   kyc_fee:            { default: 999,             type: 'number', group: 'Fees',     label: 'KYC verification fee (₹)' },
+  register_fee:       { default: 500,             type: 'number', group: 'Fees',     label: 'Registration fee (₹)' },
   gst_percent:        { default: 18,              type: 'number', group: 'Fees',     label: 'GST on withdrawal (%)', public: true },
   deposit_bonus:      { default: 489,             type: 'number', group: 'Fees',     label: 'First-deposit bonus (₹)' },
   min_typing_accuracy:{ default: 0.97,            type: 'number', group: 'Tasks',    label: 'Min typing accuracy (0–1)' },
   task_reward_multiplier: { default: 3,           type: 'number', group: 'Tasks',    label: 'Task reward multiplier (×)' },
-  withdraw_min:       { default: 7500,            type: 'number', group: 'Fees',     label: 'Minimum withdrawal (₹)' },
-  withdraw_min_tasks: { default: 3,               type: 'number', group: 'Fees',     label: 'Tasks required to withdraw' },
+  withdraw_min:       { default: 5500,            type: 'number', group: 'Fees',     label: 'Minimum withdrawal (₹)' },
+  transfer_min:       { default: 3000,            type: 'number', group: 'Fees',     label: 'Minimum transfer to Total Income (₹)' },
+  transfer_bonus:     { default: 2001,            type: 'number', group: 'Fees',     label: 'Bonus per transfer chunk (₹)' },
+  withdraw_min_tasks: { default: 0,               type: 'number', group: 'Fees',     label: 'Tasks required to withdraw' },
 };
 
 const cache = new Map();

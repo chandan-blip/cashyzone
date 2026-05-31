@@ -190,7 +190,7 @@ The 7 steps
    sudo nginx -t && sudo systemctl reload nginx
 
 7. HTTPS:
-   sudo certbot --nginx -d cashyzone.YOURDOMAIN.com
+   sudo certbot --nginx -d cashytype.lootmarket.store
 
 Open https://cashyzone.YOURDOMAIN.com.
 

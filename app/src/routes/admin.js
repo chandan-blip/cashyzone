@@ -94,9 +94,10 @@ router.post('/deposits/:id/approve', async (req, res, next) => {
     if (dep.status !== 'pending') { await conn.rollback(); return res.status(409).json({ error: 'Already reviewed' }); }
 
     await conn.query("UPDATE deposits SET status = 'approved', reviewed_at = NOW() WHERE id = ?", [dep.id]);
+    // Credit the wallet but NOT Total Income — only transfers count as income.
     await conn.query(
-      'UPDATE users SET balance = balance + ?, total_income = total_income + ?, transactions_count = transactions_count + 1 WHERE id = ?',
-      [dep.amount, dep.amount, dep.user_id]
+      'UPDATE users SET balance = balance + ?, transactions_count = transactions_count + 1 WHERE id = ?',
+      [dep.amount, dep.user_id]
     );
     await conn.query(
       'INSERT INTO transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)',
@@ -232,8 +233,8 @@ router.post('/kyc/:id/verify', async (req, res, next) => {
         const dep = deps[0];
         await conn.query("UPDATE deposits SET status = 'approved', reviewed_at = NOW() WHERE id = ?", [dep.id]);
         await conn.query(
-          'UPDATE users SET balance = balance + ?, total_income = total_income + ?, transactions_count = transactions_count + 1 WHERE id = ?',
-          [dep.amount, dep.amount, dep.user_id]
+          'UPDATE users SET balance = balance + ?, transactions_count = transactions_count + 1 WHERE id = ?',
+          [dep.amount, dep.user_id]
         );
         await conn.query(
           'INSERT INTO transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)',

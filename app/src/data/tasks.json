@@ -1,866 +1,245 @@
 [
   {
-    "id": 99,
-    "type": "excel",
-    "title": "Filter Bengaluru Employees — HCL Technologies",
-    "category": "Excel Data Entry",
-    "price": 499,
-    "reward": 1497,
-    "company": {
-      "name": "HCL Technologies Ltd.",
-      "address": "Plot 3A, Sector 126, Noida, Uttar Pradesh 201304",
-      "gstin": "09AAACH1925P1ZR",
-      "email": "records@hcltech.com",
-      "website": "www.hcltech.com"
-    },
-    "instructions": "Each batch below lists 20 employees from mixed cities. Find ONLY the employees based in Bengaluru and enter their Emp ID, Name and Salary into the sheet on the right. Complete all 5 batches to claim your reward.",
-    "filter": {
-      "column": "city",
-      "value": "Bengaluru"
-    },
-    "sourceColumns": [
-      {
-        "key": "employeeId",
-        "label": "Emp ID"
-      },
-      {
-        "key": "name",
-        "label": "Name"
-      },
-      {
-        "key": "city",
-        "label": "City"
-      },
-      {
-        "key": "department",
-        "label": "Department"
-      },
-      {
-        "key": "salary",
-        "label": "Salary (Rs.)"
-      }
-    ],
-    "outputColumns": [
-      {
-        "key": "employeeId",
-        "label": "Emp ID"
-      },
-      {
-        "key": "name",
-        "label": "Name"
-      },
-      {
-        "key": "salary",
-        "label": "Salary (Rs.)",
-        "numeric": true
-      }
-    ],
-    "steps": [
-      {
-        "label": "Batch 1 (rows 1–20)",
-        "rows": [
-          {
-            "employeeId": "HCL1001",
-            "name": "Aarav Sharma",
-            "city": "Bengaluru",
-            "department": "Engineering",
-            "salary": 30000
-          },
-          {
-            "employeeId": "HCL1002",
-            "name": "Priya Nair",
-            "city": "Mumbai",
-            "department": "Human Resources",
-            "salary": 35000
-          },
-          {
-            "employeeId": "HCL1003",
-            "name": "Rohan Gupta",
-            "city": "New Delhi",
-            "department": "Operations",
-            "salary": 40000
-          },
-          {
-            "employeeId": "HCL1004",
-            "name": "Sneha Menon",
-            "city": "Pune",
-            "department": "Marketing",
-            "salary": 45000
-          },
-          {
-            "employeeId": "HCL1005",
-            "name": "Vikram Mehta",
-            "city": "Chennai",
-            "department": "Finance",
-            "salary": 50000
-          },
-          {
-            "employeeId": "HCL1006",
-            "name": "Anjali Kapoor",
-            "city": "Hyderabad",
-            "department": "Sales",
-            "salary": 55000
-          },
-          {
-            "employeeId": "HCL1007",
-            "name": "Karan Iyer",
-            "city": "Kolkata",
-            "department": "Support",
-            "salary": 60000
-          },
-          {
-            "employeeId": "HCL1008",
-            "name": "Divya Reddy",
-            "city": "Bengaluru",
-            "department": "Engineering",
-            "salary": 65000
-          },
-          {
-            "employeeId": "HCL1009",
-            "name": "Rahul Das",
-            "city": "Mumbai",
-            "department": "Human Resources",
-            "salary": 70000
-          },
-          {
-            "employeeId": "HCL1010",
-            "name": "Meera Joshi",
-            "city": "New Delhi",
-            "department": "Operations",
-            "salary": 75000
-          },
-          {
-            "employeeId": "HCL1011",
-            "name": "Arjun Bose",
-            "city": "Pune",
-            "department": "Marketing",
-            "salary": 80000
-          },
-          {
-            "employeeId": "HCL1012",
-            "name": "Pooja Verma",
-            "city": "Chennai",
-            "department": "Finance",
-            "salary": 85000
-          },
-          {
-            "employeeId": "HCL1013",
-            "name": "Sanjay Patel",
-            "city": "Hyderabad",
-            "department": "Sales",
-            "salary": 90000
-          },
-          {
-            "employeeId": "HCL1014",
-            "name": "Neha Singh",
-            "city": "Kolkata",
-            "department": "Support",
-            "salary": 95000
-          },
-          {
-            "employeeId": "HCL1015",
-            "name": "Amit Rao",
-            "city": "Bengaluru",
-            "department": "Engineering",
-            "salary": 30000
-          },
-          {
-            "employeeId": "HCL1016",
-            "name": "Kavya Pillai",
-            "city": "Mumbai",
-            "department": "Human Resources",
-            "salary": 35000
-          },
-          {
-            "employeeId": "HCL1017",
-            "name": "Manish Sharma",
-            "city": "New Delhi",
-            "department": "Operations",
-            "salary": 40000
-          },
-          {
-            "employeeId": "HCL1018",
-            "name": "Ritu Nair",
-            "city": "Pune",
-            "department": "Marketing",
-            "salary": 45000
-          },
-          {
-            "employeeId": "HCL1019",
-            "name": "Suresh Gupta",
-            "city": "Chennai",
-            "department": "Finance",
-            "salary": 50000
-          },
-          {
-            "employeeId": "HCL1020",
-            "name": "Deepa Menon",
-            "city": "Hyderabad",
-            "department": "Sales",
-            "salary": 55000
-          }
-        ]
-      },
-      {
-        "label": "Batch 2 (rows 21–40)",
-        "rows": [
-          {
-            "employeeId": "HCL1021",
-            "name": "Aarav Mehta",
-            "city": "Kolkata",
-            "department": "Support",
-            "salary": 60000
-          },
-          {
-            "employeeId": "HCL1022",
-            "name": "Priya Kapoor",
-            "city": "Bengaluru",
-            "department": "Engineering",
-            "salary": 65000
-          },
-          {
-            "employeeId": "HCL1023",
-            "name": "Rohan Iyer",
-            "city": "Mumbai",
-            "department": "Human Resources",
-            "salary": 70000
-          },
-          {
-            "employeeId": "HCL1024",
-            "name": "Sneha Reddy",
-            "city": "New Delhi",
-            "department": "Operations",
-            "salary": 75000
-          },
-          {
-            "employeeId": "HCL1025",
-            "name": "Vikram Das",
-            "city": "Pune",
-            "department": "Marketing",
-            "salary": 80000
-          },
-          {
-            "employeeId": "HCL1026",
-            "name": "Anjali Joshi",
-            "city": "Chennai",
-            "department": "Finance",
-            "salary": 85000
-          },
-          {
-            "employeeId": "HCL1027",
-            "name": "Karan Bose",
-            "city": "Hyderabad",
-            "department": "Sales",
-            "salary": 90000
-          },
-          {
-            "employeeId": "HCL1028",
-            "name": "Divya Verma",
-            "city": "Kolkata",
-            "department": "Support",
-            "salary": 95000
-          },
-          {
-            "employeeId": "HCL1029",
-            "name": "Rahul Patel",
-            "city": "Bengaluru",
-            "department": "Engineering",
-            "salary": 30000
-          },
-          {
-            "employeeId": "HCL1030",
-            "name": "Meera Singh",
-            "city": "Mumbai",
-            "department": "Human Resources",
-            "salary": 35000
-          },
-          {
-            "employeeId": "HCL1031",
-            "name": "Arjun Rao",
-            "city": "New Delhi",
-            "department": "Operations",
-            "salary": 40000
-          },
-          {
-            "employeeId": "HCL1032",
-            "name": "Pooja Pillai",
-            "city": "Pune",
-            "department": "Marketing",
-            "salary": 45000
-          },
-          {
-            "employeeId": "HCL1033",
-            "name": "Sanjay Sharma",
-            "city": "Chennai",
-            "department": "Finance",
-            "salary": 50000
-          },
-          {
-            "employeeId": "HCL1034",
-            "name": "Neha Nair",
-            "city": "Hyderabad",
-            "department": "Sales",
-            "salary": 55000
-          },
-          {
-            "employeeId": "HCL1035",
-            "name": "Amit Gupta",
-            "city": "Kolkata",
-            "department": "Support",
-            "salary": 60000
-          },
-          {
-            "employeeId": "HCL1036",
-            "name": "Kavya Menon",
-            "city": "Bengaluru",
-            "department": "Engineering",
-            "salary": 65000
-          },
-          {
-            "employeeId": "HCL1037",
-            "name": "Manish Mehta",
-            "city": "Mumbai",
-            "department": "Human Resources",
-            "salary": 70000
-          },
-          {
-            "employeeId": "HCL1038",
-            "name": "Ritu Kapoor",
-            "city": "New Delhi",
-            "department": "Operations",
-            "salary": 75000
-          },
-          {
-            "employeeId": "HCL1039",
-            "name": "Suresh Iyer",
-            "city": "Pune",
-            "department": "Marketing",
-            "salary": 80000
-          },
-          {
-            "employeeId": "HCL1040",
-            "name": "Deepa Reddy",
-            "city": "Chennai",
-            "department": "Finance",
-            "salary": 85000
-          }
-        ]
-      },
-      {
-        "label": "Batch 3 (rows 41–60)",
-        "rows": [
-          {
-            "employeeId": "HCL1041",
-            "name": "Aarav Das",
-            "city": "Hyderabad",
-            "department": "Sales",
-            "salary": 90000
-          },
-          {
-            "employeeId": "HCL1042",
-            "name": "Priya Joshi",
-            "city": "Kolkata",
-            "department": "Support",
-            "salary": 95000
-          },
-          {
-            "employeeId": "HCL1043",
-            "name": "Rohan Bose",
-            "city": "Bengaluru",
-            "department": "Engineering",
-            "salary": 30000
-          },
-          {
-            "employeeId": "HCL1044",
-            "name": "Sneha Verma",
-            "city": "Mumbai",
-            "department": "Human Resources",
-            "salary": 35000
-          },
-          {
-            "employeeId": "HCL1045",
-            "name": "Vikram Patel",
-            "city": "New Delhi",
-            "department": "Operations",
-            "salary": 40000
-          },
-          {
-            "employeeId": "HCL1046",
-            "name": "Anjali Singh",
-            "city": "Pune",
-            "department": "Marketing",
-            "salary": 45000
-          },
-          {
-            "employeeId": "HCL1047",
-            "name": "Karan Rao",
-            "city": "Chennai",
-            "department": "Finance",
-            "salary": 50000
-          },
-          {
-            "employeeId": "HCL1048",
-            "name": "Divya Pillai",
-            "city": "Hyderabad",
-            "department": "Sales",
-            "salary": 55000
-          },
-          {
-            "employeeId": "HCL1049",
-            "name": "Rahul Sharma",
-            "city": "Kolkata",
-            "department": "Support",
-            "salary": 60000
-          },
-          {
-            "employeeId": "HCL1050",
-            "name": "Meera Nair",
-            "city": "Bengaluru",
-            "department": "Engineering",
-            "salary": 65000
-          },
-          {
-            "employeeId": "HCL1051",
-            "name": "Arjun Gupta",
-            "city": "Mumbai",
-            "department": "Human Resources",
-            "salary": 70000
-          },
-          {
-            "employeeId": "HCL1052",
-            "name": "Pooja Menon",
-            "city": "New Delhi",
-            "department": "Operations",
-            "salary": 75000
-          },
-          {
-            "employeeId": "HCL1053",
-            "name": "Sanjay Mehta",
-            "city": "Pune",
-            "department": "Marketing",
-            "salary": 80000
-          },
-          {
-            "employeeId": "HCL1054",
-            "name": "Neha Kapoor",
-            "city": "Chennai",
-            "department": "Finance",
-            "salary": 85000
-          },
-          {
-            "employeeId": "HCL1055",
-            "name": "Amit Iyer",
-            "city": "Hyderabad",
-            "department": "Sales",
-            "salary": 90000
-          },
-          {
-            "employeeId": "HCL1056",
-            "name": "Kavya Reddy",
-            "city": "Kolkata",
-            "department": "Support",
-            "salary": 95000
-          },
-          {
-            "employeeId": "HCL1057",
-            "name": "Manish Das",
-            "city": "Bengaluru",
-            "department": "Engineering",
-            "salary": 30000
-          },
-          {
-            "employeeId": "HCL1058",
-            "name": "Ritu Joshi",
-            "city": "Mumbai",
-            "department": "Human Resources",
-            "salary": 35000
-          },
-          {
-            "employeeId": "HCL1059",
-            "name": "Suresh Bose",
-            "city": "New Delhi",
-            "department": "Operations",
-            "salary": 40000
-          },
-          {
-            "employeeId": "HCL1060",
-            "name": "Deepa Verma",
-            "city": "Pune",
-            "department": "Marketing",
-            "salary": 45000
-          }
-        ]
-      },
-      {
-        "label": "Batch 4 (rows 61–80)",
-        "rows": [
-          {
-            "employeeId": "HCL1061",
-            "name": "Aarav Patel",
-            "city": "Chennai",
-            "department": "Finance",
-            "salary": 50000
-          },
-          {
-            "employeeId": "HCL1062",
-            "name": "Priya Singh",
-            "city": "Hyderabad",
-            "department": "Sales",
-            "salary": 55000
-          },
-          {
-            "employeeId": "HCL1063",
-            "name": "Rohan Rao",
-            "city": "Kolkata",
-            "department": "Support",
-            "salary": 60000
-          },
-          {
-            "employeeId": "HCL1064",
-            "name": "Sneha Pillai",
-            "city": "Bengaluru",
-            "department": "Engineering",
-            "salary": 65000
-          },
-          {
-            "employeeId": "HCL1065",
-            "name": "Vikram Sharma",
-            "city": "Mumbai",
-            "department": "Human Resources",
-            "salary": 70000
-          },
-          {
-            "employeeId": "HCL1066",
-            "name": "Anjali Nair",
-            "city": "New Delhi",
-            "department": "Operations",
-            "salary": 75000
-          },
-          {
-            "employeeId": "HCL1067",
-            "name": "Karan Gupta",
-            "city": "Pune",
-            "department": "Marketing",
-            "salary": 80000
-          },
-          {
-            "employeeId": "HCL1068",
-            "name": "Divya Menon",
-            "city": "Chennai",
-            "department": "Finance",
-            "salary": 85000
-          },
-          {
-            "employeeId": "HCL1069",
-            "name": "Rahul Mehta",
-            "city": "Hyderabad",
-            "department": "Sales",
-            "salary": 90000
-          },
-          {
-            "employeeId": "HCL1070",
-            "name": "Meera Kapoor",
-            "city": "Kolkata",
-            "department": "Support",
-            "salary": 95000
-          },
-          {
-            "employeeId": "HCL1071",
-            "name": "Arjun Iyer",
-            "city": "Bengaluru",
-            "department": "Engineering",
-            "salary": 30000
-          },
-          {
-            "employeeId": "HCL1072",
-            "name": "Pooja Reddy",
-            "city": "Mumbai",
-            "department": "Human Resources",
-            "salary": 35000
-          },
-          {
-            "employeeId": "HCL1073",
-            "name": "Sanjay Das",
-            "city": "New Delhi",
-            "department": "Operations",
-            "salary": 40000
-          },
-          {
-            "employeeId": "HCL1074",
-            "name": "Neha Joshi",
-            "city": "Pune",
-            "department": "Marketing",
-            "salary": 45000
-          },
-          {
-            "employeeId": "HCL1075",
-            "name": "Amit Bose",
-            "city": "Chennai",
-            "department": "Finance",
-            "salary": 50000
-          },
-          {
-            "employeeId": "HCL1076",
-            "name": "Kavya Verma",
-            "city": "Hyderabad",
-            "department": "Sales",
-            "salary": 55000
-          },
-          {
-            "employeeId": "HCL1077",
-            "name": "Manish Patel",
-            "city": "Kolkata",
-            "department": "Support",
-            "salary": 60000
-          },
-          {
-            "employeeId": "HCL1078",
-            "name": "Ritu Singh",
-            "city": "Bengaluru",
-            "department": "Engineering",
-            "salary": 65000
-          },
-          {
-            "employeeId": "HCL1079",
-            "name": "Suresh Rao",
-            "city": "Mumbai",
-            "department": "Human Resources",
-            "salary": 70000
-          },
-          {
-            "employeeId": "HCL1080",
-            "name": "Deepa Pillai",
-            "city": "New Delhi",
-            "department": "Operations",
-            "salary": 75000
-          }
-        ]
-      },
-      {
-        "label": "Batch 5 (rows 81–100)",
-        "rows": [
-          {
-            "employeeId": "HCL1081",
-            "name": "Aarav Sharma",
-            "city": "Pune",
-            "department": "Marketing",
-            "salary": 80000
-          },
-          {
-            "employeeId": "HCL1082",
-            "name": "Priya Nair",
-            "city": "Chennai",
-            "department": "Finance",
-            "salary": 85000
-          },
-          {
-            "employeeId": "HCL1083",
-            "name": "Rohan Gupta",
-            "city": "Hyderabad",
-            "department": "Sales",
-            "salary": 90000
-          },
-          {
-            "employeeId": "HCL1084",
-            "name": "Sneha Menon",
-            "city": "Kolkata",
-            "department": "Support",
-            "salary": 95000
-          },
-          {
-            "employeeId": "HCL1085",
-            "name": "Vikram Mehta",
-            "city": "Bengaluru",
-            "department": "Engineering",
-            "salary": 30000
-          },
-          {
-            "employeeId": "HCL1086",
-            "name": "Anjali Kapoor",
-            "city": "Mumbai",
-            "department": "Human Resources",
-            "salary": 35000
-          },
-          {
-            "employeeId": "HCL1087",
-            "name": "Karan Iyer",
-            "city": "New Delhi",
-            "department": "Operations",
-            "salary": 40000
-          },
-          {
-            "employeeId": "HCL1088",
-            "name": "Divya Reddy",
-            "city": "Pune",
-            "department": "Marketing",
-            "salary": 45000
-          },
-          {
-            "employeeId": "HCL1089",
-            "name": "Rahul Das",
-            "city": "Chennai",
-            "department": "Finance",
-            "salary": 50000
-          },
-          {
-            "employeeId": "HCL1090",
-            "name": "Meera Joshi",
-            "city": "Hyderabad",
-            "department": "Sales",
-            "salary": 55000
-          },
-          {
-            "employeeId": "HCL1091",
-            "name": "Arjun Bose",
-            "city": "Kolkata",
-            "department": "Support",
-            "salary": 60000
-          },
-          {
-            "employeeId": "HCL1092",
-            "name": "Pooja Verma",
-            "city": "Bengaluru",
-            "department": "Engineering",
-            "salary": 65000
-          },
-          {
-            "employeeId": "HCL1093",
-            "name": "Sanjay Patel",
-            "city": "Mumbai",
-            "department": "Human Resources",
-            "salary": 70000
-          },
-          {
-            "employeeId": "HCL1094",
-            "name": "Neha Singh",
-            "city": "New Delhi",
-            "department": "Operations",
-            "salary": 75000
-          },
-          {
-            "employeeId": "HCL1095",
-            "name": "Amit Rao",
-            "city": "Pune",
-            "department": "Marketing",
-            "salary": 80000
-          },
-          {
-            "employeeId": "HCL1096",
-            "name": "Kavya Pillai",
-            "city": "Chennai",
-            "department": "Finance",
-            "salary": 85000
-          },
-          {
-            "employeeId": "HCL1097",
-            "name": "Manish Sharma",
-            "city": "Hyderabad",
-            "department": "Sales",
-            "salary": 90000
-          },
-          {
-            "employeeId": "HCL1098",
-            "name": "Ritu Nair",
-            "city": "Kolkata",
-            "department": "Support",
-            "salary": 95000
-          },
-          {
-            "employeeId": "HCL1099",
-            "name": "Suresh Gupta",
-            "city": "Bengaluru",
-            "department": "Engineering",
-            "salary": 30000
-          },
-          {
-            "employeeId": "HCL1100",
-            "name": "Deepa Menon",
-            "city": "Mumbai",
-            "department": "Human Resources",
-            "salary": 35000
-          }
-        ]
-      }
-    ]
+    "id": 1,
+    "title": "Typing Task #1",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Data entry and typing form the backbone of modern business documentation. As a professional typist, your role is to transcribe information with absolute precision. This task includes client records, financial statements, and official correspondence. Accuracy ensures compliance and reduces operational errors. Companies rely on typists to maintain data integrity across digital platforms. Your attention to detail directly impacts workflow efficiency. Always cross-check numbers, spellings, and formatting. The modern workplace demands speed without sacrificing correctness. Practice daily to achieve 60+ WPM with zero errors. This document serves as a standard reference for data entry guidelines. Use proper indentation and consistent spacing. Avoid auto-correct assumptions—follow the source exactly. Typists are the silent guardians of information quality. Every character matters in legal and medical transcription. Build discipline by copying complex passages. Your precision creates trust with employers. Keep a steady rhythm and verify each line."
   },
   {
-    "id": 100,
-    "type": "form",
-    "title": "Student Enrollment Entry — Wipro TalentNext",
-    "category": "Form Data Entry",
-    "price": 999,
-    "reward": 2997,
-    "company": {
-      "name": "Wipro Limited",
-      "address": "Doddakannelli, Sarjapur Road, Bengaluru, Karnataka 560035",
-      "gstin": "29AAACW0387R1ZE",
-      "email": "enroll@wipro.com",
-      "website": "www.wipro.com"
-    },
-    "instructions": "Read each student card and copy the details into the enrollment form below, one student at a time. Submit all 5 students to claim your reward.",
-    "fields": [
-      {
-        "key": "name",
-        "label": "Full name",
-        "type": "text"
-      },
-      {
-        "key": "rollNo",
-        "label": "Roll number",
-        "type": "text"
-      },
-      {
-        "key": "course",
-        "label": "Course",
-        "type": "text"
-      },
-      {
-        "key": "city",
-        "label": "City",
-        "type": "text"
-      },
-      {
-        "key": "email",
-        "label": "Email",
-        "type": "email"
-      }
-    ],
-    "records": [
-      {
-        "name": "Rohan Verma",
-        "rollNo": "WPR2026101",
-        "course": "B.Tech CSE",
-        "city": "Bengaluru",
-        "email": "rohan.verma@student.wipro.com"
-      },
-      {
-        "name": "Karan Gupta",
-        "rollNo": "WPR2026102",
-        "course": "B.Com",
-        "city": "Hyderabad",
-        "email": "karan.gupta@student.wipro.com"
-      },
-      {
-        "name": "Arjun Joshi",
-        "rollNo": "WPR2026103",
-        "course": "BBA",
-        "city": "Pune",
-        "email": "arjun.joshi@student.wipro.com"
-      },
-      {
-        "name": "Amit Sharma",
-        "rollNo": "WPR2026104",
-        "course": "B.Sc IT",
-        "city": "Chennai",
-        "email": "amit.sharma@student.wipro.com"
-      },
-      {
-        "name": "Suresh Reddy",
-        "rollNo": "WPR2026105",
-        "course": "BCA",
-        "city": "Mumbai",
-        "email": "suresh.reddy@student.wipro.com"
-      }
-    ]
+    "id": 2,
+    "title": "Typing Task #2",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Digital transformation has increased the demand for remote typing jobs. Firms outsource documentation to skilled professionals who deliver error-free outputs. This paragraph contains instructions for handling spreadsheets and email correspondence. You must replicate names, addresses, and numerical data without alterations. Typographical mistakes cause miscommunication and financial losses. Use dual-monitor setups to compare source and input fields. Proofreading remains a non-negotiable habit. Many platforms like CashyType reward meticulous work. Each assignment sharpens your cognitive focus. The global typing industry is projected to grow 8% annually. Secure long-term contracts by building a reputation for excellence. Learn keyboard shortcuts to reduce fatigue. This training module emphasizes exact replication: every comma, period, and line break. Mastery leads to higher earning brackets. Continue to the next exercise after full verification."
+  },
+  {
+    "id": 3,
+    "title": "Typing Task #3",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Corporate administrative roles value typing specialists who manage memos, reports, and client details. This specific exercise focuses on formatting legal disclaimers and contact directories. Begin by copying the entire passage word-for-word. Notice the use of bullet points and numbered lists. Consistency in indentation reflects professionalism. Many companies use automated plagiarism checkers for data entry; they flag mismatched phrasing. Therefore, your submission must mirror the source exactly. Key areas: email addresses, website URLs, phone extensions. One wrong digit can break communication channels. Develop a systematic approach: read a phrase, memorize, then type. After finishing, compare side by side. The goal is 100% fidelity. Repetitive practice builds muscle memory. This task is designed to simulate real client briefs from e-commerce platforms."
+  },
+  {
+    "id": 4,
+    "title": "Typing Task #4",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Accuracy in typing transforms raw data into actionable insights. This document contains fictitious customer feedback and product SKUs. Your job: reproduce names, ratings, and comments exactly. Avoid adding or omitting any special characters. Common errors include swapping homophones (their/there) or misplacing hyphens. Use the tab key for structured columns when needed. High-stakes environments like healthcare require 99.9% precision. As a typist, you act as a quality filter. The following sentences include alphanumeric codes: INV-9872, PO#2301-56, and tracking IDs. Replicate them faithfully. After finishing this task, you'll earn ₹100, and the next unique passage will unlock. Always reset your focus. Build stamina through daily sessions. The global freelance economy expects reliable typing partners. Showcase your precision by acing this assignment."
+  },
+  {
+    "id": 5,
+    "title": "Typing Task #5",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Typing jobs often involve extracting information from PDFs or handwritten notes. In this sample, you'll transcribe meeting minutes and action items. Pay attention to dates, names of attendees, and project timelines. The CEO emphasized \"zero rework policy\" during Q3 review. Action items: Alex to update CRM by May 12; Linda to finalize budget. Typists must capture every nuance because minutes become legal records. Insert line breaks exactly as shown. Use double spaces after periods where indicated. This discipline separates amateurs from pros. Companies reward typists who deliver clean copy without back-and-forth corrections. Also watch for homonyms: effect/affect, complement/compliment. The paragraph ends with a list of three key deliverables. Master this, and you're ready for enterprise contracts. Good luck."
+  },
+  {
+    "id": 6,
+    "title": "Typing Task #6",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Financial data entry demands heightened vigilance. This passage includes currency values, percentages, and fiscal year references. Q1 revenue grew by 14.7% to $2.3M. Operating expenses: $890K, net margin 22.4%. You must type numbers with correct decimal placement. Also replicate the currency symbols ($, €, £) exactly. Many accounting systems reject mismatched formats. Moreover, note the footnote reference \"[1]\" and the disclaimer \"subject to audit.\" Typists often overlook small symbols but they matter. Practice inserting em dashes and en dashes when present. This segment includes a short bullet list: - reconciliation completed; - variance analysis pending; - audit trail verified. Typing this with 100% accuracy demonstrates professional-grade skill. Each correct job boosts your wallet. After claim, new paragraph arrives."
+  },
+  {
+    "id": 7,
+    "title": "Typing Task #7",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Healthcare documentation requires strict adherence to terminology. This sample includes medical terms: hypertension, tachycardia, subcutaneous injection, and laboratory values (WBC 6.2, Hgb 13.4). Abbreviations like \"q.d.\" and \"PRN\" must remain unchanged. The patient's name is J. Morrison, DOB 04/15/1982. Any variation violates compliance. Typists in medical billing need to replicate ICD-10 codes: I10, E11.9, Z23. Errors cause claim denials. Therefore, practice with clinical notes improves employability. This task simulates a discharge summary excerpt. Check capitalisation of diagnosis: \"Type 2 Diabetes Mellitus.\" Use monospaced attention. Claim reward only when every character aligns. After completion, the system advances automatically."
+  },
+  {
+    "id": 8,
+    "title": "Typing Task #8",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "E-commerce product listing management: this task requires transcribing titles, SKUs, and price variations. Example: \"UltraSoft Blanket – Queen Size, SKU: US-BL-Q42, price $39.99, inventory: 147 units.\" You must copy the colon placements and hyphens. Also replicate the product dimensions: 60\"x80\" and material \"100% cotton.\" Online marketplaces reject listings with mismatched attributes. Typists who master this can work for dropshipping brands. Additional fields: weight 3.2 lbs, color: 'Navy Blue'. Include quotation marks as shown. The second product: \"Ceramic Coffee Mug Set of 4, SKU: CM-440, price $24.50.\" Write each field on new line exactly. Accuracy ensures inventory sync. Keep practicing for freelance opportunities. After verification, earn ₹100."
+  },
+  {
+    "id": 9,
+    "title": "Typing Task #9",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Legal transcription snippet: This affidavit concerns property transfer case #CV-2024-891. The deponent, Mr. Lawrence Higgins, states that the property at 742 Evergreen Terrace has no encumbrances. Notary public: Jessica Ruiz, Commission expires 12/2026. Typists must reproduce all punctuation, especially semicolons and parentheses. The phrase \"under penalty of perjury\" appears in italics – replicate as plain but exact wording. Also include witness signatures: __________ (L. Higgins). Legal documents are unforgiving. One missing period changes meaning. Use extra caution for case numbers and dates. The ability to type legal drafts opens higher paid positions. Complete this flawless and proceed."
+  },
+  {
+    "id": 10,
+    "title": "Typing Task #10",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "IT support ticket transcription: User reported issue: \"VPN connection drops every 30 minutes (error code 0x80072EE2).\" Steps to reproduce: 1) Connect to corporate network; 2) Open remote desktop; 3) After 30 min, session freezes. Typist must replicate step numbers and parentheses. Also record ticket ID: INC-2209-44, priority: High. The admin requested logs from 03/10/2025. Reproduce the time format as MM/DD/YYYY. This is typical for helpdesk roles. Good typing precision reduces IT resolution time. After finishing, submit for verification. Claim reward and unlock task 11."
+  },
+  {
+    "id": 11,
+    "title": "Typing Task #11",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Market research summary: 67% of consumers prefer contactless payment (source: FinTech report 2025). The survey sampled 2,500 adults across urban zones. Key findings: - 44% use digital wallets weekly; - 28% use BNPL services. Typists must replicate percentage symbols and bullet hyphens. Additional data: average transaction value $34.70. Dashes and decimals matter. Copy the phrase \"Year-over-year growth: +12.3%\" exactly. Research firms require exact transcription for internal databases. Hone your skills."
+  },
+  {
+    "id": 12,
+    "title": "Typing Task #12",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "HR onboarding document excerpt: New employee name: Priya Kaur, Job title: Senior Data Analyst, Start date: 06/01/2025. Supervisor: David Chen. Benefits: health insurance (PPO plan) and 401(k) matching up to 4%. Typists must capture parentheses and slashes. Also include internal note: \"background verification pending.\" Onboarding checklists rely on accurate data entry. Mimic every comma and space. Complete to earn ₹100."
+  },
+  {
+    "id": 13,
+    "title": "Typing Task #13",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Real estate listing: 3 bed, 2 bath house at 4512 Maple Street, list price $425,000. Features: granite countertops, hardwood floors, fenced yard. Listing agent: Nora Simmons (555) 789-1234. Typists must replicate comma placement and square footage: 1,875 sqft. Also legal description: Lot 7, Block C, Green Meadows Subdivision. Accuracy prevents legal disputes. Good luck."
+  },
+  {
+    "id": 14,
+    "title": "Typing Task #14",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Educational transcript: Student ID: S-8823, GPA: 3.78, Major: Computer Science. Courses: CS450 (Database), MATH210 (Calculus II). Grade: A-, B+, respectively. Typists should replicate hyphen and parentheses. University requires exact data entry for diploma processing. Pay attention to course codes. After correct typing, next module unlocks."
+  },
+  {
+    "id": 15,
+    "title": "Typing Task #15",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Insurance claim narrative: Policy #H-77654, Claimant: Marcus T. Jones, Date of loss: 02/18/2025. Loss description: water damage due to burst pipe. Adjuster's estimate: $7,450. Deductible: $1,000. Net payable: $6,450. Typists must copy currency symbols, decimals, and claim number. Insurers flag any discrepancy. Be meticulous and earn your reward."
+  },
+  {
+    "id": 16,
+    "title": "Typing Task #16",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Logistics waybill: Tracking No: 1Z999AA10123456789, Shipper: TechLogix Inc., Consignee: BrightStar Retail. Weight: 47.5 lbs, dimensions 24x18x12 in. Service: Ground Freight. Typists replicate colon alignment and periods. Freight documentation errors cause delivery delays. Precision matters."
+  },
+  {
+    "id": 17,
+    "title": "Typing Task #17",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Customer support script: Agent: \"Thank you for contacting support. Your ticket #CS7842 is being reviewed.\" Customer: \"My device shows error E-47.\" Resolution: reset network settings. Typists must copy quotation marks accurately. Support transcripts become training material. Full accuracy required."
+  },
+  {
+    "id": 18,
+    "title": "Typing Task #18",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Event planning checklist: Venue: Grand Hall, Date: 09/12/2025, Guest count: 220. Caterer: Zest & Co, Menu: vegan & non-veg options. AV requirements: projector, wireless mic. Reproduce ampersand and commas. Planners rely on precise data."
+  },
+  {
+    "id": 19,
+    "title": "Typing Task #19",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Research abstract: \"Neural networks improve diagnostic accuracy by 23.8% (p<0.01).\" Authors: Lee, Park, & Gupta. Journal: AI Medicine Vol 14. Reproduce parentheses and italic symbols as plain text. Scientific accuracy is mandatory."
+  },
+  {
+    "id": 20,
+    "title": "Typing Task #20",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Government form excerpt: Applicant ID: AQ-99832, D.O.B 07/22/1990, Citizenship: USA. Declaration: \"I affirm that the information provided is true.\" Signature: ______. Typists must copy quotes and line. Great for official roles."
+  },
+  {
+    "id": 21,
+    "title": "Typing Task #21",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Social media caption draft: \"🚀 New features live! Swipe to see updates. #Productivity #TypingJobs\" copy emojis as written. Emojis matter for brand consistency."
+  },
+  {
+    "id": 22,
+    "title": "Typing Task #22",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Bank statement line: Transaction date: 04/01/2025, description: \"ATM Withdrawal\", amount: -$200.00, balance: $1,250.75. Typists: negative sign and decimal points critical."
+  },
+  {
+    "id": 23,
+    "title": "Typing Task #23",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Inventory stock: SKU: B07XJ6K8T, Qty: 340 units, Reorder level: 50. Warehouse: Aisle 12, Bin 4. Accurate data prevents stockouts."
+  },
+  {
+    "id": 24,
+    "title": "Typing Task #24",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Meeting RSVP list: Attendees: Rachel Green (confirmed), Monica Geller (pending), Chandler Bing (declined). Reproduce parentheses exactly."
+  },
+  {
+    "id": 25,
+    "title": "Typing Task #25",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Flight itinerary: Confirmation: LKJ890, From JFK to LAX, Depart: 8:45 AM PST, Arrival: 11:55 AM PST. Seat 22A. Gate B7."
+  },
+  {
+    "id": 26,
+    "title": "Typing Task #26",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "E-learning quiz: Q1: What is the capital of Norway? Answer: Oslo. Q2: Solve 34*12 = 408. Typists copy Q&A exactly."
+  },
+  {
+    "id": 27,
+    "title": "Typing Task #27",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Construction blueprint note: Beam length 14' 6\", material: ASTM A36 steel, load capacity 4,200 lbs. Quotes and units crucial."
+  },
+  {
+    "id": 28,
+    "title": "Typing Task #28",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Restaurant reservation: Name: Emilia's Bistro, Date: 05/20, Time: 7:30 PM, Party of 6, Special request: \"near window\"."
+  },
+  {
+    "id": 29,
+    "title": "Typing Task #29",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Library catalog entry: Title: \"The Silent Typist\", Author: M. Fujimoto, ISBN: 978-0451524935, Status: Available."
+  },
+  {
+    "id": 30,
+    "title": "Typing Task #30",
+    "category": "Typing",
+    "price": 0,
+    "reward": 100,
+    "text": "Final task: Congratulations! You reached the last passage. This exact copy earns ₹100. After claiming, you'll have completed all 30 assignments. Keep honing your craft. Persistence and precision define pro typists. Great work! This is the final typing job. You have mastered the 30-task challenge. Refresh and your earnings remain."
   }
 ]
+
+
+

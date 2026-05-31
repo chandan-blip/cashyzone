@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CashyType — Instant Withdrawal</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #ffffff;
+            font-family: 'Inter', sans-serif;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 1.1;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            background: linear-gradient(135deg, #0f2b3d, #1e4a76);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero p {
+            color: #4b5563;
+            font-size: 1rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .container { padding: 1.5rem 1.2rem; }
+            .hero h1 { font-size: 3.2rem; }
+        }
+
+        @media (max-width: 560px) {
+            .container { padding: 1.1rem 0.9rem; }
+            .hero { margin-bottom: 1.6rem; }
+            .hero h1 { font-size: 2.5rem; line-height: 1.15; }
+            .hero p { font-size: 0.9rem; }
+            .dashboard-grid { gap: 1.2rem; margin-bottom: 1.2rem; }
+            .balance-card, .withdraw-card { padding: 1.3rem; }
+            .balance-header h2 { font-size: 1.2rem; }
+            .balance-amount .amount { font-size: 2.7rem; }
+            .balance-amount .currency-badge { font-size: 1.4rem; }
+            .section-title { font-size: 1.25rem; }
+            .pay-method { flex: 1 1 70px; padding: 0.6rem 0.35rem; }
+            .pay-method i { font-size: 1.35rem; }
+            .pay-method span { font-size: 0.68rem; }
+            .history-panel { padding: 1.1rem; }
+            .insight-card { padding: 1rem 1.1rem; }
+            .insight-card ol { margin-left: 1rem; padding-left: 0.4rem; }
+            .notify-card { padding: 1.5rem 1.2rem; }
+            .notify-amount { font-size: 1.7rem; }
+        }
+
+        @media (max-width: 360px) {
+            .balance-amount .amount { font-size: 2.2rem; }
+            .pay-method { flex: 1 1 60px; }
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 1.8rem;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0,0,0,0.02);
+            border: 1px solid #eef2f8;
+        }
+
+        .balance-card {
+            padding: 1.8rem;
+        }
+
+        .balance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .balance-header h2 {
+            font-weight: 600;
+            font-size: 1.5rem;
+            color: #0f3b5c;
+        }
+
+        .balance-amount {
+            margin: 1rem 0 0.5rem;
+        }
+
+        .balance-amount .currency-badge {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #2c6e9e;
+        }
+
+        .balance-amount .amount {
+            font-size: 3.8rem;
+            font-weight: 800;
+            background: linear-gradient(120deg, #1e2f3f, #2c5a7a);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .update-tag {
+            font-size: 0.75rem;
+            background: #eef2ff;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0.3rem 0.9rem;
+            border-radius: 40px;
+            color: #2563eb;
+        }
+
+        .withdraw-card {
+            padding: 1.8rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #2c7da0;
+            padding-left: 0.9rem;
+            color: #0f2b3d;
+        }
+
+        .form-group {
+            margin-bottom: 1.4rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: #334155;
+        }
+
+        .form-control {
+            width: 100%;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 0.85rem 1rem;
+            font-size: 1rem;
+            color: #0f172a;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2c7da0;
+            box-shadow: 0 0 0 3px rgba(44,125,160,0.2);
+            background: white;
+        }
+
+        .payment-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin: 1rem 0;
+        }
+
+        .pay-method {
+            flex: 1 1 88px;
+            min-width: 0;
+            background: #f9fafb;
+            border-radius: 1.2rem;
+            padding: 0.7rem 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #e2e8f0;
+        }
+
+        .pay-method i {
+            font-size: 1.6rem;
+            display: block;
+            margin-bottom: 5px;
+            color: #2c7da0;
+        }
+
+        .pay-method span {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .pay-method.active {
+            background: linear-gradient(135deg, #eef6ff, #ffffff);
+            border-color: #2c7da0;
+            box-shadow: 0 6px 14px rgba(44,125,160,0.15);
+            transform: scale(0.98);
+        }
+
+        .dynamic-fields {
+            margin-top: 1.2rem;
+            background: #fefefe;
+            border-radius: 1.2rem;
+            padding: 1rem;
+            border: 1px solid #edf2f7;
+        }
+
+        .method-detail {
+            display: none;
+            animation: fadeSlide 0.3s ease;
+        }
+
+        .method-detail.show {
+            display: block;
+        }
+
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(6px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        .withdraw-btn {
+            width: 100%;
+            background: linear-gradient(95deg, #0f3b5c, #1e5a7a);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 1.5rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 1rem;
+            box-shadow: 0 8px 18px -6px rgba(15,59,92,0.3);
+        }
+
+        .withdraw-btn:hover {
+            background: linear-gradient(95deg, #0a2e48, #144e6b);
+            transform: translateY(-2px);
+        }
+
+        .withdraw-btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+
+        .history-panel {
+            background: #ffffff;
+            border-radius: 1.8rem;
+            padding: 1.5rem;
+            border: 1px solid #eef2f8;
+            box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 1.2rem;
+        }
+
+        .history-list {
+            max-height: 380px;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+
+        .history-list::-webkit-scrollbar {
+            width: 5px;
+        }
+        .history-list::-webkit-scrollbar-track {
+            background: #eef2ff;
+            border-radius: 10px;
+        }
+        .history-list::-webkit-scrollbar-thumb {
+            background: #2c7da0;
+            border-radius: 10px;
+        }
+
+        .empty-history {
+            background: #fafcff;
+            border-radius: 1.2rem;
+            padding: 2rem;
+            text-align: center;
+            color: #5b6e8c;
+            font-size: 1rem;
+            border: 1px dashed #cbd5e1;
+        }
+
+        /* Withdrawal history items */
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            background: #f9fbfd;
+            border: 1px solid #eef2f8;
+            border-radius: 1.1rem;
+            padding: 0.85rem 1.1rem;
+            margin-bottom: 0.6rem;
+        }
+        .history-item > div { min-width: 0; }
+        .history-item .hi-amt { font-weight: 700; font-size: 1.05rem; color: #0f3b5c; }
+        .history-item .hi-sub { font-size: 0.75rem; color: #64748b; margin-top: 2px; word-break: break-all; }
+        .hi-status { font-size: 0.7rem; padding: 4px 12px; border-radius: 20px; font-weight: 700; text-transform: capitalize; white-space: nowrap; }
+        .hi-status.pending { background: rgba(245,166,35,0.15); color: #b9770e; }
+        .hi-status.approved { background: rgba(44,125,160,0.15); color: #2c7da0; }
+        .hi-status.rejected { background: rgba(220,53,69,0.12); color: #dc3545; }
+
+        .insight-card {
+            background: #f9fbfd;
+            border-radius: 1.5rem;
+            padding: 1.2rem 1.8rem;
+            border-left: 6px solid #f5a623;
+            box-shadow: 0 6px 12px -6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eef2f8;
+        }
+
+        .insight-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 0.8rem;
+            color: #1e293b;
+        }
+        .insight-card ol {
+            margin-left: 1.2rem;
+            color: #334155;
+        }
+        .insight-card li {
+            margin: 0.6rem 0;
+            line-height: 1.4;
+            font-size: 11px;
+        }
+
+        /* Modal notification */
+        .modal-notification {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0.2s, opacity 0.25s ease;
+        }
+
+        .modal-notification.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .notify-card {
+            background: white;
+            max-width: 400px;
+            width: 90%;
+            border-radius: 2rem;
+            padding: 1.8rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 30px 40px -15px rgba(0, 0, 0, 0.3);
+            animation: popIn 0.35s cubic-bezier(0.21, 1.11, 0.35, 1);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .notify-icon {
+            background: linear-gradient(145deg, #0f3b5c, #1e5a7a);
+            width: 70px;
+            height: 70px;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem auto;
+            font-size: 2.2rem;
+            color: white;
+        }
+
+        .notify-card h3 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: #0f2b3d;
+        }
+
+        .notify-amount {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #2c7da0;
+            margin: 0.5rem 0;
+        }
+
+        .notify-detail {
+            background: #f1f5f9;
+            padding: 0.7rem;
+            border-radius: 1rem;
+            margin: 1rem 0;
+            font-size: 0.85rem;
+            color: #334155;
+        }
+
+        .notify-close {
+            background: #eef2ff;
+            border: none;
+            padding: 0.7rem 1.8rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            color: #1e4a76;
+            cursor: pointer;
+        }
+
+        /* GST Modal */
+        .gst-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 2000; visibility: hidden; opacity: 0;
+            transition: visibility 0.2s, opacity 0.25s ease; padding: 1rem;
+        }
+        .gst-modal.show { visibility: visible; opacity: 1; }
+        .modal-content {
+            background: white; max-width: 450px; width: 100%; border-radius: 2rem;
+            padding: 2rem 1.8rem; text-align: center; box-shadow: 0 30px 40px -15px rgba(0, 0, 0, 0.3);
+            animation: popIn 0.35s cubic-bezier(0.21, 1.11, 0.35, 1);
+        }
+        .gst-icon {
+            background: #f97316; width: 70px; height: 70px; border-radius: 60px;
+            display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;
+            font-size: 2.1rem; color: #fff;
+        }
+        .gst-modal h3 { font-size: 1.5rem; font-weight: 800; color: #0f2b3d; margin-bottom: 0.4rem; }
+        .gst-amount { font-size: 2.4rem; font-weight: 800; color: #b45309; margin: 0.4rem 0 0.9rem; }
+        .gst-note { background: #f1f5f9; border-radius: 1rem; padding: 0.9rem; font-size: 0.85rem; color: #334155; margin-bottom: 1.2rem; line-height: 1.5; }
+        .gst-note i { color: #2c7da0; }
+        .pay-gst-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+            background: linear-gradient(95deg, #0f3b5c, #1e5a7a); color: #fff; text-decoration: none;
+            border: none; padding: 1rem; border-radius: 1.3rem; font-weight: 700; font-size: 1rem;
+            cursor: pointer; margin-top: 0.6rem; transition: all 0.2s;
+        }
+        .pay-gst-btn:hover { transform: translateY(-2px); }
+        .close-modal-btn { background: #eef2f7; color: #64748b; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="hero">
+        <h1><i class="fas fa-bolt"></i> CashyTypeWithdrawl</h1>
+        <p>Fast payouts • Bank • UPI • Wallets</p>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Balance Card -->
+        <div class="card balance-card">
+            <div class="balance-header">
+                <h2><i class="fas fa-wallet"></i> Available Balance</h2>
+                <i class="fas fa-shield-alt" style="color: #2c7da0;"></i>
+            </div>
+            <div class="balance-amount">
+                <span class="currency-badge">₹</span>
+                <span class="amount" id="globalBalance">0.00</span>
+            </div>
+            <div class="update-tag">
+                <i class="fas fa-sync-alt fa-fw"></i> real-time &amp; secure
+            </div>
+        </div>
+
+        <!-- Withdrawal Card -->
+        <div class="card withdraw-card">
+            <div class="section-title">Request Withdrawal</div>
+            <div id="withdrawForm">
+            <div class="form-group">
+                <label><i class="fas fa-coins"></i> Amount (₹)</label>
+                <input type="number" id="withdrawAmount" class="form-control" placeholder="0" readonly style="background:#eef3f8; cursor:not-allowed; font-weight:700;">
+                <small style="color:#64748b; display:block; margin-top:6px;">Fixed to your available balance.</small>
+                <small id="amountError" style="color:#e07c3c; display: none;">Enter valid amount</small>
+            </div>
+
+            <label>Payment method</label>
+            <div class="payment-grid" id="paymentMethodsContainer">
+                <div class="pay-method" data-method="bank">
+                    <i class="fas fa-university"></i><span>Bank</span>
+                </div>
+                <div class="pay-method" data-method="upi">
+                    <i class="fas fa-mobile-alt"></i><span>PhonePe/UPI</span>
+                </div>
+                <div class="pay-method" data-method="google-pay">
+                    <i class="fab fa-google-pay"></i><span>Google Pay</span>
+                </div>
+                <div class="pay-method" data-method="paytm">
+                    <i class="fab fa-amazon-pay"></i><span>Paytm</span>
+                </div>
+                <div class="pay-method" data-method="paypal">
+                    <i class="fab fa-paypal"></i><span>PayPal</span>
+                </div>
+            </div>
+
+            <div class="dynamic-fields" id="dynamicFieldsArea">
+                <div id="bankDetail" class="method-detail">
+                    <div class="form-group"><label>Account Holder</label><input type="text" id="accName" class="form-control" value=""></div>
+                    <div class="form-group"><label>Account Number</label><input type="text" id="accNumber" class="form-control" value=""></div>
+                    <div class="form-group"><label>IFSC Code</label><input type="text" id="ifscCode" class="form-control" value=""></div>
+                </div>
+                <div id="upiDetail" class="method-detail">
+                    <div class="form-group"><label>UPI ID / VPA</label><input type="text" id="upiId" class="form-control" value=""></div>
+                </div>
+                <div id="googleDetail" class="method-detail">
+                    <div class="form-group"><label>Google Pay UPI ID</label><input type="text" id="gpayId" class="form-control" value=""></div>
+                </div>
+                <div id="paytmDetail" class="method-detail">
+                    <div class="form-group"><label>Paytm Mobile Number</label><input type="text" id="paytmMobile" class="form-control" value=""></div>
+                </div>
+                <div id="paypalDetail" class="method-detail">
+                    <div class="form-group"><label>PayPal Email</label><input type="email" id="paypalEmail" class="form-control" value=""></div>
+                </div>
+            </div>
+
+            <button class="withdraw-btn" id="processWithdrawBtn">
+                <i class="fas fa-paper-plane"></i> Withdraw <span id="btnAmount"></span>
+            </button>
+            </div>
+
+            <div id="withdrawLock" style="display:none; text-align:center; padding:1.4rem 0.4rem 0.6rem;">
+                <div style="font-size:2.6rem; color:#94a3b8; margin-bottom:0.7rem;"><i class="fas fa-lock"></i></div>
+                <p style="color:#334155; font-weight:700; font-size:1.05rem; margin-bottom:6px;">Withdrawal locked</p>
+                <p style="color:#64748b; font-size:0.9rem; line-height:1.5;">You need at least <strong id="lockMin">₹5,500</strong> in your available balance to withdraw.<br>Keep completing tasks and transfer your earnings.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Panel -->
+    <div class="history-panel">
+        <div class="history-header">
+            <div class="section-title" style="margin-bottom:0; border-left-color:#2c7da0;">Withdrawal History</div>
+            <div><i class="fas fa-history"></i> transactions</div>
+        </div>
+        <div class="history-list" id="historyList">
+            <div class="empty-history">
+                <i class="fas fa-receipt" style="font-size: 2rem; margin-bottom: 0.5rem; display: block; color: #94a3b8;"></i>
+                No payment history
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions Box -->
+    <div class="insight-card">
+        <h3><i class="fas fa-circle-info" style="color:#f5a623;"></i> Payment Instructions</h3>
+        <ol>
+            <li>⚡ Receive Payment Within Minutes (Instant settlement).</li>
+            <li>📱 Our Sender Name: <strong>"Cashytype"</strong> (You will see *CashyType * in your UPI history).</li>
+            <li>👑 Anshuman (CEO) - All withdrawals are processed with trust &amp; security.</li>
+            <li>🔒 Withdrawal history &amp; balance are saved automatically.</li>
+            <li>💰 Your current balance is <span id="instrBalance">₹0.00</span>. Please complete typing jobs for payouts .</li>
+        </ol>
+    </div>
+</div>
+
+<!-- Success modal -->
+<div class="modal-notification" id="notifyModal">
+    <div class="notify-card">
+        <div class="notify-icon"><i class="fas fa-check"></i></div>
+        <h3>Withdrawal Requested</h3>
+        <div class="notify-amount" id="notifyAmount">₹0</div>
+        <div class="notify-detail" id="notifyDetail">Your request is pending approval.</div>
+        <button class="notify-close" id="notifyClose">Done</button>
+    </div>
+</div>
+
+<!-- GST Modal -->
+<div id="gstModal" class="gst-modal">
+    <div class="modal-content">
+        <div class="gst-icon"><i class="fas fa-percent"></i></div>
+        <h3>Pay 18% GST</h3>
+        <div class="gst-amount" id="gstAmount">₹0.00</div>
+        <div class="gst-note">
+            <i class="fas fa-info-circle"></i> GST is mandatory to process your withdrawal of <span id="gstWithdrawAmt">₹0</span>.<br>
+            Click the button below to complete payment.
+        </div>
+        <button class="pay-gst-btn" id="payGstBtn"><i class="fas fa-rupee-sign"></i> Pay <span id="gstBtnAmt">₹0</span> GST</button>
+        <button class="pay-gst-btn close-modal-btn" id="cancelGstModalBtn"><i class="fas fa-times"></i> Cancel</button>
+    </div>
+</div>
+
+<script src="/assets/app.js"></script>
+<script src="/assets/mainnav.js"></script>
+<script>
+    if (!CZ.requireAuth()) { /* redirected to login */ }
+
+    const $ = (id) => document.getElementById(id);
+    let activeMethod = null;
+    let withdrawMin = 5500;
+    let gstPercent = 18;
+    let pendingWd = null;
+
+    const DETAIL = { bank: 'bankDetail', upi: 'upiDetail', 'google-pay': 'googleDetail', paytm: 'paytmDetail', paypal: 'paypalDetail' };
+
+    // Method selection → reveal the matching detail fields.
+    document.querySelectorAll('.pay-method').forEach((m) => {
+      m.addEventListener('click', () => {
+        document.querySelectorAll('.pay-method').forEach((x) => x.classList.remove('active'));
+        m.classList.add('active');
+        activeMethod = m.dataset.method;
+        document.querySelectorAll('.method-detail').forEach((d) => d.classList.remove('show'));
+        const el = $(DETAIL[activeMethod]);
+        if (el) el.classList.add('show');
+      });
+    });
+
+    // Build the payout destination string for the selected method.
+    function buildDest() {
+      switch (activeMethod) {
+        case 'bank': {
+          const n = $('accName').value.trim(), a = $('accNumber').value.trim(), i = $('ifscCode').value.trim().toUpperCase();
+          return (n && a) ? ('Bank: ' + n + ' • A/C ' + a + (i ? ' • IFSC ' + i : '')) : '';
+        }
+        case 'upi': { const v = $('upiId').value.trim(); return v ? 'UPI: ' + v : ''; }
+        case 'google-pay': { const v = $('gpayId').value.trim(); return v ? 'Google Pay: ' + v : ''; }
+        case 'paytm': { const v = $('paytmMobile').value.trim(); return v ? 'Paytm: ' + v : ''; }
+        case 'paypal': { const v = $('paypalEmail').value.trim(); return v ? 'PayPal: ' + v : ''; }
+        default: return '';
+      }
+    }
+
+    function inr(n) { return (Number(n) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+    function renderHistory(list) {
+      const el = $('historyList');
+      if (!list || !list.length) {
+        el.innerHTML = '<div class="empty-history"><i class="fas fa-receipt" style="font-size:2rem;margin-bottom:0.5rem;display:block;color:#94a3b8;"></i>No payment history</div>';
+        return;
+      }
+      el.innerHTML = list.map((w) => {
+        const d = new Date(w.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        return '<div class="history-item"><div><div class="hi-amt">₹' + inr(w.amount) + '</div>' +
+          '<div class="hi-sub">' + d + ' • ' + (w.upi_id || '') + '</div></div>' +
+          '<span class="hi-status ' + w.status + '">' + w.status + '</span></div>';
+      }).join('');
+    }
+
+    async function load() {
+      const data = await CZ.api('/api/wallet');
+      if (data.config) {
+        withdrawMin = Number(data.config.withdrawMin) || withdrawMin;
+        gstPercent = Number(data.config.gstPercent) || gstPercent;
+      }
+      // Available balance is the full withdrawable balance (includes the
+      // registration fee once approved, plus transferred earnings + bonus).
+      const available = Number(data.balance) || 0;
+      $('globalBalance').textContent = inr(available);
+      $('instrBalance').textContent = '₹' + inr(available);
+      // Withdrawal amount is fixed to the full available balance.
+      $('withdrawAmount').value = available > 0 ? available : '';
+      $('btnAmount').textContent = available > 0 ? '₹' + inr(available) : 'instantly';
+
+      // Withdrawal is only available once the balance reaches the minimum.
+      const canWithdraw = available >= withdrawMin;
+      $('withdrawForm').style.display = canWithdraw ? '' : 'none';
+      $('withdrawLock').style.display = canWithdraw ? 'none' : 'block';
+      $('lockMin').textContent = '₹' + inr(withdrawMin);
+
+      renderHistory(data.withdrawals || []);
+    }
+
+    function showNotify(amount, dest) {
+      $('notifyAmount').textContent = '₹' + inr(amount);
+      $('notifyDetail').textContent = 'Sent to ' + dest + ' — pending approval.';
+      $('notifyModal').classList.add('show');
+    }
+    $('notifyClose').addEventListener('click', () => $('notifyModal').classList.remove('show'));
+    $('notifyModal').addEventListener('click', (e) => { if (e.target === $('notifyModal')) $('notifyModal').classList.remove('show'); });
+
+    function showError(msg) { $('amountError').textContent = msg; $('amountError').style.display = 'block'; }
+
+    // Withdraw → validate → open the GST modal (18% GST must be paid first).
+    $('processWithdrawBtn').addEventListener('click', () => {
+      const amount = Number($('withdrawAmount').value);
+      $('amountError').style.display = 'none';
+      if (!(amount > 0)) { showError('Enter a valid amount.'); return; }
+      if (amount < withdrawMin) { showError('Minimum withdrawal is ₹' + inr(withdrawMin) + '.'); return; }
+      if (!activeMethod) { showError('Select a payment method.'); return; }
+      const dest = buildDest();
+      if (!dest) { showError('Enter your payout details.'); return; }
+
+      const gst = Number((amount * gstPercent / 100).toFixed(2));
+      pendingWd = { amount, dest, gst };
+      $('gstAmount').textContent = '₹' + inr(gst);
+      $('gstWithdrawAmt').textContent = '₹' + inr(amount);
+      $('gstBtnAmt').textContent = '₹' + inr(gst);
+      $('gstModal').classList.add('show');
+    });
+
+    $('cancelGstModalBtn').addEventListener('click', () => $('gstModal').classList.remove('show'));
+    $('gstModal').addEventListener('click', (e) => { if (e.target === $('gstModal')) $('gstModal').classList.remove('show'); });
+    $('payGstBtn').addEventListener('click', () => {
+      if (!pendingWd) return;
+      // Stash the withdrawal so the GST pay page can finish it after payment.
+      sessionStorage.setItem('cz_pending_withdrawal', JSON.stringify(pendingWd));
+      location.href = '/gst-pay.html';
+    });
+
+    load().catch(() => showError('Could not load your wallet. Please refresh.'));
+</script>
+</body>
+</html>

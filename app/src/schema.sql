@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
   state         VARCHAR(100),
   country       VARCHAR(100),
   balance       DECIMAL(12, 2) NOT NULL DEFAULT 0,
+  task_balance  DECIMAL(12, 2) NOT NULL DEFAULT 0, -- task rewards held until transferred to Total Income
   is_admin      TINYINT(1) NOT NULL DEFAULT 0,
   auto_mode     TINYINT(1) NOT NULL DEFAULT 0,
   -- Denormalised activity counters, kept in sync as the user transacts.

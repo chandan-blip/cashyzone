@@ -44,6 +44,7 @@ async function main() {
     // (CREATE TABLE IF NOT EXISTS won't alter an existing table).
     await ensureColumn(conn, 'users', 'is_admin', 'TINYINT(1) NOT NULL DEFAULT 0');
     await ensureColumn(conn, 'users', 'balance', 'DECIMAL(12,2) NOT NULL DEFAULT 0');
+    await ensureColumn(conn, 'users', 'task_balance', 'DECIMAL(12,2) NOT NULL DEFAULT 0');
     await ensureColumn(conn, 'users', 'phone', 'VARCHAR(20)');
     await ensureColumn(conn, 'users', 'dob', 'DATE');
     await ensureColumn(conn, 'users', 'state', 'VARCHAR(100)');
@@ -70,7 +71,9 @@ async function main() {
     await conn.query(`
       UPDATE users u SET
         total_income = (SELECT COALESCE(SUM(amount),0) FROM transactions t
-                        WHERE t.user_id = u.id AND t.type IN ('deposit','earning','bonus')),
+                        WHERE t.user_id = u.id
+                          AND (t.type = 'bonus'
+                               OR (t.type = 'deposit' AND t.description = 'Task earnings transferred to Total Income'))),
         withdrawal = (SELECT COALESCE(SUM(amount),0) FROM transactions t
                       WHERE t.user_id = u.id AND t.type = 'withdraw'),
         task_completed = (SELECT COUNT(*) FROM task_purchases tp

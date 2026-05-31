@@ -280,7 +280,22 @@
       document.body.style.overflow = '';
       setTimeout(() => d.classList.add('hidden'), 300);
     },
+    // Registration-fee gate: a logged-in non-admin whose registration fee has
+    // not been approved is confined to the reg-fee page until an admin approves.
+    async guardActivation() {
+      if (!this.token) return;                 // visitors browse freely
+      if (this.user && this.user.is_admin) return;
+      const page = (location.pathname.replace(/\/+$/, '') || '/').toLowerCase();
+      const exempt = ['/reg-fee.html', '/login.html', '/register.html'];
+      if (exempt.includes(page) || page.startsWith('/admin')) return;
+      try {
+        const data = await this.api('/api/auth/activation');
+        if (data.status !== 'active') location.href = '/reg-fee.html';
+      } catch { /* network error — don't lock the user out */ }
+    },
   };
 
   window.CZ = CZ;
+  // Enforce the registration-fee paywall on every page load.
+  CZ.guardActivation();
 })();

@@ -14,7 +14,7 @@ router.use(authRequired);
 router.get('/', async (req, res, next) => {
   try {
     const [u] = await pool.query(
-      `SELECT balance, auto_mode, created_at,
+      `SELECT balance, task_balance, auto_mode, created_at,
               total_income, task_completed, total_perchased, task_earning, bonus_money,
               withdrawal, transactions_count
          FROM users WHERE id = ?`,
@@ -49,15 +49,27 @@ router.get('/', async (req, res, next) => {
       [req.user.id]
     );
 
+    // Has the user moved task earnings into their balance at least once? The
+    // withdrawable balance is only surfaced after the first transfer, so the
+    // registration fee alone never shows as "available".
+    const [[tf]] = await pool.query(
+      "SELECT COUNT(*) AS n FROM transactions WHERE user_id = ? AND type = 'deposit' AND description = 'Task earnings transferred to Total Income'",
+      [req.user.id]
+    );
+    const hasTransferred = Number(tf.n) > 0;
+
     res.json({
       currency: CURRENCY,
       balance: u[0]?.balance ?? 0,
+      hasTransferred,
+      taskBalance: Number(u[0]?.task_balance ?? 0),
       autoMode: !!u[0]?.auto_mode,
       memberSince: u[0]?.created_at ?? null,
       config: {
         gstPercent: settings.get('gst_percent'),
         withdrawMin: settings.get('withdraw_min'),
         withdrawMinTasks: settings.get('withdraw_min_tasks'),
+        transferMin: settings.get('transfer_min'),
       },
       stats: {
         totalIncome,
@@ -89,7 +101,7 @@ router.get('/upi', (req, res) => {
 router.post('/deposit', async (req, res, next) => {
   const amount = Number(req.body.amount);
   const utr = (req.body.utr || '').trim();
-  const purpose = ['kyc', 'gst'].includes(req.body.purpose) ? req.body.purpose : 'wallet';
+  const purpose = ['kyc', 'gst', 'register'].includes(req.body.purpose) ? req.body.purpose : 'wallet';
   if (!(amount > 0)) return res.status(400).json({ error: 'Amount must be greater than ₹0' });
   if (utr.length < 6) return res.status(400).json({ error: 'Please enter a valid UTR / reference number' });
 
@@ -105,6 +117,7 @@ router.post('/deposit', async (req, res, next) => {
 
     const note = purpose === 'kyc' ? 'KYC verification fee'
       : purpose === 'gst' ? 'GST on withdrawal'
+      : purpose === 'register' ? 'Registration fee'
       : null;
     const depStatus = autoDeposit ? 'approved' : 'pending';
     const [result] = await conn.query(
@@ -113,13 +126,16 @@ router.post('/deposit', async (req, res, next) => {
     );
 
     // Auto-approved deposits credit the wallet + log the ledger entry immediately.
+    // Total Income is NOT touched here — it only grows when task earnings are
+    // transferred (reg-fee / GST / top-up deposits are not "income").
     if (autoDeposit) {
       await conn.query(
-        'UPDATE users SET balance = balance + ?, total_income = total_income + ?, transactions_count = transactions_count + 1 WHERE id = ?',
-        [amount, amount, req.user.id]
+        'UPDATE users SET balance = balance + ?, transactions_count = transactions_count + 1 WHERE id = ?',
+        [amount, req.user.id]
       );
       const desc = purpose === 'kyc' ? `KYC fee (UTR ${utr})`
         : purpose === 'gst' ? `GST payment (UTR ${utr})`
+        : purpose === 'register' ? `Registration fee (UTR ${utr})`
         : `Deposit approved (UTR ${utr})`;
       await conn.query(
         'INSERT INTO transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)',
@@ -229,6 +245,59 @@ router.post('/withdraw', async (req, res, next) => {
 
     await conn.commit();
     res.status(201).json({ id: result.insertId, status: wdStatus, amount });
+  } catch (err) {
+    await conn.rollback();
+    next(err);
+  } finally {
+    conn.release();
+  }
+});
+
+// Transfer the user's HELD task earnings into their Total Income / withdrawable
+// balance. Moves the whole task_balance at once and logs it in the ledger.
+router.post('/transfer', async (req, res, next) => {
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    const [rows] = await conn.query('SELECT task_balance FROM users WHERE id = ? FOR UPDATE', [req.user.id]);
+    const held = Number(rows[0]?.task_balance ?? 0);
+    if (!(held > 0)) {
+      await conn.rollback();
+      return res.status(400).json({ error: 'No task earnings available to transfer' });
+    }
+    const transferMin = Number(settings.get('transfer_min'));
+    if (held < transferMin) {
+      await conn.rollback();
+      return res.status(400).json({ error: `Minimum transfer is ₹${transferMin}. Keep completing tasks to reach it.` });
+    }
+
+    await conn.query(
+      'UPDATE users SET task_balance = 0, balance = balance + ?, total_income = total_income + ?, transactions_count = transactions_count + 1 WHERE id = ?',
+      [held, held, req.user.id]
+    );
+    await conn.query(
+      "INSERT INTO transactions (user_id, type, amount, description) VALUES (?, 'deposit', ?, 'Task earnings transferred to Total Income')",
+      [req.user.id, held]
+    );
+
+    // Reward bonus: a fixed bonus for every full `transferMin` (₹3,000) chunk
+    // transferred — e.g. ₹2,000 per ₹3,000 moved.
+    const bonusPer = Number(settings.get('transfer_bonus'));
+    const bonus = bonusPer > 0 && transferMin > 0 ? Math.floor(held / transferMin) * bonusPer : 0;
+    if (bonus > 0) {
+      await conn.query(
+        'UPDATE users SET balance = balance + ?, total_income = total_income + ?, bonus_money = bonus_money + ?, transactions_count = transactions_count + 1 WHERE id = ?',
+        [bonus, bonus, bonus, req.user.id]
+      );
+      await conn.query(
+        "INSERT INTO transactions (user_id, type, amount, description) VALUES (?, 'bonus', ?, ?)",
+        [req.user.id, bonus, `Transfer bonus (₹${bonus})`]
+      );
+    }
+
+    const [u] = await conn.query('SELECT balance, total_income, task_balance FROM users WHERE id = ?', [req.user.id]);
+    await conn.commit();
+    res.json({ transferred: held, bonus, balance: u[0].balance, totalIncome: u[0].total_income, taskBalance: u[0].task_balance });
   } catch (err) {
     await conn.rollback();
     next(err);

@@ -1,561 +1,375 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Wallet — CashyZone</title>
-  <script src="/assets/head.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CashyType — Balance Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+    body { background: linear-gradient(135deg, #f8f9fc 0%, #eef2f6 100%); min-height: 100vh; color: #333; }
+
+    .dashboard-container { max-width: 1200px; margin: 0 auto; padding: 26px 20px 40px; }
+
+    /* Header Styles */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 26px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      margin-bottom: 30px;
+      border: 1px solid #eef2f6;
+    }
+
+    .logo { display: flex; align-items: center; gap: 15px; }
+    .logo h1 { font-size: 30px; font-weight: 800; color: #4361ee; text-shadow: 0 2px 4px rgba(67, 97, 238, 0.1); }
+
+    .user-profile { display: flex; align-items: center; gap: 15px; }
+    .user-profile img {
+      width: 55px; height: 55px; border-radius: 50%; object-fit: cover;
+      border: 3px solid #4361ee; box-shadow: 0 5px 15px rgba(67, 97, 238, 0.2);
+    }
+    .user-info h2 { font-size: 22px; font-weight: 700; color: #333; }
+
+    /* Balance Cards Section */
+    .balance-section { margin-bottom: 35px; }
+
+    .section-title {
+      font-size: 22px; font-weight: 700; margin-bottom: 22px; color: #333;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .section-title i {
+      color: #4361ee; background: rgba(67, 97, 238, 0.1);
+      width: 45px; height: 45px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+
+    .cards-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+
+    .card {
+      background: white; border-radius: 20px; padding: 26px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+      transition: all 0.4s ease; position: relative; overflow: hidden; border: 1px solid #f0f4f9;
+    }
+    .card:hover { transform: translateY(-8px); box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12); }
+    .card::before { content: ''; position: absolute; top: 0; left: 0; width: 5px; height: 100%; background: #4361ee; }
+    .card:nth-child(2)::before { background: #4cc9f0; }
+    .card:nth-child(3)::before { background: #f72585; }
+    .card:nth-child(4)::before { background: #7209b7; }
+
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
+    .card-title { font-size: 17px; font-weight: 600; color: #666; }
+    .card-icon {
+      width: 52px; height: 52px; border-radius: 15px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(67, 97, 238, 0.1); color: #4361ee; font-size: 24px;
+    }
+    .card:nth-child(2) .card-icon { background: rgba(76, 201, 240, 0.1); color: #4cc9f0; }
+    .card:nth-child(3) .card-icon { background: rgba(247, 37, 133, 0.1); color: #f72585; }
+    .card:nth-child(4) .card-icon { background: rgba(114, 9, 183, 0.1); color: #7209b7; }
+
+    .balance-amount { font-size: 34px; font-weight: 800; color: #333; margin-bottom: 5px; letter-spacing: -0.5px; }
+    .balance-inr { font-size: 15px; color: #777; font-weight: 600; }
+    .balance-change { display: flex; align-items: center; gap: 6px; font-size: 14px; margin-top: 14px; color: #28a745; font-weight: 600; }
+    .balance-change.negative { color: #dc3545; }
+
+    /* Main Content Layout */
+    .main-content { display: grid; grid-template-columns: 1fr; gap: 30px; }
+
+    /* Payment History */
+    .payment-history {
+      background: white; border-radius: 20px; padding: 26px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); border: 1px solid #f0f4f9;
+    }
+    .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 12px; flex-wrap: wrap; }
+    .view-all {
+      color: #4361ee; text-decoration: none; font-weight: 600; transition: all 0.3s ease;
+      padding: 8px 16px; border-radius: 10px; background: rgba(67, 97, 238, 0.1); font-size: 14px;
+    }
+    .view-all:hover { background: rgba(67, 97, 238, 0.2); }
+
+    .history-table { width: 100%; border-collapse: collapse; }
+    .history-table th { text-align: left; padding: 12px 8px; font-weight: 700; color: #555; border-bottom: 2px solid #f0f4f9; font-size: 15px; }
+    .history-table td { padding: 12px 8px; border-bottom: 1px solid #f0f4f9; color: #333; font-weight: 600; font-size: 14.5px; }
+    .history-table tr:last-child td { border-bottom: none; }
+    .history-table tbody tr { transition: all 0.3s ease; }
+    .history-table tbody tr:hover { background-color: #f8fafd; }
+    .amt-pos { color: #28a745; }
+    .amt-neg { color: #dc3545; }
+
+    .status { padding: 5px 12px; border-radius: 20px; font-size: 12.5px; font-weight: 600; display: inline-block; }
+    .status.completed { background: rgba(76, 201, 240, 0.15); color: #2bb3d6; }
+    .status.pending { background: rgba(255, 193, 7, 0.15); color: #d39e00; }
+    .status.failed { background: rgba(248, 113, 113, 0.15); color: #f87171; }
+
+    /* Payment Forms */
+    .payment-forms {
+      background: white; border-radius: 20px; padding: 26px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); border: 1px solid #f0f4f9;
+    }
+    .tabs { display: flex; gap: 8px; margin-bottom: 22px; border-bottom: 2px solid #f0f4f9; padding-bottom: 14px; flex-wrap: wrap; }
+    .tab {
+      padding: 10px 18px; border-radius: 12px; background: #f8fafd; cursor: pointer;
+      font-weight: 600; transition: all 0.3s ease; color: #666; font-size: 14.5px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .tab.active { background: #4361ee; color: white; box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3); }
+    .tab:hover:not(.active) { background: #f0f4f9; }
+
+    .form-container { display: none; }
+    .form-container.active { display: block; animation: fadeIn 0.5s ease; }
+
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; margin-bottom: 9px; font-weight: 600; color: #555; font-size: 14.5px; }
+    .form-group input {
+      width: 100%; padding: 13px 16px; background: white; border: 2px solid #eef2f6;
+      border-radius: 12px; font-size: 15px; transition: all 0.3s ease; color: #333; font-weight: 500;
+    }
+    .form-group input:focus { border-color: #4361ee; outline: none; box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.2); }
+
+    .payment-methods { display: flex; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
+    .payment-method {
+      flex: 1; min-width: 110px; padding: 16px 10px; border-radius: 12px; border: 2px solid #eef2f6;
+      background: white; text-align: center; transition: all 0.3s ease; cursor: pointer;
+    }
+    .payment-method:hover { border-color: #4361ee; transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05); }
+    .payment-method.active { border-color: #4361ee; background: rgba(67, 97, 238, 0.05); box-shadow: 0 5px 15px rgba(67, 97, 238, 0.1); }
+    .payment-method i { font-size: 28px; margin-bottom: 8px; color: #4361ee; }
+    .payment-method .method-name { font-weight: 600; color: #333; font-size: 13.5px; }
+
+    .btn {
+      background: #28a745; color: white; border: none; padding: 14px; border-radius: 12px;
+      font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.4s ease; width: 100%;
+      display: block; text-align: center; position: relative; overflow: hidden; margin-top: 20px;
+      box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3); letter-spacing: 0.5px;
+    }
+    .btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(40, 167, 69, 0.4); }
+    .btn:disabled { opacity: 0.65; cursor: not-allowed; }
+
+    .form-msg { margin-top: 14px; font-size: 14px; font-weight: 600; display: none; }
+    .form-msg.err { color: #dc3545; display: block; }
+    .form-msg.ok { color: #28a745; display: block; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .count-up { animation: fadeIn 1s ease-out; }
+
+    footer { text-align: center; padding: 18px 0; color: #777; font-size: 14px; margin-top: 36px; border-top: 1px solid #eef2f6; }
+
+    /* Toast */
+    .cz-toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: #222f3e; color: #fff; padding: 13px 22px; border-radius: 12px; font-weight: 600;
+      font-size: 14px; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25); z-index: 3000; opacity: 0;
+      transition: all 0.3s ease; pointer-events: none;
+    }
+    .cz-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .main-content { grid-template-columns: 1fr; }
+      header { flex-direction: column; text-align: center; gap: 18px; }
+    }
+    @media (max-width: 576px) {
+      .dashboard-container { padding: 18px 14px 32px; }
+      .cards-container { grid-template-columns: 1fr; gap: 16px; }
+      .card { padding: 22px; }
+      .payment-history, .payment-forms { padding: 20px; }
+      .history-table { display: block; overflow-x: auto; }
+      .tabs { flex-direction: column; }
+      .balance-amount { font-size: 30px; }
+    }
+  </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased">
-  <div id="nav"></div>
+<body>
+  <div class="dashboard-container">
+    <!-- Header Section -->
+    <header>
+      <div class="logo">
+        <h1>CashyType</h1>
+      </div>
+      <div class="user-profile">
+        <img id="userAvatar" alt="User" src="https://ui-avatars.com/api/?name=User&background=4361ee&color=fff&size=128" />
+        <div class="user-info">
+          <h2 id="userName">User</h2>
+        </div>
+      </div>
+    </header>
 
-  <main class="max-w-6xl mx-auto px-5 py-10">
-    <!-- Header -->
-    <div class="flex flex-wrap items-center justify-between  gap-3">
-      <div>
-        <h1 class="text-3xl font-black">My Wallet</h1>
-        <p class="text-slate-500 mt-1">Account balance (INR).</p>
-      </div>
-      <div class="flex gap-2">
-        <a href="/deposit.html" class="bg-brand-500 hover:bg-brand-600 text-white font-semibold px-5 py-3 rounded-xl transition" style="box-shadow:0 18px 40px -18px rgba(22,196,95,.6)">+ Add Money</a>
-      </div>
-    </div>
-
-    <!-- Profile block -->
-    <div class="mt-6 bg-white rounded-3xl border border-slate-200 p-5 flex items-center gap-4 transition duration-300 hover:shadow-xl hover:-translate-y-0.5">
-      <div class="w-14 h-14 shrink-0 rounded-2xl bg-gradient-to-br from-brand-500 to-emerald-500 text-white grid place-items-center shadow-lg shadow-brand-500/30">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      </div>
-      <div class="min-w-0">
-        <p id="profileName" class="font-black text-lg truncate">Account</p>
-        <p id="profileEmail" class="text-sm text-slate-500 truncate"></p>
-      </div>
-    </div>
-
-    <!-- BLOCK 1: Balance cards -->
-    <section class="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <!-- Total income (primary) -->
-      <div class="col-span-2 lg:col-span-1 relative overflow-hidden bg-gradient-to-br from-brand-600 via-emerald-500 to-teal-400 text-white rounded-3xl p-6 shadow-lg shadow-brand-500/20 transition duration-300 hover:shadow-2xl hover:shadow-brand-500/40 hover:-translate-y-0.5">
-        <div class="absolute -top-12 -right-10 w-40 h-40 rounded-full bg-white/15 blur-2xl"></div>
-        <div class="absolute -bottom-16 -left-10 w-44 h-44 rounded-full bg-emerald-300/25 blur-3xl"></div>
-        <div class="relative">
-          <div class="flex items-center justify-between">
-            <div class="w-11 h-11 grid place-items-center rounded-2xl bg-white/20 backdrop-blur-sm ring-1 ring-white/25">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-            </div>
-            <span class="text-xs font-semibold bg-white/20 px-2 py-1 rounded-full ring-1 ring-white/20">INR</span>
+    <!-- Balance Cards Section -->
+    <section class="balance-section">
+      <h2 class="section-title"><i class="fas fa-wallet"></i> Account Balance</h2>
+      <div class="cards-container">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Total Income</h3>
+            <div class="card-icon"><i class="fas fa-wallet"></i></div>
           </div>
-          <p class="mt-3 text-sm/none opacity-90">Total Income</p>
-          <p class="mt-1 text-3xl sm:text-4xl font-black leading-tight tracking-tight tabular-nums break-words" id="cTotal">₹0.00</p>
-          <p class="mt-1 text-xs opacity-80">Deposit + Purchase + Bonus</p>
+          <div class="balance-amount count-up" id="total-balance">₹0</div>
+          <div class="balance-inr">Transferred income</div>
+          <div class="balance-change"><i class="fas fa-arrow-up"></i> Grows only on transfer</div>
         </div>
-      </div>
 
-      <!-- Available balance -->
-      <div class="col-span-2 lg:col-span-1 bg-white rounded-3xl border border-slate-200 p-6 transition duration-300 hover:shadow-xl hover:-translate-y-0.5">
-        <div class="w-11 h-11 grid place-items-center rounded-2xl bg-brand-100 text-brand-600">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-2a2 2 0 0 1 0-4h2"/><path d="M3 5v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"/></svg>
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Available Balance</h3>
+            <div class="card-icon"><i class="fas fa-rupee-sign"></i></div>
+          </div>
+          <div class="balance-amount count-up" id="available-balance">₹0</div>
+          <div class="balance-inr">Ready for withdrawal</div>
+          <div class="balance-change"><i class="fas fa-arrow-up"></i> All total</div>
         </div>
-        <p class="mt-3 text-sm text-slate-500">Available Balance</p>
-        <p class="mt-1 text-2xl sm:text-3xl font-black text-slate-800 leading-tight tracking-tight tabular-nums break-words" id="cAvailable">₹0.00</p>
-        <p class="mt-1 text-xs text-slate-400">Ready for withdrawal</p>
-      </div>
 
-      <!-- Bonus money -->
-      <div class="col-span-2 lg:col-span-1 bg-white rounded-3xl border border-slate-200 p-6 transition duration-300 hover:shadow-xl hover:-translate-y-0.5">
-        <div class="w-11 h-11 grid place-items-center rounded-2xl bg-amber-100 text-amber-600">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg>
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Bonus Income</h3>
+            <div class="card-icon"><i class="fas fa-gift"></i></div>
+          </div>
+          <div class="balance-amount count-up" id="bonus-balance">₹0</div>
+          <div class="balance-inr">Bonuses received</div>
+          <div class="balance-change"><i class="fas fa-arrow-up"></i> Rewards</div>
         </div>
-        <p class="mt-3 text-sm text-slate-500">Bonus Money</p>
-        <p class="mt-1 text-2xl sm:text-3xl font-black text-amber-500 leading-tight tracking-tight tabular-nums break-words" id="cBonus">₹0.00</p>
-        <p class="mt-1 text-xs text-slate-400">Welcome bonus credited</p>
-      </div>
 
-      <!-- Withdrawn -->
-      <div class="col-span-2 lg:col-span-1 bg-white rounded-3xl border border-slate-200 p-6 transition duration-300 hover:shadow-xl hover:-translate-y-0.5">
-        <div class="w-11 h-11 grid place-items-center rounded-2xl bg-sky-100 text-sky-600">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Withdrawn</h3>
+            <div class="card-icon"><i class="fas fa-check-circle"></i></div>
+          </div>
+          <div class="balance-amount count-up" id="withdrawn-balance">₹0</div>
+          <div class="balance-inr">Total earnings withdrawn</div>
+          <div class="balance-change"><i class="fas fa-arrow-up"></i> Paid out</div>
         </div>
-        <p class="mt-3 text-sm text-slate-500">Withdrawn</p>
-        <p class="mt-1 text-2xl sm:text-3xl font-black text-slate-800 leading-tight tracking-tight tabular-nums break-words" id="cWithdrawn">₹0.00</p>
-        <p class="mt-1 text-xs text-slate-400">Total earnings withdrawn</p>
       </div>
     </section>
 
-    <!-- Mini stats row -->
-    <section class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-      <div class="bg-white rounded-2xl border border-slate-200 px-5 py-4 transition duration-300 hover:shadow-xl hover:-translate-y-0.5">
-        <div class="w-9 h-9 grid place-items-center rounded-xl bg-brand-100 text-brand-600 mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg></div>
-        <p class="text-xl sm:text-2xl font-black text-brand-600 leading-tight tracking-tight tabular-nums break-words" id="sTasks">0</p><p class="text-xs text-slate-500">Tasks completed</p>
-      </div>
-      <div class="bg-white rounded-2xl border border-slate-200 px-5 py-4 transition duration-300 hover:shadow-xl hover:-translate-y-0.5">
-        <div class="w-9 h-9 grid place-items-center rounded-xl bg-emerald-100 text-emerald-600 mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg></div>
-        <p class="text-xl sm:text-2xl font-black leading-tight tracking-tight tabular-nums break-words" id="sEarned">₹0</p><p class="text-xs text-slate-500">Task earnings</p>
-      </div>
-      <div class="bg-white rounded-2xl border border-slate-200 px-5 py-4 transition duration-300 hover:shadow-xl hover:-translate-y-0.5">
-        <div class="w-9 h-9 grid place-items-center rounded-xl bg-indigo-100 text-indigo-600 mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
-        <p class="text-xl sm:text-2xl font-black leading-tight tracking-tight tabular-nums break-words" id="sPurchases">₹0</p><p class="text-xs text-slate-500">Total purchases</p>
-      </div>
-      <div class="bg-white rounded-2xl border border-slate-200 px-5 py-4 transition duration-300 hover:shadow-xl hover:-translate-y-0.5">
-        <div class="w-9 h-9 grid place-items-center rounded-xl bg-amber-100 text-amber-600 mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-        <p class="text-xl sm:text-2xl font-black leading-tight tracking-tight tabular-nums break-words" id="sPendWd">0</p><p class="text-xs text-slate-500">Pending withdrawals</p>
-      </div>
-      <div class="bg-white rounded-2xl border border-slate-200 px-5 py-4 transition duration-300 hover:shadow-xl hover:-translate-y-0.5">
-        <div class="w-9 h-9 grid place-items-center rounded-xl bg-sky-100 text-sky-600 mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg></div>
-        <p class="text-xl sm:text-2xl font-black leading-tight tracking-tight tabular-nums break-words" id="sTxns">0</p><p class="text-xs text-slate-500">Transactions</p>
-      </div>
-    </section>
-
-    <div class="mt-8 grid lg:grid-cols-5 gap-6">
-      <!-- BLOCK 2: Withdraw Funds (tabbed methods) -->
-      <section class="lg:col-span-2 bg-white rounded-3xl border border-slate-200 p-6 transition duration-300 hover:shadow-xl">
-        <div class="flex items-center gap-3">
-          <div class="w-11 h-11 grid place-items-center rounded-2xl bg-brand-100 text-brand-600">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/><path d="M5 5v14"/></svg>
-          </div>
-          <div>
-            <h2 class="text-xl font-black">Withdraw Funds</h2>
-            <p class="text-slate-500 text-sm">Choose a method and request a payout.</p>
-          </div>
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Payment History Section -->
+      <section class="payment-history">
+        <div class="history-header">
+          <h2 class="section-title"><i class="fas fa-history"></i> Payment History</h2>
+          <a class="view-all" id="txCount" href="#">No Transactions</a>
         </div>
-
-        <!-- method tabs -->
-        <div class="mt-5 grid grid-cols-3 gap-2 text-sm">
-          <button data-m="upi" class="m-tab flex flex-col items-center gap-1.5 py-3 rounded-xl bg-brand-500 text-white font-semibold">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></svg>
-            UPI
-          </button>
-          <button data-m="bank" class="m-tab flex flex-col items-center gap-1.5 py-3 rounded-xl bg-slate-100 font-semibold">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 18 0"/><path d="M3 10h18"/><path d="M5 6l7-3 7 3"/><path d="M4 10v11"/><path d="M20 10v11"/><path d="M8 14v3"/><path d="M12 14v3"/><path d="M16 14v3"/></svg>
-            Bank
-          </button>
-          <button data-m="paypal" class="m-tab flex flex-col items-center gap-1.5 py-3 rounded-xl bg-slate-100 font-semibold">
-            <img src="https://cdn.simpleicons.org/paypal/003087" alt="PayPal" width="22" height="22" class="h-[22px] w-[22px]" />
-            PayPal
-          </button>
-        </div>
-
-        <form id="withdrawForm" class="mt-5 space-y-3">
-          <!-- UPI fields -->
-          <div data-fields="upi" class="space-y-3">
-            <div class="flex gap-2 flex-wrap text-xs">
-              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100"><img src="https://cdn.simpleicons.org/googlepay/4285F4" alt="" width="14" height="14" class="h-3.5 w-3.5" />Google Pay</span>
-              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100"><img src="https://cdn.simpleicons.org/phonepe/5F259F" alt="" width="14" height="14" class="h-3.5 w-3.5" />PhonePe</span>
-              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100"><img src="https://cdn.simpleicons.org/paytm/00BAF2" alt="" width="14" height="14" class="h-3.5 w-3.5" />Paytm</span>
-              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100"><img src="https://cdn.simpleicons.org/amazonpay/FF9900" alt="" width="14" height="14" class="h-3.5 w-3.5" />Amazon Pay</span>
-            </div>
-            <input id="upiId" placeholder="Enter your UPI ID (e.g. name@upi)"
-              class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
-          </div>
-
-          <!-- Bank fields -->
-          <div data-fields="bank" class="space-y-3" hidden>
-            <input id="bankName" placeholder="Enter bank name" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
-            <input id="bankAcct" placeholder="Enter account number" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
-            <input id="bankIfsc" placeholder="Enter IFSC code" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
-          </div>
-
-          <!-- PayPal fields -->
-          <div data-fields="paypal" class="space-y-3" hidden>
-            <input id="ppEmail" type="email" placeholder="Enter your PayPal email" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
-          </div>
-
-          <!-- amount (shared) -->
-          <input id="wdAmount" type="number" step="0.01" placeholder="Enter amount"
-            class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-400 outline-none" />
-
-          <p id="wdMsg" hidden class="text-sm"></p>
-          <button id="wdBtn" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 rounded-xl transition">Withdraw via UPI</button>
-        </form>
-      </section>
-
-      <!-- BLOCK 3: Payment History (collapsible items) -->
-      <section class="lg:col-span-3 bg-white rounded-3xl border border-slate-200 overflow-hidden transition duration-300 hover:shadow-xl">
-        <div class="p-6 pb-3 flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-11 h-11 grid place-items-center rounded-2xl bg-violet-100 text-violet-600">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>
-            </div>
-            <h2 class="text-xl font-black">Payment History</h2>
-          </div>
-          <span class="hidden sm:flex gap-6 pr-9 text-xs font-semibold text-slate-400 uppercase tracking-wide">
-            <span>Amount</span><span>Status</span>
-          </span>
-        </div>
-        <div id="historyList" class="divide-y divide-slate-100">
-          <p class="px-6 py-10 text-center text-slate-400">No Transactions</p>
-        </div>
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="txBody">
+            <tr><td colspan="3" style="text-align:center;color:#999;padding:24px 0;">Loading…</td></tr>
+          </tbody>
+        </table>
       </section>
     </div>
-  </main>
 
-  <!-- Withdrawal notice modal (shown on click when a requirement isn't met) -->
-  <div id="noticeModal" class="fixed inset-0 z-50 hidden">
-    <div onclick="closeNotice()" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
-    <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] max-w-sm bg-white rounded-3xl shadow-2xl p-6 text-center">
-      <div class="w-12 h-12 grid place-items-center rounded-2xl bg-amber-100 text-amber-600 mx-auto">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-      </div>
-      <h3 id="noticeTitle" class="mt-4 text-lg font-black">Complete tasks first</h3>
-      <p id="noticeBody" class="mt-2 text-sm text-slate-500"></p>
-      <div class="mt-5 flex gap-2">
-        <button onclick="closeNotice()" class="flex-1 py-3 rounded-xl border border-slate-200 font-semibold hover:bg-slate-50 transition">Close</button>
-        <a id="noticeAction" href="/tasks.html" class="flex-1 py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-semibold transition grid place-items-center">Browse tasks</a>
-      </div>
-    </div>
+    <!-- Footer -->
+    <footer>
+      <p>© 2026 CashyType — Professional Typing Platform. All rights reserved.</p>
+    </footer>
   </div>
 
-  <!-- Withdrawal processing / success modal -->
-  <div id="wdModal" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md"></div>
-    <div id="wdCard" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] max-w-md bg-white rounded-[28px] shadow-2xl overflow-hidden">
-      <!-- gradient banner -->
-      <div id="wdBanner" class="relative h-24 bg-gradient-to-br from-brand-600 via-emerald-500 to-emerald-400 transition-colors duration-500">
-        <div class="absolute -top-10 -right-6 w-32 h-32 rounded-full bg-white/20 blur-2xl"></div>
-        <div class="absolute -bottom-12 -left-8 w-36 h-36 rounded-full bg-white/10 blur-2xl"></div>
-        <div class="absolute left-1/2 -bottom-9 -translate-x-1/2">
-          <div id="wdIcon" class="w-[72px] h-[72px] rounded-3xl bg-white shadow-xl ring-1 ring-slate-100 grid place-items-center"></div>
-        </div>
-      </div>
-
-      <div class="px-6 pt-16 pb-6 text-center">
-        <h3 id="wdTitle" class="text-xl font-black">Processing withdrawal…</h3>
-        <p id="wdSubtitle" class="mt-1 text-sm text-slate-500">Securely processing your payout request.</p>
-
-        <!-- big centered amount -->
-        <p id="wdAmt" class="mt-6 text-5xl font-black text-slate-900 tracking-tight">₹0</p>
-        <p class="mt-2 text-sm text-slate-500">to <span id="wdDest" class="font-semibold text-slate-700 break-all">—</span> <span class="text-slate-300">·</span> <span id="wdMethod" class="font-semibold text-slate-700">UPI</span></p>
-
-        <div class="mt-4 flex items-center justify-center gap-2">
-          <span id="wdStatus" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-700">Processing…</span>
-          <span class="text-xs text-slate-400">Ref <span id="wdRef" class="font-mono">—</span></span>
-        </div>
-
-        <button id="wdModalBtn" hidden onclick="closeWdModal()" class="mt-5 w-full py-3 rounded-xl bg-gradient-to-r from-brand-600 to-emerald-500 text-white font-semibold shadow-lg shadow-brand-500/30 hover:opacity-95 transition">Done</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- GST payment modal -->
-  <div id="gstModal" class="fixed inset-0 z-50 hidden">
-    <div onclick="closeGst()" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
-    <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] max-w-md bg-white rounded-3xl shadow-2xl p-6">
-      <div class="w-12 h-12 grid place-items-center rounded-2xl bg-amber-100 text-amber-600 mx-auto">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      </div>
-      <h3 class="mt-4 text-xl font-black text-center">GST payment required</h3>
-      <p class="mt-2 text-sm text-slate-500 text-center">
-        As per government regulations, <b id="gstPctLabel">18%</b> GST is applicable on your withdrawal.
-        Pay the GST to process your payout.
-      </p>
-      <div class="mt-5 bg-slate-50 rounded-2xl p-4 space-y-2 text-sm">
-        <div class="flex justify-between"><span class="text-slate-500">Withdrawal amount</span><span class="font-semibold" id="gstWdAmount">₹0</span></div>
-        <div class="flex justify-between"><span class="text-slate-500">GST (<span id="gstPctInline">18</span>%)</span><span class="font-semibold text-amber-600" id="gstAmount">₹0</span></div>
-      </div>
-      <div class="mt-5 flex gap-2">
-        <button onclick="closeGst()" class="flex-1 py-3 rounded-xl border border-slate-200 font-semibold hover:bg-slate-50 transition">Cancel</button>
-        <button id="gstPayBtn" class="flex-1 py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-semibold transition">Pay GST</button>
-      </div>
-    </div>
-  </div>
+  <div class="cz-toast" id="toast"></div>
 
   <script src="/assets/app.js"></script>
+  <script src="/assets/mainnav.js"></script>
   <script>
-    if (!CZ.requireAuth()) { /* redirected */ }
-    CZ.renderNav('wallet');
+    // No auth gate — visitors can view a zeroed-out wallet (see load()).
+    const $ = (id) => document.getElementById(id);
 
-    let method = 'upi';
-    const btnLabel = { upi: 'Withdraw via UPI', bank: 'Withdraw to Bank', paypal: 'Continue to PayPal' };
-
-    const M_TAB_BASE = 'm-tab flex flex-col items-center gap-1.5 py-3 rounded-xl font-semibold';
-    document.querySelectorAll('.m-tab').forEach((b) => b.addEventListener('click', () => {
-      method = b.dataset.m;
-      document.querySelectorAll('.m-tab').forEach((x) => x.className = `${M_TAB_BASE} bg-slate-100`);
-      b.className = `${M_TAB_BASE} bg-brand-500 text-white`;
-      document.querySelectorAll('[data-fields]').forEach((f) => f.hidden = f.dataset.fields !== method);
-      document.getElementById('wdBtn').textContent = btnLabel[method];
-    }));
-
-    const badge = (s) => {
-      const map = { pending: 'bg-amber-100 text-amber-700', approved: 'bg-brand-100 text-brand-700', completed: 'bg-brand-100 text-brand-700', rejected: 'bg-red-100 text-red-700' };
-      return `<span class="text-xs font-semibold px-2.5 py-1 rounded-full ${map[s] || 'bg-slate-100 text-slate-600'}">${s}</span>`;
-    };
-    const when = (d) => new Date(d).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
-
-    const typeLabel = { deposit: 'Deposit', withdraw: 'Withdrawal', earning: 'Task reward' };
-
-    function detailRows(r) {
-      // Build the key/value pairs shown when an item is expanded.
-      const pairs = [['Type', r.kind]];
-      if (r.desc) pairs.push(['Description', r.desc]);
-      if (r.utr) pairs.push(['UTR / Reference', r.utr]);
-      if (r.dest) pairs.push(['Payout to', r.dest]);
-      pairs.push(['Amount', `${r.sign}${CZ.money(r.amount)}`]);
-      pairs.push(['Status', r.status]);
-      pairs.push(['Date & time', when(r.date)]);
-      return pairs.map(([k, v]) =>
-        `<div class="flex justify-between gap-4 py-1.5 border-b border-slate-100 last:border-0">
-           <span class="text-slate-400">${k}</span><span class="font-medium text-right">${v}</span></div>`
-      ).join('');
+    function toast(msg) {
+      const t = $('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(t._t);
+      t._t = setTimeout(() => t.classList.remove('show'), 3000);
     }
 
-    function renderHistory(data) {
-      // Combine ledger transactions + deposit/withdrawal requests into one dated list.
+    // Count-up animation from 0 → value (rupee formatted).
+    function animateBalance(el, end) {
+      const dur = 1200; let startTs = null;
+      const step = (ts) => {
+        if (!startTs) startTs = ts;
+        const p = Math.min((ts - startTs) / dur, 1);
+        el.textContent = '₹' + Math.floor(p * end).toLocaleString('en-IN');
+        if (p < 1) requestAnimationFrame(step);
+        else el.textContent = '₹' + Math.round(end).toLocaleString('en-IN');
+      };
+      requestAnimationFrame(step);
+    }
+
+    function cap(s) { return (s || '').charAt(0).toUpperCase() + (s || '').slice(1); }
+    function fmtDate(d) {
+      try { return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }); }
+      catch { return '—'; }
+    }
+
+    function renderTx(data) {
       const rows = [];
-      data.transactions.forEach((t) => rows.push({
-        date: t.created_at, kind: typeLabel[t.type] || t.type, desc: t.description || '',
-        sign: t.type === 'withdraw' ? '-' : '+',
-        color: t.type === 'withdraw' ? 'text-red-600' : 'text-brand-600',
-        amount: t.amount, status: 'completed',
-      }));
-      data.deposits.filter((d) => d.status !== 'approved').forEach((d) => rows.push({
-        date: d.created_at, kind: 'Deposit request', desc: d.note || 'Add money to wallet', utr: d.utr,
-        sign: '+', color: 'text-slate-500', amount: d.amount, status: d.status,
-      }));
-      data.withdrawals.filter((w) => w.status === 'pending').forEach((w) => rows.push({
-        date: w.created_at, kind: 'Withdrawal request', dest: w.upi_id,
-        sign: '-', color: 'text-slate-500', amount: w.amount, status: w.status,
-      }));
+      (data.deposits || []).filter((d) => d.status === 'pending').forEach((d) =>
+        rows.push({ date: d.created_at, amt: +d.amount, label: 'Deposit', status: 'pending' }));
+      (data.withdrawals || []).filter((w) => w.status === 'pending').forEach((w) =>
+        rows.push({ date: w.created_at, amt: -w.amount, label: 'Withdraw', status: 'pending' }));
+      (data.transactions || []).filter((t) => Number(t.amount) !== 0).forEach((t) => {
+        const pos = ['deposit', 'earning', 'bonus'].includes(t.type);
+        rows.push({ date: t.created_at, amt: pos ? +t.amount : -t.amount, label: cap(t.type), status: 'completed' });
+      });
       rows.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-      const list = document.getElementById('historyList');
-      if (!rows.length) { list.innerHTML = '<p class="px-6 py-10 text-center text-slate-400">No Transactions</p>'; return; }
-
-      list.innerHTML = rows.map((r) => `
-        <details class="group">
-          <summary class="list-none cursor-pointer px-6 py-3 flex items-center gap-3 hover:bg-slate-50 transition">
-            <svg class="w-4 h-4 text-slate-400 transition-transform group-open:rotate-90 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
-            <div class="flex-1 min-w-0">
-              <p class="font-semibold truncate">${r.kind}</p>
-              <p class="text-xs text-slate-400">${when(r.date)}</p>
-            </div>
-            <span class="font-bold ${r.color} whitespace-nowrap">${r.sign}${CZ.money(r.amount)}</span>
-            <span class="w-24 text-right">${badge(r.status)}</span>
-          </summary>
-          <div class="px-6 pb-4 pl-13 text-sm">
-            <div class="bg-slate-50 rounded-xl p-4">${detailRows(r)}</div>
-          </div>
-        </details>`).join('');
+      const body = $('txBody');
+      $('txCount').textContent = rows.length ? (rows.length + ' transactions') : 'No Transactions';
+      if (!rows.length) {
+        body.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#999;padding:24px 0;">No transactions yet</td></tr>';
+        return;
+      }
+      body.innerHTML = rows.slice(0, 15).map((r) => {
+        const sign = r.amt < 0 ? '-' : '+';
+        const cls = r.amt < 0 ? 'amt-neg' : 'amt-pos';
+        return '<tr><td>' + fmtDate(r.date) + '</td>' +
+          '<td class="' + cls + '">' + sign + CZ.money(Math.abs(r.amt)) + '</td>' +
+          '<td><span class="status ' + r.status + '">' + r.label + '</span></td></tr>';
+      }).join('');
     }
 
-    // GST config (loaded from /api/wallet); 18% of the withdrawal amount is
-    // collected before a payout is processed.
-    let gstPercent = 18;
-    let withdrawMin = 7500;
-    let withdrawMinTasks = 3;
-    let tasksCompleted = 0;
-    let availableBalance = 0;
-    let autoMode = false; // auto-approve users bypass all withdrawal gates
+    function setAvatar(name) {
+      $('userName').textContent = name;
+      $('userAvatar').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=4361ee&color=fff&size=128';
+    }
 
     async function load() {
-      // Profile block — name from the cached session user.
-      const me = CZ.user || {};
-      document.getElementById('profileName').textContent = me.name || 'Account';
+      // Visitors (not logged in) see a zeroed-out wallet instead of being redirected.
+      if (!CZ.token) {
+        setAvatar('User Name');
+        animateBalance($('total-balance'), 0);
+        animateBalance($('available-balance'), 0);
+        animateBalance($('bonus-balance'), 0);
+        animateBalance($('withdrawn-balance'), 0);
+        renderTx({ transactions: [], deposits: [], withdrawals: [] });
+        return;
+      }
 
       const data = await CZ.api('/api/wallet');
-      const s = data.stats;
-      availableBalance = Number(data.balance) || 0;
-      tasksCompleted = Number(s.tasksCompleted) || 0;
-      autoMode = !!data.autoMode;
+      setAvatar((CZ.user && CZ.user.name) || 'User');
 
-      // Show the member-since date in place of the email.
-      if (data.memberSince) {
-        const d = new Date(data.memberSince);
-        document.getElementById('profileEmail').textContent =
-          'Member since ' + d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-      }
-      if (data.config) {
-        gstPercent = Number(data.config.gstPercent) || gstPercent;
-        withdrawMin = Number(data.config.withdrawMin) || withdrawMin;
-        withdrawMinTasks = Number(data.config.withdrawMinTasks) || withdrawMinTasks;
-      }
-      CZ.countUp(document.getElementById('cTotal'), s.totalIncome, { money: true });
-      CZ.countUp(document.getElementById('cAvailable'), data.balance, { money: true });
-      CZ.countUp(document.getElementById('cBonus'), s.bonusIncome, { money: true });
-      CZ.countUp(document.getElementById('cWithdrawn'), s.withdrawn, { money: true });
-      CZ.countUp(document.getElementById('sTasks'), s.tasksCompleted);
-      CZ.countUp(document.getElementById('sEarned'), s.taskIncome, { money: true });
-      CZ.countUp(document.getElementById('sPurchases'), s.totalPurchases, { money: true });
-      CZ.countUp(document.getElementById('sPendWd'), data.withdrawals.filter((w) => w.status === 'pending').length);
-      CZ.countUp(document.getElementById('sTxns'), s.transactionsCount);
-      const pill = document.getElementById('navBalance'); if (pill) pill.textContent = CZ.money(data.balance);
-      CZ.setSession(CZ.token, { ...CZ.user, balance: data.balance });
+      // Total Income = money transferred into income (only grows on transfer).
+      // Available Balance = the full withdrawable balance.
+      animateBalance($('total-balance'), Number(data.stats.totalIncome) || 0);
+      animateBalance($('available-balance'), Number(data.balance) || 0);
+      animateBalance($('bonus-balance'), Number(data.stats.bonusIncome) || 0);
+      animateBalance($('withdrawn-balance'), Number(data.stats.withdrawn) || 0);
 
-      renderHistory(data);
+      renderTx(data);
+      return data;
     }
 
-    // Round the GST to a whole rupee for a clean payable amount.
-    const gstOn = (amount) => Math.round(amount * gstPercent / 100);
-
-    function closeGst() {
-      document.getElementById('gstModal').classList.add('hidden');
-      document.body.style.overflow = '';
-    }
-    window.closeGst = closeGst;
-
-    function closeNotice() {
-      document.getElementById('noticeModal').classList.add('hidden');
-      document.body.style.overflow = '';
-    }
-    window.closeNotice = closeNotice;
-
-    // Show the small warning modal. `showAction` toggles the "Browse tasks" link.
-    function showNotice(body, title, showAction) {
-      document.getElementById('noticeTitle').textContent = title || 'Heads up';
-      document.getElementById('noticeBody').textContent = body;
-      document.getElementById('noticeAction').style.display = showAction ? '' : 'none';
-      document.getElementById('noticeModal').classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-    }
-
-    const SPIN_SVG = '<div class="relative w-12 h-12"><div class="absolute inset-0 rounded-full border-4 border-slate-100"></div><div class="absolute inset-0 rounded-full border-4 border-transparent border-t-brand-500 border-r-emerald-400 animate-spin"></div><div class="absolute inset-0 grid place-items-center text-brand-500"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 18v4"/><path d="m4.93 4.93 2.83 2.83"/><path d="m16.24 16.24 2.83 2.83"/></svg></div></div>';
-    const CHECK_SVG = '<div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-500 to-emerald-500 text-white grid place-items-center shadow-lg shadow-brand-500/40"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>';
-
-    let wdStepTimer = null;
-
-    function closeWdModal() {
-      clearInterval(wdStepTimer);
-      document.getElementById('wdModal').classList.add('hidden');
-      document.body.style.overflow = '';
-      load();
-    }
-    window.closeWdModal = closeWdModal;
-
-    // A celebratory confetti burst from the modal icon.
-    function burstConfetti() {
-      const root = document.getElementById('wdModal');
-      if (!root || !window.Motion) return;
-      const colors = ['#16c45f', '#0ea5e9', '#f59e0b', '#a855f7', '#ef4444', '#10b981'];
-      for (let i = 0; i < 22; i++) {
-        const bit = document.createElement('span');
-        bit.style.cssText = 'position:absolute;left:50%;top:42%;width:8px;height:8px;border-radius:2px;pointer-events:none;z-index:60;';
-        bit.style.background = colors[i % colors.length];
-        root.appendChild(bit);
-        const angle = (Math.PI * 2 * i) / 22 + Math.random() * 0.5;
-        const dist = 90 + Math.random() * 90;
-        const x = Math.cos(angle) * dist;
-        const y = Math.sin(angle) * dist - 30;
-        window.Motion.animate(bit,
-          { transform: [`translate(-50%,-50%) translate(0,0) rotate(0deg)`, `translate(-50%,-50%) translate(${x}px,${y}px) rotate(${Math.random() * 540}deg)`], opacity: [1, 1, 0] },
-          { duration: 1.2, ease: [0.16, 1, 0.3, 1] }
-        );
-        setTimeout(() => bit.remove(), 1300);
-      }
-    }
-
-    function popIn(el) {
-      if (window.Motion) {
-        window.Motion.animate(el, { transform: ['scale(0.4)', 'scale(1)'], opacity: [0, 1] }, { type: 'spring', stiffness: 320, damping: 16 });
-      }
-    }
-
-    // Submit a withdrawal directly (used for auto-approve users — no GST step).
-    // Shows a premium processing modal, animates ~3s, then a rich success state.
-    async function doWithdraw(amount, dest) {
-      const methodLabel = method === 'paypal' ? 'PayPal' : method.toUpperCase();
-      const ref = 'CZW' + Date.now().toString(36).toUpperCase().slice(-8);
-      const $w = (x) => document.getElementById(x);
-      $w('wdAmt').textContent = CZ.money(amount);
-      $w('wdMethod').textContent = methodLabel;
-      $w('wdDest').textContent = dest;
-      $w('wdRef').textContent = ref;
-      $w('wdStatus').textContent = 'Processing…';
-      $w('wdStatus').className = 'text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700';
-      $w('wdTitle').textContent = 'Processing withdrawal…';
-      $w('wdIcon').innerHTML = SPIN_SVG;
-      $w('wdModalBtn').hidden = true;
-      $w('wdModal').classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-      if (window.Motion) window.Motion.animate($w('wdCard'), { transform: ['translate(-50%,-50%) scale(0.92)', 'translate(-50%,-50%) scale(1)'], opacity: [0, 1] }, { duration: 0.35, ease: [0.16, 1, 0.3, 1] });
-
-      // Cycle reassuring step messages while processing.
-      const steps = ['Verifying account details…', 'Contacting payment partner…', 'Submitting payout request…', 'Almost there…'];
-      let si = 0; $w('wdSubtitle').textContent = steps[0];
-      clearInterval(wdStepTimer);
-      wdStepTimer = setInterval(() => { si = (si + 1) % steps.length; $w('wdSubtitle').textContent = steps[si]; }, 850);
-
-      try {
-        await Promise.all([
-          CZ.api('/api/wallet/withdraw', { method: 'POST', body: JSON.stringify({ amount, upi_id: dest }) }),
-          new Promise((r) => setTimeout(r, 3000)),
-        ]);
-        clearInterval(wdStepTimer);
-        document.getElementById('withdrawForm').reset();
-        $w('wdIcon').innerHTML = CHECK_SVG;
-        popIn($w('wdIcon').firstElementChild);
-        $w('wdTitle').textContent = 'Withdrawal successful 🎉';
-        $w('wdSubtitle').textContent = 'Your payout has been submitted and is on its way.';
-        $w('wdStatus').textContent = 'Submitted';
-        $w('wdStatus').className = 'text-xs font-semibold px-2.5 py-0.5 rounded-full bg-brand-100 text-brand-700';
-        $w('wdModalBtn').hidden = false;
-        if (window.Motion) window.Motion.animate($w('wdModalBtn'), { opacity: [0, 1], transform: ['translateY(8px)', 'translateY(0)'] }, { duration: 0.4 });
-        burstConfetti();
-        CZ.toast('Withdrawal requested');
-      } catch (err) {
-        clearInterval(wdStepTimer);
-        $w('wdModal').classList.add('hidden');
-        document.body.style.overflow = '';
-        const msg = document.getElementById('wdMsg');
-        msg.className = 'text-sm text-red-600'; msg.textContent = err.message; msg.hidden = false;
-      }
-    }
-
-    document.getElementById('withdrawForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const msg = document.getElementById('wdMsg');
-      msg.hidden = true;
-
-      // Requirement: must have completed the minimum number of tasks. Surfaced
-      // only here, in a small modal, when the user actually clicks Withdraw.
-      // Auto-approve users bypass this entirely.
-      if (!autoMode && tasksCompleted < withdrawMinTasks) {
-        showNotice(`Complete ${withdrawMinTasks} tasks to unlock withdrawals — ${tasksCompleted}/${withdrawMinTasks} done.`, 'Complete tasks first', true);
-        return;
-      }
-
-      // Build a payout-destination string from the active method's fields.
-      let dest = '';
-      if (method === 'upi') dest = (document.getElementById('upiId').value || '').trim();
-      else if (method === 'bank') {
-        const n = document.getElementById('bankName').value.trim();
-        const a = document.getElementById('bankAcct').value.trim();
-        const i = document.getElementById('bankIfsc').value.trim();
-        if (n && a && i) dest = `Bank: ${n}, A/C ${a}, IFSC ${i}`;
-      } else if (method === 'paypal') {
-        const em = document.getElementById('ppEmail').value.trim();
-        if (em) dest = `PayPal: ${em}`;
-      }
-      if (!dest) { showNotice('Please fill in your payout details first.', 'Payout details required', false); return; }
-
-      const amount = Number(document.getElementById('wdAmount').value);
-      if (!(amount > 0)) { showNotice('Please enter an amount to withdraw.', 'Enter an amount', false); return; }
-
-      // Auto-approve users: no minimum, no GST gate — submit the payout directly.
-      if (autoMode) {
-        doWithdraw(amount, dest);
-        return;
-      }
-
-      if (amount < withdrawMin) { showNotice(`The minimum withdrawal is ${CZ.money(withdrawMin)}.`, 'Minimum withdrawal', false); return; }
-      if (amount > availableBalance) { showNotice('You do not have enough balance for this withdrawal.', 'Insufficient balance', false); return; }
-
-      // Show the GST popup: 18% of the withdrawal amount is payable first.
-      const gst = gstOn(amount);
-      document.getElementById('gstWdAmount').textContent = CZ.money(amount);
-      document.getElementById('gstAmount').textContent = CZ.money(gst);
-      document.getElementById('gstPctLabel').textContent = gstPercent + '%';
-      document.getElementById('gstPctInline').textContent = gstPercent;
-      document.getElementById('gstPayBtn').onclick = () => {
-        // Remember the withdrawal so it can be created once the GST is paid.
-        sessionStorage.setItem('cz_pending_withdrawal', JSON.stringify({ amount, dest, gst }));
-        // Off to the GST QR page for this exact amount (same QR flow as before).
-        location.href = `/deposit.html?purpose=gst&amount=${gst}`;
-      };
-      document.getElementById('gstModal').classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-    });
-
-    load();
+    load().catch(() => toast('Could not load your wallet. Please refresh.'));
   </script>
 </body>
 </html>

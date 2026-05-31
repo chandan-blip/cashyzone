@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CashyType — Achievement Certificate</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+    body { background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c); color: #fff; min-height: 100vh; overflow-x: hidden; }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 16px 40px; }
+
+    .cert-header { text-align: center; padding: 24px 0 4px; position: relative; }
+    .logo { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 12px; }
+    .logo i { font-size: 3rem; color: #ffcc00; animation: pulse 2s infinite; }
+    .logo h1 {
+      font-size: 3.2rem; background: linear-gradient(to right, #ffcc00, #ff9900);
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 10px rgba(255, 204, 0, 0.3); letter-spacing: 2px;
+    }
+
+    nav.cert-nav { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 26px 0; }
+    .nav-btn {
+      padding: 12px 25px; background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 204, 0, 0.5);
+      color: #ffcc00; border-radius: 50px; cursor: pointer; font-weight: bold; transition: all 0.3s ease;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .nav-btn:hover { background: rgba(255, 204, 0, 0.2); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); }
+    .nav-btn.active { background: #ffcc00; color: #1a2a6c; border-color: #ffcc00; }
+
+    .page {
+      display: none; background: rgba(10, 15, 40, 0.8); border-radius: 20px; padding: 40px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); border: 2px solid rgba(255, 204, 0, 0.3);
+      margin-bottom: 40px; min-height: 420px; animation: fadeIn 0.8s ease;
+    }
+    .page.active { display: block; }
+
+    .page-header { text-align: center; margin-bottom: 30px; position: relative; }
+    .page-header h2 { font-size: 2.3rem; color: #ffcc00; margin-bottom: 12px; text-shadow: 0 0 10px rgba(255, 204, 0, 0.3); }
+    .page-header::after { content: ''; display: block; width: 100px; height: 4px; background: linear-gradient(to right, #ffcc00, #ff9900); margin: 15px auto; border-radius: 2px; }
+
+    .page-content { display: flex; flex-wrap: wrap; gap: 30px; align-items: center; justify-content: center; }
+    .image-container { flex: 1; min-width: 280px; display: flex; justify-content: center; align-items: center; }
+    .image-container img { max-width: 100%; border-radius: 15px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4); border: 3px solid #ffcc00; transition: transform 0.3s ease; }
+    .image-container img:hover { transform: scale(1.03); }
+
+    .text-content { flex: 1; min-width: 280px; padding: 10px; }
+    .text-content h3 { color: #ffcc00; font-size: 1.7rem; margin-bottom: 18px; }
+    .text-content p { font-size: 1.15rem; line-height: 1.6; margin-bottom: 22px; color: #e0e0ff; }
+
+    .stats { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 26px; }
+    .stat-card {
+      background: rgba(255, 204, 0, 0.1); border: 1px solid rgba(255, 204, 0, 0.3); border-radius: 15px;
+      padding: 20px; text-align: center; flex: 1; min-width: 160px; transition: transform 0.3s ease;
+    }
+    .stat-card:hover { transform: translateY(-10px); background: rgba(255, 204, 0, 0.15); }
+    .stat-card i { font-size: 2.5rem; color: #ffcc00; margin-bottom: 15px; }
+    .stat-card h4 { font-size: 1.4rem; margin-bottom: 10px; color: #ffcc00; }
+
+    .progress-container { background: rgba(0, 0, 0, 0.3); border-radius: 10px; height: 20px; margin: 20px 0; overflow: hidden; }
+    .progress-bar { height: 100%; background: linear-gradient(to right, #ffcc00, #ff9900); border-radius: 10px; }
+
+    .badge-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; margin-top: 20px; }
+    .badge {
+      width: 120px; height: 120px; background: radial-gradient(circle, #3a3a7a, #1a1a4a); border-radius: 50%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border: 3px solid #ffcc00; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); transition: transform 0.3s ease; text-align: center;
+    }
+    .badge:hover { transform: scale(1.1); }
+    .badge i { font-size: 2.3rem; color: #ffcc00; margin-bottom: 10px; }
+    .badge span { font-size: 0.9rem; color: #e0e0ff; }
+
+    .cert-footer { text-align: center; padding: 24px 0; margin-top: 10px; border-top: 1px solid rgba(255, 204, 0, 0.3); color: #a0a0d0; font-size: 1.05rem; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+    @media (max-width: 768px) {
+      .logo h1 { font-size: 2.4rem; }
+      .nav-btn { padding: 10px 15px; font-size: 0.9rem; }
+      .page { padding: 24px; }
+      .page-header h2 { font-size: 1.9rem; }
+    }
+    @media (max-width: 480px) {
+      .logo i { font-size: 2.2rem; }
+      .logo h1 { font-size: 1.9rem; }
+      .page { padding: 18px; border-radius: 16px; }
+      .page-header h2 { font-size: 1.5rem; }
+      .text-content h3 { font-size: 1.4rem; }
+      .text-content p { font-size: 1.02rem; }
+      .badge { width: 100px; height: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="cert-header">
+      <div class="logo">
+        <i class="fas fa-keyboard"></i>
+        <h1>CashyType</h1>
+      </div>
+      <h2>Typing Achievement Certificate</h2>
+    </div>
+
+    <nav class="cert-nav">
+      <button class="nav-btn active" data-page="1"><i class="fas fa-trophy"></i> Mastery</button>
+      <button class="nav-btn" data-page="2"><i class="fas fa-bolt"></i> Speed</button>
+      <button class="nav-btn" data-page="3"><i class="fas fa-bullseye"></i> Accuracy</button>
+      <button class="nav-btn" data-page="4"><i class="fas fa-calendar-check"></i> Consistency</button>
+      <button class="nav-btn" data-page="5"><i class="fas fa-medal"></i> Challenges</button>
+      <button class="nav-btn" data-page="6"><i class="fas fa-chart-line"></i> Progress</button>
+      <button class="nav-btn" data-page="7"><i class="fas fa-award"></i> Badges</button>
+    </nav>
+
+    <!-- Page 1: Mastery -->
+    <div id="page-1" class="page active">
+      <div class="page-header"><h2>CashyType Master Achievement</h2><p>Unlocked the highest typing mastery level</p></div>
+      <div class="page-content">
+        <div class="image-container"><img alt="Typing Mastery" src="https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&amp;fit=crop&amp;w=600&amp;h=400&amp;q=80" /></div>
+        <div class="text-content">
+          <h3>Congratulations, Typing Master!</h3>
+          <p>You've demonstrated exceptional typing skills and dedication to mastering the keyboard. This achievement recognizes your journey from novice to expert typist.</p>
+          <p>By completing all levels and challenges, you've joined the elite group of CashyType masters who can type with speed, accuracy, and efficiency.</p>
+          <div class="stats">
+            <div class="stat-card"><i class="fas fa-crown"></i><h4>Master Level</h4><p>Level 10</p></div>
+            <div class="stat-card"><i class="fas fa-star"></i><h4>Rating</h4><p>5/5 Stars</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page 2: Speed -->
+    <div id="page-2" class="page">
+      <div class="page-header"><h2>Lightning Speed Typist</h2><p>Achieved 100+ WPM with high accuracy</p></div>
+      <div class="page-content">
+        <div class="text-content">
+          <h3>Speed Demon Unlocked!</h3>
+          <p>Your fingers fly across the keyboard with incredible speed, consistently achieving over 100 words per minute while maintaining excellent accuracy.</p>
+          <p>This level of typing speed places you in the top 1% of typists worldwide, making you a valuable asset in any professional setting.</p>
+          <div class="stats">
+            <div class="stat-card"><i class="fas fa-tachometer-alt"></i><h4>Top Speed</h4><p>127 WPM</p></div>
+            <div class="stat-card"><i class="fas fa-hourglass-half"></i><h4>Average Speed</h4><p>104 WPM</p></div>
+          </div>
+        </div>
+        <div class="image-container"><img alt="High Speed Typing" src="https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?auto=format&amp;fit=crop&amp;w=600&amp;h=400&amp;q=80" /></div>
+      </div>
+    </div>
+
+    <!-- Page 3: Accuracy -->
+    <div id="page-3" class="page">
+      <div class="page-header"><h2>Perfect Accuracy</h2><p>Maintained 99%+ accuracy across all tests</p></div>
+      <div class="page-content">
+        <div class="image-container"><img alt="Perfect Accuracy" src="https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&amp;fit=crop&amp;w=600&amp;h=400&amp;q=80" /></div>
+        <div class="text-content">
+          <h3>Precision Perfectionist</h3>
+          <p>Your commitment to accuracy is unmatched. Achieving 99% or higher accuracy across all typing tests demonstrates incredible attention to detail.</p>
+          <p>This level of precision minimizes errors and maximizes productivity, making your typing skills exceptionally valuable.</p>
+          <div class="progress-container"><div class="progress-bar" style="width: 99.5%"></div></div>
+          <p>Overall Accuracy: 99.5%</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page 4: Consistency -->
+    <div id="page-4" class="page">
+      <div class="page-header"><h2>Consistency Champion</h2><p>100 consecutive days of typing practice</p></div>
+      <div class="page-content">
+        <div class="text-content">
+          <h3>Dedication Rewarded</h3>
+          <p>Your unwavering commitment to daily practice has paid off. Completing 100 consecutive days of typing exercises shows remarkable discipline.</p>
+          <p>Consistent practice is the key to mastery, and you've demonstrated this principle through your actions.</p>
+          <div class="stats">
+            <div class="stat-card"><i class="fas fa-fire"></i><h4>Current Streak</h4><p>112 Days</p></div>
+            <div class="stat-card"><i class="fas fa-calendar-alt"></i><h4>Total Practice</h4><p>87 Hours</p></div>
+          </div>
+        </div>
+        <div class="image-container"><img alt="Daily Practice" src="https://images.unsplash.com/photo-1496171367470-9ed9a91ea931?auto=format&amp;fit=crop&amp;w=600&amp;h=400&amp;q=80" /></div>
+      </div>
+    </div>
+
+    <!-- Page 5: Challenges -->
+    <div id="page-5" class="page">
+      <div class="page-header"><h2>Challenge Conqueror</h2><p>Completed all expert typing challenges</p></div>
+      <div class="page-content">
+        <div class="image-container"><img alt="Typing Challenges" src="https://images.unsplash.com/photo-1551650975-87deedd944c3?auto=format&amp;fit=crop&amp;w=600&amp;h=400&amp;q=80" /></div>
+        <div class="text-content">
+          <h3>Master of All Challenges</h3>
+          <p>You've conquered every challenge CashyType has to offer, from complex coding exercises to literary masterpieces and technical documents.</p>
+          <p>Your ability to adapt to different typing scenarios makes you a versatile and highly skilled typist.</p>
+          <div class="stats">
+            <div class="stat-card"><i class="fas fa-flag-checkered"></i><h4>Challenges</h4><p>24/24 Completed</p></div>
+            <div class="stat-card"><i class="fas fa-tasks"></i><h4>Lessons</h4><p>78/78 Mastered</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page 6: Progress -->
+    <div id="page-6" class="page">
+      <div class="page-header"><h2>Remarkable Progress</h2><p>From beginner to expert in 90 days</p></div>
+      <div class="page-content">
+        <div class="text-content">
+          <h3>Accelerated Learning</h3>
+          <p>Your typing journey shows incredible progress. Starting at 35 WPM, you've tripled your speed while maintaining excellent accuracy.</p>
+          <p>This rapid improvement demonstrates your dedication to practice and learning efficient typing techniques.</p>
+          <div class="progress-container" style="margin-top: 40px;"><div class="progress-bar" style="width: 100%"></div></div>
+          <div style="display: flex; justify-content: space-between; margin-top: 10px;"><span>Start: 35 WPM</span><span>Current: 104 WPM</span></div>
+        </div>
+        <div class="image-container"><img alt="Progress Chart" src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&amp;fit=crop&amp;w=600&amp;h=400&amp;q=80" /></div>
+      </div>
+    </div>
+
+    <!-- Page 7: Badges -->
+    <div id="page-7" class="page">
+      <div class="page-header"><h2>Badge Collection</h2><p>Earned all mastery badges</p></div>
+      <div class="page-content">
+        <div class="badge-container">
+          <div class="badge"><i class="fas fa-bolt"></i><span>Speed Master</span></div>
+          <div class="badge"><i class="fas fa-bullseye"></i><span>Accuracy Pro</span></div>
+          <div class="badge"><i class="fas fa-infinity"></i><span>Endurance</span></div>
+          <div class="badge"><i class="fas fa-code"></i><span>Code Master</span></div>
+          <div class="badge"><i class="fas fa-book"></i><span>Literature Pro</span></div>
+          <div class="badge"><i class="fas fa-globe"></i><span>Multilingual</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cert-footer">© 2026 CashyType — Typing Achievement Certificate</div>
+  </div>
+
+  <script src="/assets/app.js"></script>
+  <script src="/assets/mainnav.js"></script>
+  <script>
+    // Tab switching between achievement pages.
+    document.querySelectorAll('.nav-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.nav-btn').forEach((b) => b.classList.remove('active'));
+        document.querySelectorAll('.page').forEach((p) => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('page-' + btn.dataset.page).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

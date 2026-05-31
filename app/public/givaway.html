@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CashyType | 1-Hour Mega Giveaway</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { overflow-x: hidden; }
+
+    body {
+      min-height: 100vh;
+      width: 100%;
+      max-width: 100%;
+      background: radial-gradient(circle at 10% 20%, #0a0f1f, #03060f);
+      font-family: 'Space Grotesk', sans-serif;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .orb { position: absolute; border-radius: 50%; filter: blur(70px); z-index: 0; pointer-events: none; }
+    .orb-1 { width: 40vw; height: 40vw; background: #3b2b8f80; top: -15vh; left: -10vw; }
+    .orb-2 { width: 50vw; height: 50vw; background: #ae3c9b40; bottom: -20vh; right: -15vw; }
+    .orb-3 { width: 35vw; height: 35vw; background: #1f6e8c60; top: 40%; left: 60%; }
+
+    .giveaway-container {
+      max-width: 720px; width: min(720px, calc(100% - 2rem)); margin: 1.8rem auto;
+      background: rgba(12, 18, 34, 0.55); backdrop-filter: blur(15px); border-radius: 3rem;
+      border: 1px solid rgba(255, 215, 100, 0.25);
+      box-shadow: 0 35px 65px rgba(0, 0, 0, 0.5), 0 0 0 0.5px rgba(255, 220, 100, 0.15);
+      z-index: 10; overflow: hidden; position: relative;
+    }
+
+    .premium-header { background: linear-gradient(115deg, #0e1428 0%, #171e3a 100%); padding: 1.8rem 2rem; text-align: center; border-bottom: 1px solid rgba(255, 200, 70, 0.4); position: relative; }
+    .premium-header h1 { font-size: 2.4rem; font-weight: 700; line-height: 1.15; overflow-wrap: break-word; word-break: break-word; background: linear-gradient(135deg, #FFE6B0, #FFB347, #FFD966); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: -0.5px; }
+    .premium-header p { color: #b9c8ff; font-weight: 500; font-size: 0.9rem; margin-top: 6px; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .badge-glow { background: rgba(255, 200, 100, 0.12); padding: 5px 12px; border-radius: 40px; font-size: 0.7rem; font-weight: 600; backdrop-filter: blur(2px); border: 1px solid rgba(255, 190, 80, 0.5); color: #ffdd99; }
+
+    .wallet-3d { background: linear-gradient(145deg, #10172b, #0a0f20); margin: 1.8rem 1.8rem 0.5rem; padding: 1rem 1.8rem; border-radius: 2rem; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; border: 1px solid rgba(255, 210, 90, 0.3); box-shadow: 0 8px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05); }
+    .wallet-label { display: flex; align-items: center; gap: 12px; font-weight: 600; color: #cbdcff; font-size: 1.1rem; }
+    .wallet-label i { font-size: 1.6rem; color: #FFC857; text-shadow: 0 0 5px #ffb347; }
+    .wallet-amount { font-size: 2.2rem; font-weight: 800; background: linear-gradient(145deg, #FFF2CF, #FFD982); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: 1px; }
+
+    .content-dynamic { padding: 1.8rem 1.8rem 2rem; }
+
+    .entry-group { background: rgba(0, 0, 0, 0.35); border-radius: 2rem; padding: 1.5rem; backdrop-filter: blur(4px); border: 1px solid rgba(78, 120, 255, 0.2); }
+    .field-title { font-weight: 600; margin-bottom: 1rem; color: #dfe9ff; display: flex; gap: 8px; align-items: center; }
+    .name-flex { display: flex; gap: 12px; flex-wrap: wrap; }
+    .name-flex input { flex: 2; min-width: 180px; background: #050a17; border: 1.5px solid #2e4172; border-radius: 60px; padding: 14px 22px; font-size: 1rem; font-weight: 500; color: #ffffff; font-family: 'Space Grotesk', monospace; transition: 0.2s; }
+    .name-flex input:focus { border-color: #f5b042; outline: none; box-shadow: 0 0 12px rgba(245,176,66,0.4); }
+    .glow-btn { background: linear-gradient(105deg, #f5a623, #f7c450); border: none; padding: 14px 28px; border-radius: 60px; font-weight: 700; font-size: 1rem; color: #0a0f1f; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; box-shadow: 0 5px 12px rgba(0,0,0,0.3); }
+    .glow-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 20px rgba(245,165,35,0.4); background: linear-gradient(105deg, #ffb347, #ffdd77); }
+
+    .timer-dashboard { background: linear-gradient(125deg, #0a1022cc, #0b1128cc); border-radius: 2rem; padding: 1.5rem; backdrop-filter: blur(8px); border: 1px solid rgba(255,195,90,0.5); box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
+    .user-badge { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-bottom: 1rem; border-bottom: 1px dashed #3f5185; padding-bottom: 0.7rem; }
+    .user-name-highlight { font-size: 1.4rem; font-weight: 700; background: linear-gradient(135deg, #E9F0FF, #FFE1A0); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .timer-block { text-align: center; margin: 1.2rem 0; }
+    .timer-digits { font-family: 'Space Grotesk', monospace; font-size: 2.6rem; font-weight: 800; background: #00000055; display: inline-block; padding: 0.4rem 1.6rem; border-radius: 80px; letter-spacing: 5px; color: #FFE6A3; text-shadow: 0 0 6px #ffb347; backdrop-filter: blur(4px); }
+
+    .win-card { background: radial-gradient(ellipse at top, #1d3e34, #0b241d); border-radius: 2rem; padding: 1.8rem; text-align: center; border: 1px solid #7effb2; box-shadow: 0 0 25px #7effb250; margin-bottom: 1.8rem; }
+    .win-amount-big { font-size: 2.8rem; font-weight: 800; color: #caffb2; }
+
+    .winners-section { background: rgba(0, 0, 0, 0.45); backdrop-filter: blur(8px); border-radius: 2rem; padding: 1.2rem; margin-top: 1rem; border: 1px solid rgba(255, 200, 100, 0.3); }
+    .winners-title { font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 1rem; color: #FFE2A4; border-left: 4px solid #FFB347; padding-left: 15px; }
+    .winner-grid { display: flex; flex-direction: column; gap: 0.6rem; }
+    .winner-row { background: rgba(10, 20, 35, 0.7); border-radius: 60px; padding: 0.7rem 1.2rem; display: flex; justify-content: space-between; align-items: center; gap: 10px; border: 1px solid rgba(255, 210, 100, 0.2); transition: all 0.2s; }
+    .winner-row:hover { background: rgba(50, 70, 110, 0.5); transform: translateX(5px); border-color: #ffc857; }
+    .winner-name { font-weight: 600; display: flex; align-items: center; gap: 12px; color: #dfe9ff; }
+    .winner-name i { color: #FFD966; }
+    .winner-amount { font-weight: 700; background: linear-gradient(145deg, #FFECB3, #FFD58C); -webkit-background-clip: text; background-clip: text; color: transparent; font-size: 1.1rem; white-space: nowrap; }
+    .medal-icon { background: #ffb34730; border-radius: 50%; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+    .flash-message { background: #2a1e2ecc; border-left: 5px solid #ffb347; padding: 12px 16px; border-radius: 20px; margin-bottom: 16px; text-align: center; font-weight: 500; color: #ffe9c7; backdrop-filter: blur(4px); transition: opacity 0.4s ease; }
+
+    footer { text-align: center; font-size: 0.72rem; padding: 1.2rem; color: #6d7ea8; display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .reset-btn { background: rgba(255, 80, 80, 0.2); border: 1px solid #ff8888; border-radius: 40px; padding: 5px 14px; font-size: 0.72rem; font-weight: 500; color: #ffb8b8; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+    .reset-btn:hover { background: rgba(255, 80, 80, 0.4); color: #ffdddd; border-color: #ff5555; transform: scale(0.96); }
+    button:disabled { opacity: 0.6; cursor: default; }
+
+    .winner-grid::-webkit-scrollbar { width: 4px; }
+    .winner-grid::-webkit-scrollbar-track { background: #1f2a44; border-radius: 10px; }
+    .winner-grid::-webkit-scrollbar-thumb { background: #ffb347; border-radius: 10px; }
+
+    /* Shrink the decorative orbs on small screens so they can't force overflow. */
+    @media (max-width: 768px) {
+      .orb-1 { width: 60vw; height: 60vw; }
+      .orb-2 { width: 70vw; height: 70vw; right: -25vw; }
+      .orb-3 { width: 55vw; height: 55vw; left: 50%; }
+      .premium-header h1 { font-size: 2rem; }
+      .wallet-amount { font-size: 2rem; }
+    }
+
+    @media (max-width: 560px) {
+      .giveaway-container { border-radius: 1.6rem; margin: 1.1rem auto; width: calc(100% - 1.4rem); }
+      .premium-header { padding: 1.3rem 1rem; }
+      .premium-header h1 { font-size: 1.55rem; }
+      .premium-header p { gap: 8px; font-size: 0.8rem; }
+      .badge-glow { font-size: 0.62rem; padding: 4px 9px; }
+      .wallet-3d { margin: 1.1rem 1rem 0.4rem; padding: 0.85rem 1.1rem; border-radius: 1.4rem; }
+      .wallet-label { font-size: 0.95rem; }
+      .wallet-amount { font-size: 1.7rem; }
+      .content-dynamic { padding: 1.1rem 1rem 1.5rem; }
+      .entry-group, .timer-dashboard, .winners-section, .win-card { padding: 1.1rem; border-radius: 1.4rem; }
+      .timer-digits { font-size: 1.8rem; letter-spacing: 2px; padding: 0.4rem 0.9rem; }
+      .win-amount-big { font-size: 2.1rem; }
+      .winners-title { font-size: 1.05rem; }
+      .winner-row { padding: 0.6rem 0.9rem; border-radius: 1.2rem; }
+      .name-flex input { flex: 1 1 100%; min-width: 0; }
+      .glow-btn { width: 100%; justify-content: center; }
+      footer { flex-direction: column; gap: 10px; }
+    }
+
+    @media (max-width: 360px) {
+      .premium-header h1 { font-size: 1.35rem; }
+      .timer-digits { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="giveaway-container" id="cashyApp">
+    <div class="premium-header">
+      <h1><i class="fas fa-keyboard"></i> CashyType<span style="font-weight: 300;">·</span>Mega Hour</h1>
+      <p>
+        <span class="badge-glow"><i class="fas fa-gem"></i> ₹2000 GUARANTEED</span>
+        <span class="badge-glow"><i class="fas fa-stopwatch"></i> 1 HOUR</span>
+        <span class="badge-glow"><i class="fas fa-trophy"></i> 20+ Winners Daily</span>
+      </p>
+    </div>
+
+    <div class="wallet-3d">
+      <div class="wallet-label"><i class="fas fa-coins"></i> <span>Data Entry Wallet</span></div>
+      <div class="wallet-amount" id="walletBalance">₹0</div>
+    </div>
+
+    <div class="content-dynamic" id="dynamicContent"></div>
+
+    <footer>
+      <span><i class="fas fa-shield-alt"></i> One-time giveaway · Auto-credit after 1 hour</span>
+      <div class="reset-btn" id="resetBtn"><i class="fas fa-undo-alt"></i> Reset Giveaway</div>
+    </footer>
+  </div>
+
+  <script src="/assets/app.js"></script>
+  <script src="/assets/mainnav.js"></script>
+  <script>
+    // ======================= 1 HOUR GIVEAWAY (demo, localStorage) =======================
+    const GIVEAWAY_DURATION_MS = 3600000; // 1 hour
+    const STORAGE_GIVEAWAY = 'cashytype_giveaway_v2';
+    const STORAGE_WALLET = 'cashytype_wallet_amount';
+    const STORAGE_WINNERS_LIST = 'cashytype_winners_list';
+    let timerInterval = null;
+
+    function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
+
+    function generateWinnersList() {
+      const firstNames = ['Raj', 'Priya', 'Amit', 'Neha', 'Vikram', 'Anjali', 'Rohit', 'Sneha', 'Kunal', 'Divya', 'Manish', 'Kavya', 'Arjun', 'Pooja', 'Rahul', 'Simran', 'Deepak', 'Ishita', 'Saurabh', 'Meera'];
+      const lastNames = ['Sharma', 'Verma', 'Gupta', 'Nair', 'Reddy', 'Joshi', 'Khan', 'Singh', 'Patel', 'Yadav', 'Malhotra', 'Chopra', 'Bose', 'Kaur', 'Menon', 'Iyer', 'Das', 'Rao', 'Thakur', 'Kapoor'];
+      const amountsList = [1200, 2500, 1800, 3400, 5000, 2750, 1500, 4200, 3100, 1950, 4600, 2200, 3800, 1350, 4900, 1750, 3000, 2650, 4500, 2100];
+      const winners = [];
+      for (let i = 0; i < 20; i++) {
+        const name = firstNames[i % firstNames.length] + ' ' + lastNames[i % lastNames.length];
+        let amount = amountsList[i % amountsList.length];
+        amount = Math.min(5000, Math.max(1000, amount));
+        winners.push({ name, amount, rank: i + 1 });
+      }
+      return winners;
+    }
+    function getWinnersList() {
+      const stored = localStorage.getItem(STORAGE_WINNERS_LIST);
+      if (stored) { try { return JSON.parse(stored); } catch (e) { return generateWinnersList(); } }
+      const fresh = generateWinnersList();
+      localStorage.setItem(STORAGE_WINNERS_LIST, JSON.stringify(fresh));
+      return fresh;
+    }
+
+    function getWallet() { const v = localStorage.getItem(STORAGE_WALLET); return v === null ? 0 : (parseInt(v, 10) || 0); }
+    function setWallet(amount) { localStorage.setItem(STORAGE_WALLET, String(amount)); updateWalletUI(); }
+    function updateWalletUI() {
+      const el = document.getElementById('walletBalance');
+      if (el) el.innerHTML = '₹' + getWallet().toLocaleString('en-IN');
+    }
+
+    function getGiveaway() { const raw = localStorage.getItem(STORAGE_GIVEAWAY); if (!raw) return null; try { return JSON.parse(raw); } catch (e) { return null; } }
+    function saveGiveaway(data) { localStorage.setItem(STORAGE_GIVEAWAY, JSON.stringify(data)); }
+
+    function claimPrize(obj) {
+      if (!obj || obj.claimed === true) return false;
+      setWallet(getWallet() + 2000);
+      obj.claimed = true;
+      saveGiveaway(obj);
+      if (window.confetti) {
+        confetti({ particleCount: 180, spread: 85, origin: { y: 0.6 }, startVelocity: 35, colors: ['#ffd966', '#ffb347', '#ffecb3'] });
+        confetti({ particleCount: 60, spread: 130, origin: { y: 0.5, x: 0.3 } });
+        confetti({ particleCount: 60, spread: 130, origin: { y: 0.5, x: 0.7 } });
+      }
+      showTemporarySuccess('🎉 CONGRATULATIONS! ₹2000 credited to wallet! 🎉');
+      renderMainUI();
+      return true;
+    }
+
+    function registerGiveaway(userName) {
+      if (!userName || userName.trim() === '') { showFloatingMessage('⚠️ Please enter your name to join!', 'error'); return false; }
+      const existing = getGiveaway();
+      if (existing) {
+        showFloatingMessage(existing.claimed ? '🏆 You already won ₹2000! One-time prize claimed.' : '⏳ Giveaway already active for "' + existing.userName + '". One entry only.', 'error');
+        return false;
+      }
+      saveGiveaway({ userName: userName.trim(), startTimestamp: Date.now(), claimed: false });
+      if (localStorage.getItem(STORAGE_WALLET) === null) setWallet(0);
+      renderMainUI();
+      return true;
+    }
+
+    function showFloatingMessage(msg, type) {
+      const container = document.getElementById('dynamicContent');
+      if (!container) return;
+      let div = document.getElementById('globalFlashMsg');
+      if (!div) { div = document.createElement('div'); div.id = 'globalFlashMsg'; div.className = 'flash-message'; container.prepend(div); }
+      div.innerHTML = '<i class="fas ' + (type === 'error' ? 'fa-times-circle' : 'fa-gift') + '"></i> ' + msg;
+      setTimeout(() => { div.style.opacity = '0'; setTimeout(() => div.parentNode && div.remove(), 500); }, 2800);
+    }
+    function showTemporarySuccess(msg) {
+      const container = document.getElementById('dynamicContent');
+      if (!container) return;
+      let div = document.getElementById('globalFlashMsg');
+      if (!div) { div = document.createElement('div'); div.id = 'globalFlashMsg'; div.className = 'flash-message'; container.prepend(div); }
+      div.style.background = '#1f4235cc'; div.style.borderLeftColor = '#7eff9e'; div.style.opacity = '1';
+      div.innerHTML = '<i class="fas fa-trophy"></i> ' + msg;
+      setTimeout(() => { div.style.opacity = '0'; setTimeout(() => div.parentNode && div.remove(), 800); }, 4000);
+    }
+
+    function formatTimeHMS(ms) {
+      if (ms <= 0) return '00:00:00';
+      const t = Math.floor(ms / 1000);
+      const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60;
+      return [h, m, s].map((n) => String(n).padStart(2, '0')).join(':');
+    }
+
+    function renderWinnersList() {
+      const winners = getWinnersList();
+      if (!winners.length) return '';
+      return '<div class="winners-section">' +
+        '<div class="winners-title"><i class="fas fa-chart-line"></i> 🏆 RECENT GIVEAWAY WINNERS ' +
+        '<span style="font-size:0.7rem;background:#00000055;padding:2px 10px;border-radius:30px;">₹1000 - ₹5000</span></div>' +
+        '<div class="winner-grid">' +
+        winners.map((w) => '<div class="winner-row"><div class="winner-name">' +
+          '<span class="medal-icon"><i class="fas fa-trophy" style="color:#FFC107;font-size:0.8rem;"></i></span>' +
+          '<span>' + escapeHtml(w.name) + '</span></div>' +
+          '<div class="winner-amount"><i class="fas fa-rupee-sign"></i> ' + w.amount.toLocaleString('en-IN') + '</div></div>').join('') +
+        '</div>' +
+        '<div style="font-size:0.65rem;text-align:center;margin-top:12px;color:#8aa1d4;"><i class="fas fa-clock"></i> Past 20 winners · one-time rewards</div>' +
+        '</div>';
+    }
+
+    function resetEverything() {
+      if (confirm('⚠️ Are you sure? This resets your giveaway entry and wallet to ₹0, then reloads the page.')) {
+        localStorage.removeItem(STORAGE_GIVEAWAY);
+        localStorage.removeItem(STORAGE_WALLET);
+        localStorage.removeItem(STORAGE_WINNERS_LIST);
+        if (timerInterval) clearInterval(timerInterval);
+        window.location.reload();
+      }
+    }
+
+    function renderMainUI() {
+      const container = document.getElementById('dynamicContent');
+      if (!container) return;
+      if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+      const giveaway = getGiveaway();
+
+      // No entry yet → registration form.
+      if (!giveaway) {
+        container.innerHTML =
+          '<div class="entry-group"><div class="field-title"><i class="fas fa-user-astronaut"></i> <span>Enter your details to unlock ₹2000 giveaway (1 hour)</span></div>' +
+          '<div class="name-flex"><input type="text" id="winnerName" placeholder="e.g., Aayush Verma" autocomplete="off">' +
+          '<button id="startGiveawayBtn" class="glow-btn"><i class="fas fa-hourglass-half"></i> Start 1-Hour Challenge</button></div>' +
+          '<div style="margin-top:18px;font-size:0.75rem;color:#b0c4ff;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">' +
+          '<span><i class="fas fa-clock"></i> 1 hour timer</span><span><i class="fas fa-rupee-sign"></i> Instant ₹2000 after timer</span><span><i class="fas fa-gift"></i> One-time reward</span></div></div>' +
+          renderWinnersList();
+        const start = () => registerGiveaway(document.getElementById('winnerName').value);
+        document.getElementById('startGiveawayBtn').addEventListener('click', start);
+        document.getElementById('winnerName').addEventListener('keydown', (e) => { if (e.key === 'Enter') start(); });
+        return;
+      }
+
+      // Already claimed.
+      if (giveaway.claimed) {
+        container.innerHTML =
+          '<div class="win-card"><div style="font-size:2.4rem;color:#caffb2;"><i class="fas fa-trophy"></i></div>' +
+          '<div class="win-amount-big">₹2000</div>' +
+          '<p style="color:#bfeccd;margin-top:8px;">Prize already claimed by <strong>' + escapeHtml(giveaway.userName) + '</strong> 🎉</p></div>' +
+          renderWinnersList();
+        return;
+      }
+
+      const remaining = GIVEAWAY_DURATION_MS - (Date.now() - giveaway.startTimestamp);
+
+      // Timer still running.
+      if (remaining > 0) {
+        container.innerHTML =
+          '<div class="timer-dashboard"><div class="user-badge">' +
+          '<span class="user-name-highlight"><i class="fas fa-user-check"></i> ' + escapeHtml(giveaway.userName) + '</span>' +
+          '<span style="font-size:0.8rem;color:#9fb3e8;"><i class="fas fa-gem"></i> ₹2000 locked</span></div>' +
+          '<div class="timer-block"><div style="font-size:0.85rem;color:#b9c8ff;margin-bottom:8px;">Time left to unlock your reward</div>' +
+          '<div class="timer-digits" id="timerDigits">' + formatTimeHMS(remaining) + '</div></div>' +
+          '<div style="text-align:center;font-size:0.8rem;color:#8aa1d4;"><i class="fas fa-lock"></i> Prize auto-unlocks when the timer ends</div></div>' +
+          renderWinnersList();
+        timerInterval = setInterval(() => {
+          const rem = GIVEAWAY_DURATION_MS - (Date.now() - giveaway.startTimestamp);
+          const digits = document.getElementById('timerDigits');
+          if (rem <= 0) { clearInterval(timerInterval); timerInterval = null; renderMainUI(); return; }
+          if (digits) digits.textContent = formatTimeHMS(rem);
+        }, 1000);
+        return;
+      }
+
+      // Timer finished, not claimed → claim button.
+      container.innerHTML =
+        '<div class="win-card"><div style="font-size:2.2rem;color:#caffb2;"><i class="fas fa-gift"></i></div>' +
+        '<p style="color:#bfeccd;margin:8px 0;">Your 1-hour challenge is complete, <strong>' + escapeHtml(giveaway.userName) + '</strong>!</p>' +
+        '<div class="win-amount-big">₹2000</div>' +
+        '<button id="claimBtn" class="glow-btn" style="margin-top:16px;"><i class="fas fa-hand-holding-usd"></i> Claim ₹2000 Now</button></div>' +
+        renderWinnersList();
+      document.getElementById('claimBtn').addEventListener('click', () => claimPrize(getGiveaway()));
+    }
+
+    (function init() {
+      updateWalletUI();
+      renderMainUI();
+      const resetBtn = document.getElementById('resetBtn');
+      if (resetBtn) resetBtn.addEventListener('click', resetEverything);
+    })();
+  </script>
+</body>
+</html>

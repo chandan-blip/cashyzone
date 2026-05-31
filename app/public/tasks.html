@@ -1,103 +1,631 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tasks — CashyZone</title>
-  <script src="/assets/head.js"></script>
-</head>
-<body class="bg-slate-50 text-slate-800 antialiased">
-  <div id="nav"></div>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CashyType Pro | Data Entry Work</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&amp;family=Montserrat:wght@700;800&amp;display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  <main class="max-w-6xl mx-auto px-5 py-5">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-      <div>
-        <h1 class="text-3xl font-black">Available tasks</h1>
-        <p class="text-slate-500 mt-1">Buy a task, complete the data entry correctly, and earn <b>3×</b> your buy price.</p>
-      </div>
-      <div class="flex gap-2 text-sm">
-        <button data-filter="all" class="filter px-3 py-2 rounded-xl bg-brand-500 text-white font-semibold">All</button>
-        <button data-filter="open" class="filter px-3 py-2 rounded-xl bg-white border border-slate-200 font-semibold">Not bought</button>
-        <button data-filter="mine" class="filter px-3 py-2 rounded-xl bg-white border border-slate-200 font-semibold">My tasks</button>
-        <button data-filter="done" class="filter px-3 py-2 rounded-xl bg-white border border-slate-200 font-semibold">Completed</button>
-      </div>
-    </div>
-
-    <div id="grid" class="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-      <p class="text-slate-400">Loading tasks…</p>
-    </div>
-  </main>
-
-  <script src="/assets/app.js"></script>
-  <script>
-    CZ.renderNav('tasks');
-    let allTasks = [];
-    let filter = 'all';
-
-    function render() {
-      const grid = document.getElementById('grid');
-      const list = allTasks.filter((t) =>
-        filter === 'all' ? true
-        : filter === 'done' ? t.status === 'completed'
-        : filter === 'mine' ? t.status !== 'none'
-        : /* open */ t.status === 'none'
-      );
-      if (!list.length) { grid.innerHTML = '<p class="text-slate-400">No tasks here.</p>'; return; }
-      grid.innerHTML = list.map((t) => {
-        const border = t.status === 'completed' ? 'border-brand-200 bg-brand-50/40'
-                     : t.status === 'purchased' ? 'border-sky-200 bg-sky-50/40' : 'border-slate-200';
-        let action;
-        if (t.status === 'completed') {
-          action = '<button disabled class="w-full bg-brand-100 text-brand-700 text-sm font-semibold py-2 rounded-xl">✓ Completed</button>';
-        } else if (t.status === 'purchased') {
-          action = `<a href="/attempt.html?id=${t.id}" class="block text-center w-full bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold py-2 rounded-xl transition">Attempt now</a>`;
-        } else {
-          action = `<button data-buy="${t.id}" class="buy w-full bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold py-2 rounded-xl transition">Buy for ${CZ.money(t.price)}</button>`;
-        }
-        return `
-        <div class="bg-white rounded-2xl border ${border} p-5 flex flex-col hover:shadow-lg transition">
-          <div class="flex items-start justify-between">
-            <span class="text-xs font-semibold bg-brand-50 text-brand-700 px-2.5 py-1 rounded-full">${t.category}</span>
-            <span class="text-right">
-              <span class="block text-[11px] text-slate-400 leading-none">Buy ${CZ.money(t.price)}</span>
-              <span class="block text-lg font-black text-brand-600">Earn ${CZ.money(t.reward)}</span>
-            </span>
-          </div>
-          <h3 class="mt-3 font-bold leading-snug">${t.title}</h3>
-          <p class="mt-1 text-sm text-slate-400">Task #${t.id} • ${t.summary} • 3× return</p>
-          <div class="mt-4 pt-4 border-t border-slate-100">${action}</div>
-        </div>`;
-      }).join('');
+    :root {
+      --primary: #4e54c8;
+      --secondary: #8f94fb;
+      --accent: #ff6b6b;
+      --success: #1dd1a1;
+      --dark: #222f3e;
+      --light: #f7f9fc;
+      --card-bg: #ffffff;
+      --shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+      --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
     }
 
-    document.querySelectorAll('.filter').forEach((b) => b.addEventListener('click', () => {
-      filter = b.dataset.filter;
-      document.querySelectorAll('.filter').forEach((x) => x.className = 'filter px-3 py-2 rounded-xl bg-white border border-slate-200 font-semibold');
-      b.className = 'filter px-3 py-2 rounded-xl bg-brand-500 text-white font-semibold';
-      render();
-    }));
+    body {
+      background: var(--light);
+      font-family: 'Poppins', sans-serif;
+      color: var(--dark);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
 
-    document.getElementById('grid').addEventListener('click', async (e) => {
-      const btn = e.target.closest('.buy');
-      if (!btn) return;
-      if (!CZ.token) { location.href = '/login.html?next=/tasks.html'; return; }
-      const id = btn.dataset.buy;
-      btn.disabled = true; btn.textContent = 'Buying…';
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(circle at 10% 20%, rgba(143, 148, 251, 0.1) 0%, rgba(78, 84, 200, 0.05) 100%);
+      z-index: -1;
+    }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 20px; }
+
+    header {
+      background: var(--gradient);
+      color: white;
+      padding: 20px 0;
+      box-shadow: var(--shadow);
+      position: relative;
+      z-index: 1;
+    }
+
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 30px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.8rem;
+      font-weight: 700;
+      font-family: 'Montserrat', sans-serif;
+      color: white;
+      text-decoration: none;
+    }
+
+    .logo i { color: #ffd166; font-size: 2.2rem; }
+
+    .user-info { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+
+    .user-name { font-size: 1.2rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+
+    .wallet {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 8px 18px;
+      border-radius: 40px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 500;
+      backdrop-filter: blur(5px);
+    }
+
+    .wallet-amount { font-weight: 700; font-size: 1.3rem; color: #ffd166; }
+
+    .reset-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: white;
+      border-radius: 40px;
+      padding: 8px 18px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: 0.2s;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .reset-btn:hover { background: rgba(255, 255, 255, 0.3); }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 40px;
+      margin-top: 40px;
+    }
+
+    .typing-section {
+      background: var(--card-bg);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 30px;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .typing-section::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 6px; height: 100%;
+      background: var(--gradient);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+
+    .section-title { font-size: 1.6rem; font-weight: 700; display: flex; align-items: center; gap: 12px; }
+
+    .task-progress {
+      background: #eef2ff;
+      padding: 8px 18px;
+      border-radius: 40px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .earning-badge {
+      background: linear-gradient(to right, var(--success), #10ac84);
+      color: white;
+      padding: 6px 18px;
+      border-radius: 40px;
+      font-weight: 600;
+    }
+
+    .source-container { margin-bottom: 28px; }
+
+    .source-header { display: flex; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+
+    .source-label { font-weight: 600; color: var(--primary); }
+
+    .source-text {
+      background: #f8faff;
+      border-radius: 20px;
+      padding: 20px;
+      line-height: 1.7;
+      max-height: 340px;
+      overflow-y: auto;
+      font-size: 0.98rem;
+      border: 1px solid #eef2ff;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+
+    textarea {
+      width: 100%;
+      height: 230px;
+      padding: 18px;
+      border: 2px solid #e9edff;
+      border-radius: 20px;
+      resize: vertical;
+      font-size: 0.98rem;
+      font-family: monospace;
+      background: #fafbff;
+    }
+
+    textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(78, 84, 200, 0.2); }
+
+    .typing-label { font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+
+    .stats-bar { display: flex; justify-content: space-between; margin-top: 15px; gap: 12px; flex-wrap: wrap; }
+
+    .stat-item { background: #f1f5f9; padding: 6px 14px; border-radius: 30px; font-size: 0.85rem; }
+
+    .action-buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 25px; }
+
+    .btn {
+      padding: 14px 16px;
+      border: none;
+      border-radius: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 1rem;
+    }
+
+    .btn-primary { background: var(--gradient); color: white; }
+    .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(78, 84, 200, 0.3); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+    .btn-outline:hover:not(:disabled) { background: var(--primary); color: white; }
+
+    .stats-card {
+      background: var(--card-bg);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 28px;
+      margin-bottom: 30px;
+    }
+
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 20px 0; }
+
+    .stat-box { background: #f8faff; border-radius: 18px; padding: 18px; text-align: center; }
+
+    .stat-icon { font-size: 1.4rem; color: var(--primary); margin-bottom: 8px; }
+    .stat-title { font-size: 0.85rem; color: #64748b; margin-bottom: 6px; }
+    .stat-value-large { font-size: 1.8rem; font-weight: 700; }
+
+    .inr { color: #23bf08; font-weight: 700; }
+
+    .form-group { margin-bottom: 20px; }
+    .form-group label { font-weight: 600; display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+
+    input {
+      width: 100%;
+      padding: 14px 18px;
+      border: 2px solid #e9edff;
+      border-radius: 14px;
+      font-size: 1rem;
+    }
+    input:focus { outline: none; border-color: var(--primary); }
+
+    .amount-input { position: relative; }
+    .inr-symbol { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); font-weight: 700; }
+    .amount-input input { padding-left: 45px; }
+
+    .withdraw-btn {
+      background: var(--gradient);
+      width: 100%;
+      padding: 14px;
+      border-radius: 14px;
+      font-weight: 700;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .min-amount { margin-top: 12px; font-size: 0.85rem; color: #64748b; }
+
+    .error-msg { color: #e55039; font-size: 0.85rem; margin-top: 8px; display: flex; align-items: center; gap: 6px; }
+
+    .notification {
+      position: fixed;
+      top: 30px; right: 30px;
+      background: white;
+      padding: 16px 24px;
+      border-radius: 20px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      z-index: 2000;
+      transform: translateX(150%);
+      transition: transform 0.3s ease;
+      border-left: 6px solid var(--success);
+    }
+    .notification.show { transform: translateX(0); }
+    .notification i { color: var(--success); font-size: 1.6rem; }
+
+    footer { background: var(--dark); color: white; text-align: center; padding: 35px 0; margin-top: 60px; }
+    .footer-logo { font-size: 1.3rem; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; }
+    .footer-logo i { color: #ffd166; }
+
+    /* Tablet: single column + lighter spacing */
+    @media (max-width: 1100px) {
+      .dashboard { grid-template-columns: 1fr; gap: 24px; margin-top: 24px; }
+      .header-container { padding: 0 16px; gap: 12px; }
+      .typing-section { padding: 24px; }
+      .stats-card { padding: 22px; margin-bottom: 24px; }
+    }
+
+    /* Small tablet / large phone */
+    @media (max-width: 768px) {
+      .container { padding: 0 14px; }
+      header { padding: 14px 0; }
+      .header-container { padding: 0 14px; }
+      .logo { font-size: 1.4rem; }
+      .logo i { font-size: 1.7rem; }
+      .user-info { gap: 12px; width: 100%; justify-content: space-between; }
+      .user-name { font-size: 1rem; }
+      .wallet { padding: 6px 14px; }
+      .wallet-amount { font-size: 1.1rem; }
+      .section-title { font-size: 1.3rem; }
+      .source-text { padding: 16px; max-height: 260px; }
+      textarea { height: 200px; padding: 14px; }
+    }
+
+    /* Phone */
+    @media (max-width: 560px) {
+      .dashboard { gap: 18px; margin-top: 18px; }
+      .typing-section { padding: 18px; border-radius: 18px; }
+      .stats-card { padding: 18px; border-radius: 18px; margin-bottom: 18px; }
+      .section-header { gap: 8px; margin-bottom: 18px; }
+      .task-progress, .earning-badge { padding: 5px 14px; font-size: 0.85rem; }
+      .action-buttons { grid-template-columns: 1fr; gap: 10px; margin-top: 18px; }
+      .btn { padding: 12px 14px; }
+      .stats-grid { gap: 12px; margin: 16px 0; }
+      .stat-box { padding: 14px; }
+      .stat-value-large { font-size: 1.4rem; }
+      .notification { top: 14px; right: 14px; left: 14px; padding: 14px 18px; }
+      footer { padding: 28px 16px; margin-top: 36px; }
+    }
+
+    @keyframes confettiPop {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100px) rotate(360deg); opacity: 0; }
+    }
+    .confetti { position: fixed; pointer-events: none; z-index: 9999; animation: confettiPop 1.2s ease-out forwards; }
+
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-container">
+      <a class="logo" href="/"><i class="fas fa-coins"></i><span>CashyType Pro</span></a>
+      <div class="user-info">
+        <div class="user-name"><i class="fas fa-user"></i><span id="userName">User</span></div>
+        <div class="wallet"><i class="fas fa-wallet"></i> Balance: ₹<span class="wallet-amount" id="walletAmount">0</span></div>
+        <button class="reset-btn" id="resetProgressBtn"><i class="fas fa-trash-alt"></i> Reset Progress</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="dashboard">
+      <!-- Typing Job Panel -->
+      <div class="typing-section">
+        <div class="section-header">
+          <h1 class="section-title"><i class="fas fa-keyboard"></i> Typing Task</h1>
+          <div class="task-progress" id="taskCounter">Task 1 / 30</div>
+          <div class="earning-badge"><i class="fas fa-rupee-sign"></i> ₹100 per task</div>
+        </div>
+
+        <div class="source-container">
+          <div class="source-header">
+            <div class="source-label"><i class="fas fa-file-alt"></i> Source document — type it exactly</div>
+            <div class="source-info"><span class="stat-item"><i class="fas fa-font"></i> Words: <span id="sourceWordCount">0</span></span></div>
+          </div>
+          <div class="source-text" id="sourceTextDisplay">Loading…</div>
+        </div>
+
+        <div class="typing-container">
+          <div class="typing-label"><i class="fas fa-pencil-alt"></i> Your exact copy</div>
+          <textarea id="typingInput" placeholder="Type the entire text above exactly (including punctuation and spacing)..."></textarea>
+          <div class="stats-bar">
+            <div class="stat-item"><i class="fas fa-font"></i> Words: <span id="wordCount">0</span></div>
+            <div class="stat-item"><i class="fas fa-check-circle"></i> Match: <span id="matchStatus">Pending</span></div>
+          </div>
+          <div id="matchError" class="error-msg"></div>
+        </div>
+
+        <div class="action-buttons">
+          <button class="btn btn-primary" id="submitBtn"><i class="fas fa-paper-plane"></i> Submit &amp; Verify</button>
+          <button class="btn btn-success" id="claimBtn" disabled><i class="fas fa-rupee-sign"></i> Claim ₹100</button>
+          <button class="btn btn-outline" id="refreshHintBtn"><i class="fas fa-redo"></i> Later / Refresh safe</button>
+        </div>
+      </div>
+
+      <!-- Stats + Withdrawal -->
+      <div class="stats-section">
+        <div class="stats-card">
+          <h2 class="section-title"><i class="fas fa-chart-line"></i> Your Progress</h2>
+          <div class="stats-grid">
+            <div class="stat-box"><div class="stat-icon"><i class="fas fa-bullseye"></i></div><div class="stat-title">Accuracy</div><div class="stat-value-large">100%</div></div>
+            <div class="stat-box"><div class="stat-icon"><i class="fas fa-tasks"></i></div><div class="stat-title">Tasks Completed</div><div class="stat-value-large"><span id="completedCount">0</span> / 30</div></div>
+            <div class="stat-box"><div class="stat-icon"><i class="fas fa-coins"></i></div><div class="stat-title">Task Earnings</div><div class="stat-value-large"><span class="inr">₹</span> <span id="taskEarning">0</span></div></div>
+            <div class="stat-box"><div class="stat-icon"><i class="fas fa-star"></i></div><div class="stat-title">Next Reward</div><div class="stat-value-large">₹100</div></div>
+          </div>
+        </div>
+
+        <div class="stats-card">
+          <h2 class="section-title"><i class="fas fa-right-left"></i> Transfer Funds</h2>
+          <p style="margin-bottom: 15px; color:#64748b;">Move your task earnings into your Total Income, then withdraw them.</p>
+          <div class="stat-box" style="margin-bottom:12px;">
+            <div class="stat-title">Available to transfer</div>
+            <div class="stat-value-large"><span class="inr">₹</span> <span id="transferable">0</span></div>
+          </div>
+          <div id="transferHint" style="font-size:0.85rem;color:#64748b;margin-bottom:14px;"></div>
+          <button class="withdraw-btn" id="transferBtn" disabled style="display:flex;align-items:center;justify-content:center;gap:10px;"><i class="fas fa-right-left"></i> Transfer to Total Income</button>
+          <div id="transferMsg" class="error-msg"></div>
+          <a href="/instant-withdrawal.html" style="display:block;text-align:center;margin-top:12px;color:var(--primary);font-weight:600;text-decoration:none;font-size:0.9rem;">Go to Instant Withdrawal →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notification" id="notification"><i class="fas fa-check-circle"></i><div class="notification-content"><h3 id="notifTitle">Done</h3><p id="notifBody"></p></div></div>
+
+  <footer>
+    <div class="footer-logo"><i class="fas fa-coins"></i> CashyType.com</div>
+    <p style="margin-top:8px;color:#94a3b8;">30 typing tasks • ₹100 each • Progress saved to your account</p>
+    <div style="margin-top:8px;color:#64748b;font-size:0.85rem;">© 2026 CashyType Pro</div>
+  </footer>
+
+  <script src="/assets/app.js"></script>
+  <script src="/assets/mainnav.js"></script>
+  <script>
+    if (!CZ.requireAuth()) { /* redirected to login */ }
+
+    const TOTAL = 30;
+    let tasks = [];          // [{id, completed}]
+    let current = null;      // full current task {id, text, ...}
+    let saveTimer = null;
+
+    const $ = (id) => document.getElementById(id);
+    const sourceTextDisplay = $('sourceTextDisplay');
+    const typingInput = $('typingInput');
+
+    function escapeHtml(s) { return String(s).replace(/[&<>]/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
+    function countWords(s) { const t = (s || '').trim(); return t ? t.split(/\s+/).length : 0; }
+    function normalize(s) { return (s || '').trim().replace(/\s+/g, ' '); }
+
+    // Header + stats from the wallet endpoint (authoritative balance & counters).
+    async function refreshStats() {
+      $('userName').textContent = (CZ.user && CZ.user.name ? CZ.user.name.split(' ')[0] : 'User');
       try {
-        await CZ.api('/api/tasks/' + id + '/buy', { method: 'POST' });
-        CZ.toast('Task purchased ✓');
-        location.href = '/attempt.html?id=' + id;
-      } catch (err) {
-        CZ.toast(err.message);
-        render(); // restore button
+        const w = await CZ.api('/api/wallet');
+        const held = Number(w.taskBalance || 0);
+        const min = Number((w.config && w.config.transferMin) || 3000);
+        // Header wallet shows the transferable (held, not-yet-transferred) amount.
+        $('walletAmount').textContent = CZ.num(held);
+        // Task Earnings shows only the held (not-yet-transferred) earnings.
+        $('taskEarning').textContent = CZ.num(held);
+        $('transferable').textContent = CZ.num(held);
+        const ready = held >= min;
+        $('transferBtn').disabled = !ready;
+        $('transferHint').textContent = ready
+          ? 'Ready to transfer ₹' + CZ.num(held) + ' to Total Income.'
+          : 'Minimum ₹' + CZ.num(min) + ' to transfer — ₹' + CZ.num(Math.max(0, min - held)) + ' more to go.';
+      } catch { /* ignore */ }
+    }
+
+    function checkMatch() {
+      if (!current) return false;
+      const ok = normalize(typingInput.value) === normalize(current.text);
+      $('wordCount').textContent = countWords(typingInput.value);
+      if (ok) {
+        $('matchStatus').innerHTML = '✅ Exact match';
+        $('matchError').innerHTML = '';
+      } else {
+        $('matchStatus').innerHTML = '❌ Not matched';
+        $('matchError').innerHTML = '<i class="fas fa-exclamation-triangle"></i> Text must match the source (spacing, punctuation, case).';
+      }
+      return ok;
+    }
+
+    function allDoneView() {
+      sourceTextDisplay.innerHTML = "<div style='padding:20px;text-align:center'>🎉 All " + TOTAL + " tasks completed!<br>Great work — your earnings are saved to your wallet.</div>";
+      typingInput.value = '';
+      typingInput.disabled = true;
+      $('submitBtn').disabled = true;
+      $('claimBtn').disabled = true;
+      $('taskCounter').textContent = 'Completed ✅';
+      $('sourceWordCount').textContent = '0';
+    }
+
+    async function loadCurrent() {
+      // Pull the task list, count completed, pick the first unfinished task.
+      tasks = await CZ.api('/api/tasks');
+      const done = tasks.filter((t) => t.completed).length;
+      const next = tasks.find((t) => !t.completed);
+      $('completedCount').textContent = done;
+
+      if (!next) { allDoneView(); return; }
+      $('taskCounter').textContent = 'Task ' + (done + 1) + ' / ' + TOTAL;
+
+      // Full detail (includes the text + any saved progress) and ensure it's unlocked.
+      current = await CZ.api('/api/tasks/' + next.id);
+      if (current.status === 'none') {
+        try { await CZ.api('/api/tasks/' + next.id + '/buy', { method: 'POST', body: '{}' }); }
+        catch { /* already unlocked / ignore */ }
+      }
+
+      sourceTextDisplay.innerHTML = '<pre style="white-space:pre-wrap;font-family:inherit;margin:0;">' + escapeHtml(current.text) + '</pre>';
+      $('sourceWordCount').textContent = countWords(current.text);
+      typingInput.disabled = false;
+      typingInput.value = (current.progress && current.progress.typed) ? current.progress.typed : '';
+      $('submitBtn').disabled = false;
+      $('claimBtn').disabled = true;
+      checkMatch();
+    }
+
+    // Persist in-progress typing so it survives refresh.
+    typingInput.addEventListener('input', () => {
+      checkMatch();
+      $('claimBtn').disabled = true;
+      $('submitBtn').disabled = false;
+      if (!current) return;
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => {
+        CZ.api('/api/tasks/' + current.id + '/progress', { method: 'POST', body: JSON.stringify({ typed: typingInput.value }) }).catch(() => {});
+      }, 800);
+    });
+
+    $('submitBtn').addEventListener('click', () => {
+      if (!current) return;
+      if (checkMatch()) {
+        $('claimBtn').disabled = false;
+        $('submitBtn').disabled = true;
+        $('matchError').innerHTML = '<i class="fas fa-check-circle" style="color:#1dd1a1;"></i> Verified! Click “Claim ₹100” to get paid.';
+      } else {
+        $('claimBtn').disabled = true;
       }
     });
 
-    async function load() {
-      allTasks = await CZ.api('/api/tasks').catch(() => []);
-      render();
+    $('claimBtn').addEventListener('click', async () => {
+      if (!current) return;
+      const btn = $('claimBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Claiming…';
+      try {
+        const res = await CZ.api('/api/tasks/' + current.id + '/claim', { method: 'POST', body: JSON.stringify({ typed: typingInput.value }) });
+        if (CZ.user) { CZ.user.balance = res.balance; localStorage.setItem('cz_user', JSON.stringify(CZ.user)); }
+        confetti();
+        notify('+₹100 Earned!', 'Reward credited • next task loaded');
+        await refreshStats();
+        await loadCurrent();
+      } catch (err) {
+        $('matchError').innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + err.message;
+      } finally {
+        btn.innerHTML = '<i class="fas fa-rupee-sign"></i> Claim ₹100';
+      }
+    });
+
+    // Transfer held task earnings into Total Income (withdrawable balance).
+    $('transferBtn').addEventListener('click', async () => {
+      const btn = $('transferBtn');
+      const original = btn.innerHTML;
+      $('transferMsg').innerHTML = '';
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Transferring…';
+      try {
+        const res = await CZ.api('/api/wallet/transfer', { method: 'POST', body: '{}' });
+        if (CZ.user) { CZ.user.balance = res.balance; localStorage.setItem('cz_user', JSON.stringify(CZ.user)); }
+        btn.innerHTML = original;
+        const bonusMsg = res.bonus > 0 ? ' + ₹' + CZ.num(res.bonus) + ' bonus 🎉' : '';
+        notify('Transferred ✓', '₹' + CZ.num(res.transferred) + ' moved to Total Income' + bonusMsg);
+        await refreshStats();
+      } catch (err) {
+        btn.innerHTML = original; btn.disabled = false;
+        $('transferMsg').innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + err.message;
+      }
+    });
+
+    // Reset Progress restarts the 30 tasks from Task 1 so the user can redo them
+    // and earn more. Earnings, income, balances and transactions are all kept.
+    $('resetProgressBtn').addEventListener('click', async () => {
+      if (!confirm('Reset back to Task 1 and redo all 30 tasks to earn more?\n\nYour earnings, income and transaction history are kept.')) return;
+      const btn = $('resetProgressBtn');
+      const original = btn.innerHTML;
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Resetting…';
+      try {
+        await CZ.api('/api/tasks/reset', { method: 'POST', body: '{}' });
+        notify('Progress reset', 'Starting again from Task 1 — earn more!');
+        await refreshStats();
+        await loadCurrent();
+      } catch (err) {
+        alert(err.message || 'Could not reset. Please try again.');
+      } finally {
+        btn.disabled = false; btn.innerHTML = original;
+      }
+    });
+
+    // Reassure the user their work is safe to leave / refresh (it's saved server-side).
+    $('refreshHintBtn').addEventListener('click', () => {
+      notify('Progress saved ✓', 'Your typing and earnings are saved to your account — safe to refresh or come back later.');
+    });
+
+    function notify(title, body) {
+      $('notifTitle').textContent = title;
+      $('notifBody').textContent = body;
+      const n = $('notification');
+      n.classList.add('show');
+      clearTimeout(n._t);
+      n._t = setTimeout(() => n.classList.remove('show'), 3500);
     }
-    load();
+
+    function confetti() {
+      const colors = ['#4e54c8', '#8f94fb', '#1dd1a1', '#ffd166'];
+      for (let i = 0; i < 80; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.top = '-10px';
+        c.style.position = 'fixed';
+        c.style.width = (Math.random() * 10 + 5) + 'px';
+        c.style.height = (Math.random() * 10 + 5) + 'px';
+        c.style.borderRadius = '2px';
+        c.style.backgroundColor = colors[i % colors.length];
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 1200);
+      }
+    }
+
+    (async function init() {
+      await refreshStats();
+      try { await loadCurrent(); }
+      catch (e) { sourceTextDisplay.innerHTML = '<div style="padding:20px;color:#e55039;">Could not load tasks. Please refresh.</div>'; }
+    })();
   </script>
 </body>
 </html>

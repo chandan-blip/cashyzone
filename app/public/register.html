@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <meta content="Register for CashyType — earn INR by completing simple data-entry tasks. Join thousands of users earning from home today!" name="description" />
+  <title>CashyType — Create Your Account</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #eef1f7;
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .auth-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: calc(100vh - 66px);
+      padding: 30px 16px;
+    }
+
+    .container {
+      display: flex;
+      width: 100%;
+      max-width: 1000px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+      border-radius: 15px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .brand-section {
+      flex: 1;
+      background: linear-gradient(to bottom right, #0a2463, #3e92cc);
+      color: white;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+      transform: rotate(30deg);
+    }
+
+    .logo {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #ffd166, #ff9a3d);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      text-decoration: none;
+    }
+
+    .logo i {
+      font-size: 48px;
+      color: #0a2463;
+    }
+
+    .brand-section h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      position: relative;
+      z-index: 2;
+    }
+
+    .brand-section p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 30px;
+      max-width: 350px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .features {
+      text-align: left;
+      width: 100%;
+      margin-top: 30px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .feature {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      font-size: 0.95rem;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+    }
+
+    .feature i {
+      margin-right: 12px;
+      color: #ffd166;
+      font-size: 1.2rem;
+      min-width: 24px;
+    }
+
+    .form-section {
+      flex: 1.2;
+      background: #fff;
+      padding: 35px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      max-height: 400vh;
+    }
+
+    .form-section h2 {
+      color: #0a2463;
+      margin-bottom: 30px;
+      text-align: center;
+      font-size: 1.8rem;
+      position: relative;
+    }
+
+    .form-section h2::after {
+      content: '';
+      display: block;
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(to right, #0a2463, #3e92cc);
+      margin: 10px auto 0;
+      border-radius: 2px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .required {
+      color: #e63946;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 14px 15px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background-color: #fff;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: #3e92cc;
+      box-shadow: 0 0 0 3px rgba(62, 146, 204, 0.2);
+      outline: none;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 20px;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 20px;
+      margin-top: 5px;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: center;
+    }
+
+    .radio-option input {
+      margin-right: 8px;
+    }
+
+    .terms {
+      display: flex;
+      align-items: flex-start;
+      margin: 20px 0 25px;
+      background: #f8f9fa;
+      padding: 18px;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+    }
+
+    .terms input[type="checkbox"] {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border: 2px solid #000;
+      border-radius: 4px;
+      margin-right: 15px;
+      position: relative;
+      top: 3px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .terms input[type="checkbox"]:checked {
+      background: #0a2463;
+      border-color: #0a2463;
+    }
+
+    .terms input[type="checkbox"]:checked::after {
+      content: '\f00c';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      font-size: 14px;
+      color: white;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .terms label {
+      font-size: 1rem;
+      color: #555;
+      line-height: 1.5;
+      flex: 1;
+    }
+
+    .terms a {
+      color: #0a2463;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .terms a:hover {
+      text-decoration: underline;
+    }
+
+    .form-error {
+      background: #fdecea;
+      color: #b71c1c;
+      border: 1px solid #f5c6cb;
+      border-radius: 8px;
+      padding: 12px 15px;
+      margin-bottom: 18px;
+      font-size: 0.95rem;
+    }
+
+    .btn-register {
+      background: linear-gradient(to right, #0a2463, #3e92cc);
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(10, 36, 99, 0.3);
+      display: block;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-register::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -60%;
+      width: 40%;
+      height: 200%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: rotate(25deg);
+      transition: all 0.5s ease;
+    }
+
+    .btn-register:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(10, 36, 99, 0.4);
+    }
+
+    .btn-register:hover::after {
+      left: 120%;
+    }
+
+    .btn-register:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .login-link {
+      text-align: center;
+      margin-top: 25px;
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    .login-link a {
+      color: #0a2463;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+      font-size: 0.85rem;
+      color: #777;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+
+      .brand-section {
+        padding: 30px 20px;
+      }
+
+      .form-section {
+        padding: 30px 20px;
+      }
+
+      .brand-section h1 {
+        font-size: 2.2rem;
+      }
+
+      .form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-section { animation: fadeIn 0.8s ease-out; }
+
+    .feature {
+      animation: featureFadeIn 0.6s ease-out forwards;
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+
+    .feature:nth-child(1) { animation-delay: 0.2s; }
+    .feature:nth-child(2) { animation-delay: 0.3s; }
+    .feature:nth-child(3) { animation-delay: 0.4s; }
+    .feature:nth-child(4) { animation-delay: 0.5s; }
+
+    @keyframes featureFadeIn {
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .progress-container {
+      height: 6px;
+      background: #eee;
+      border-radius: 3px;
+      margin-bottom: 25px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(to right, #0a2463, #3e92cc);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-wrap">
+  <div class="container">
+    <div class="brand-section">
+      <a class="logo" href="/">
+        <i class="fas fa-keyboard"></i>
+      </a>
+      <h1>CashyType</h1>
+      <p>Earn money while improving your typing skills. Join our community of professional typists today!</p>
+
+      <div class="features">
+        <div class="feature">
+          <i class="fas fa-money-bill-wave"></i>
+          <span>Competitive typing jobs with instant payments</span>
+        </div>
+        <div class="feature">
+          <i class="fas fa-clock"></i>
+          <span>Flexible work hours - work anytime, anywhere</span>
+        </div>
+        <div class="feature">
+          <i class="fas fa-chart-line"></i>
+          <span>Progress tracking and skill improvement tools</span>
+        </div>
+        <div class="feature">
+          <i class="fas fa-headset"></i>
+          <span>24/7 customer support for all members</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>Create Your Account</h2>
+
+      <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+
+      <div class="form-error" id="formError" style="display:none"></div>
+
+      <form id="registrationForm">
+        <div class="form-group">
+          <label for="fullName">Full Name <span class="required">*</span></label>
+          <input id="fullName" name="fullName" placeholder="Enter your full name" required type="text" />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address <span class="required">*</span></label>
+          <input id="email" name="email" placeholder="Enter your email" required type="email" />
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone Number <span class="required">*</span></label>
+          <input id="phone" name="phone" placeholder="Enter your phone number" required type="tel" />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password <span class="required">*</span></label>
+          <input id="password" name="password" placeholder="Create a password (min 6 characters)" required type="password" minlength="6" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="dob">Date of Birth <span class="required">*</span></label>
+            <input id="dob" name="dob" required type="date" />
+          </div>
+
+          <div class="form-group">
+            <label for="age">Age</label>
+            <input id="age" max="100" min="16" name="age" placeholder="Your age" readonly type="number" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="gender">Gender <span class="required">*</span></label>
+          <div class="radio-group">
+            <div class="radio-option">
+              <input id="male" name="gender" required type="radio" value="male" />
+              <label for="male">Male</label>
+            </div>
+            <div class="radio-option">
+              <input id="female" name="gender" type="radio" value="female" />
+              <label for="female">Female</label>
+            </div>
+            <div class="radio-option">
+              <input id="other" name="gender" type="radio" value="other" />
+              <label for="other">Other</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="education">Education Degree <span class="required">*</span></label>
+          <select id="education" name="education" required>
+            <option value="">Select your highest degree</option>
+            <option value="highschool">High School</option>
+            <option value="associate">Associate Degree</option>
+            <option value="bachelor">Bachelor's Degree</option>
+            <option value="master">Master's Degree</option>
+            <option value="phd">Doctorate (PhD)</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="country">Country <span class="required">*</span></label>
+            <select id="country" name="country" required>
+              <option value="">Select your country</option>
+              <option value="India" selected>India</option>
+              <option value="United States">United States</option>
+              <option value="United Kingdom">United Kingdom</option>
+              <option value="Canada">Canada</option>
+              <option value="Australia">Australia</option>
+              <option value="United Arab Emirates">United Arab Emirates</option>
+              <option value="Germany">Germany</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="state">State/Province <span class="required">*</span></label>
+            <input id="state" name="state" placeholder="Enter your state" required type="text" />
+          </div>
+        </div>
+
+        <div class="terms">
+          <input id="terms" name="terms" required type="checkbox" />
+          <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+        </div>
+
+        <button class="btn-register" type="submit">Register Now</button>
+      </form>
+
+      <div class="login-link">
+        Already have an account? <a href="/login.html">Log In</a>
+      </div>
+
+      <div class="footer">
+        <p>© 2026 CashyType. All rights reserved.</p>
+        <p>Professional typing services for users worldwide</p>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <script src="/assets/app.js"></script>
+  <script src="/assets/mainnav.js"></script>
+  <script>
+    // Already logged in → skip straight to the destination.
+    const params = new URLSearchParams(location.search);
+    const next = params.get('next') || '/tasks.html';
+    if (CZ.token) location.href = next;
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const dobInput = document.getElementById('dob');
+      const ageInput = document.getElementById('age');
+      const errorBox = document.getElementById('formError');
+
+      // Auto-calculate age from date of birth.
+      dobInput.addEventListener('change', function () {
+        const dob = new Date(this.value);
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const monthDiff = today.getMonth() - dob.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) age--;
+        ageInput.value = age > 0 ? age : '';
+        updateProgress();
+      });
+
+      // Progress bar reflects how much of the form is filled.
+      const formInputs = document.querySelectorAll('#registrationForm input, #registrationForm select');
+      const progressBar = document.getElementById('progressBar');
+      formInputs.forEach((input) => input.addEventListener('input', updateProgress));
+
+      function updateProgress() {
+        let filledCount = 0;
+        let total = 0;
+        formInputs.forEach((input) => {
+          if (input.id === 'age') return;            // auto-filled
+          if (input.type === 'checkbox') return;     // counted separately
+          if (input.type === 'radio') {
+            if (input.value !== 'male') return;       // count the group once
+            total++;
+            if (document.querySelector('input[name="' + input.name + '"]:checked')) filledCount++;
+            return;
+          }
+          total++;
+          if (input.value.trim() !== '') filledCount++;
+        });
+        progressBar.style.width = (total ? (filledCount / total) * 100 : 0) + '%';
+      }
+
+      function showError(msg) {
+        errorBox.textContent = msg;
+        errorBox.style.display = 'block';
+        errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      document.getElementById('registrationForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        errorBox.style.display = 'none';
+
+        const name = document.getElementById('fullName').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const password = document.getElementById('password').value;
+        const dob = document.getElementById('dob').value;
+        const genderSelected = document.querySelector('input[name="gender"]:checked');
+        const education = document.getElementById('education').value;
+        const country = document.getElementById('country').value;
+        const state = document.getElementById('state').value.trim();
+        const terms = document.getElementById('terms').checked;
+
+        if (!name || !email || !phone || !password || !dob || !genderSelected || !education || !country || !state) {
+          showError('Please fill in all required fields.');
+          return;
+        }
+        if (password.length < 6) {
+          showError('Password must be at least 6 characters.');
+          return;
+        }
+        if (!terms) {
+          showError('You must agree to the Terms of Service and Privacy Policy to register.');
+          return;
+        }
+
+        const button = document.querySelector('.btn-register');
+        const original = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
+        button.disabled = true;
+
+        try {
+          const data = await CZ.api('/api/auth/register', {
+            method: 'POST',
+            body: JSON.stringify({ name, email, password, phone, dob, state, country }),
+          });
+          CZ.setSession(data.token, data.user);
+          // New users must pay the one-time registration fee before accessing the app.
+          location.href = data.user.is_admin ? '/admin.html' : '/reg-fee.html';
+        } catch (err) {
+          showError(err.message || 'Registration failed. Please try again.');
+          button.innerHTML = original;
+          button.disabled = false;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

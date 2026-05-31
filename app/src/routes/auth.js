@@ -4,6 +4,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const pool = require('../db');
 const { signToken, authRequired } = require('../auth');
+const settings = require('../settings');
 
 const router = express.Router();
 
@@ -64,6 +65,27 @@ router.post('/login', async (req, res, next) => {
     if (!ok) return res.status(401).json({ error: 'Invalid email or password' });
 
     res.json({ token: signToken(user), user: publicUser(user) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Registration-fee activation status. Derived from the user's registration-fee
+// deposit: approved -> active, pending -> processing, rejected (latest) -> rejected,
+// none -> needs_payment. Admins are always active.
+router.get('/activation', authRequired, async (req, res, next) => {
+  try {
+    if (req.user.is_admin) return res.json({ status: 'active', amount: 0 });
+    const amount = Number(settings.get('register_fee'));
+    const [rows] = await pool.query(
+      "SELECT status FROM deposits WHERE user_id = ? AND note = 'Registration fee' ORDER BY id DESC",
+      [req.user.id]
+    );
+    let status = 'needs_payment';
+    if (rows.some((r) => r.status === 'approved')) status = 'active';
+    else if (rows.some((r) => r.status === 'pending')) status = 'processing';
+    else if (rows.length && rows[0].status === 'rejected') status = 'rejected';
+    res.json({ status, amount });
   } catch (err) {
     next(err);
   }

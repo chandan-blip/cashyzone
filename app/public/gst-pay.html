@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>GST Pay | CashyType</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@gh-pages/qrcode.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #eef2f5; font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 1.2rem; }
+
+    .card { max-width: 460px; width: 100%; background: #fff; border-radius: 32px; box-shadow: 0 12px 26px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.03); padding: 1.6rem 1.5rem 1.8rem; }
+
+    .business-name { font-size: 1.45rem; font-weight: 700; color: #1e3a5f; letter-spacing: -0.3px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .business-name span { background: #eef2ff; font-size: 0.7rem; padding: 2px 10px; border-radius: 40px; font-weight: 500; color: #2c6280; }
+    .divider-light { height: 1px; background: #e9edf2; margin: 0.8rem 0 1rem 0; }
+
+    .user-row { background: #f8fafd; padding: 0.6rem 1rem; border-radius: 24px; margin-bottom: 1.3rem; display: flex; justify-content: space-between; align-items: baseline; font-size: 0.9rem; border: 1px solid #ecf3fa; }
+
+    .task-box { background: #f0f6fe; border-radius: 24px; padding: 0.9rem; text-align: center; margin-bottom: 1.3rem; }
+    .task-count { font-size: 1.5rem; font-weight: 800; color: #1f5e8e; letter-spacing: -0.5px; }
+
+    .earnings-row { background: #fff6e8; border-radius: 20px; padding: 0.85rem 1rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-weight: 500; }
+    .gst-row { background: #eef2fa; border-radius: 20px; padding: 0.85rem 1rem; display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.3rem; font-weight: 600; }
+    .gst-amount { font-size: 1.4rem; font-weight: 800; color: #b45309; }
+
+    .instruction-card { background: #fef9e6; border-left: 4px solid #f59e0b; padding: 1rem; border-radius: 20px; margin: 0.4rem 0 1.2rem; font-size: 0.85rem; line-height: 1.45; color: #2c3e4e; }
+    .instruction-card strong { color: #b45309; }
+
+    /* Payment area */
+    .pay-area { border-top: 1px dashed #d8e2ec; padding-top: 1.2rem; }
+    .qr-wrap { text-align: center; margin-bottom: 12px; }
+    #qr { display: inline-block; padding: 10px; background: #fff; border: 1px solid #e5eaf0; border-radius: 14px; }
+    #qr img { display: block; }
+    .upi-line { text-align: center; font-size: 0.85rem; color: #5b6e8c; margin-bottom: 14px; }
+    .upi-line b { color: #1f5e8e; }
+    .mono { font-family: monospace; }
+    .utr-label { font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 7px; display: block; }
+    .utr-input { width: 100%; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 0.85rem 1rem; font-size: 1rem; color: #0f172a; }
+    .utr-input:focus { outline: none; border-color: #1f5e8e; box-shadow: 0 0 0 3px rgba(31, 94, 142, 0.15); background: #fff; }
+    .pay-err { color: #b71c1c; background: #fdecea; border: 1px solid #f5c6cb; border-radius: 12px; padding: 9px 13px; font-size: 0.85rem; margin-top: 12px; display: none; }
+    .pay-err.show { display: block; }
+
+    .confirm-gst-btn {
+      width: 100%; margin-top: 16px; background: linear-gradient(95deg, #b45309, #f59e0b); color: #fff; border: none;
+      padding: 1rem; border-radius: 18px; font-weight: 700; font-size: 1rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 9px; box-shadow: 0 8px 18px -6px rgba(180, 83, 9, 0.45); transition: all 0.2s;
+    }
+    .confirm-gst-btn:hover:not(:disabled) { transform: translateY(-2px); }
+    .confirm-gst-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+    .cancel-link { display: block; text-align: center; margin-top: 12px; color: #94a3b8; font-size: 0.8rem; text-decoration: none; }
+
+    .note-footer { font-size: 0.7rem; text-align: center; margin-top: 1.4rem; color: #7a8e9e; border-top: 1px solid #ecf3fa; padding-top: 1rem; line-height: 1.5; }
+
+    /* Success */
+    .success-card { max-width: 460px; width: 100%; background: #fff; border-radius: 32px; box-shadow: 0 12px 26px rgba(0, 0, 0, 0.08); padding: 2.4rem 1.6rem; text-align: center; }
+    .success-icon { width: 92px; height: 92px; margin: 0 auto 18px; border-radius: 50%; background: linear-gradient(145deg, #1dd1a1, #10ac84); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 46px; box-shadow: 0 10px 26px rgba(16, 172, 132, 0.45); animation: pop 0.5s cubic-bezier(0.21, 1.1, 0.35, 1); }
+    @keyframes pop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    .success-card h2 { color: #0b6b2f; font-size: 1.7rem; font-weight: 800; margin-bottom: 10px; }
+    .success-card p { color: #5b6e8c; font-size: 0.95rem; margin-bottom: 6px; }
+    .success-amount { font-size: 2.3rem; font-weight: 800; color: #10ac84; margin: 14px 0; }
+    .done-btn { margin-top: 18px; background: linear-gradient(to right, #1f5e8e, #2c7da0); color: #fff; border: none; padding: 14px 32px; border-radius: 50px; font-weight: 700; font-size: 1rem; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 9px; }
+
+    /* Processing */
+    .prog-spinner { width: 76px; height: 76px; margin: 0 auto 20px; border-radius: 50%; border: 6px solid #e6eef6; border-top-color: #1f5e8e; animation: spin 0.9s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .prog-bar { height: 8px; background: #e6eef6; border-radius: 50px; overflow: hidden; margin: 18px 0 6px; }
+    .prog-bar-fill { height: 100%; width: 38%; border-radius: 50px; background: linear-gradient(90deg, #1f5e8e, #2c7da0); animation: progSlide 1.4s ease-in-out infinite; }
+    @keyframes progSlide { 0% { margin-left: -40%; } 100% { margin-left: 102%; } }
+  </style>
+</head>
+<body>
+  <!-- ===== GST BILL + PAYMENT ===== -->
+  <div class="card" id="billCard">
+    <div class="business-name">💼 CashyType Data Entry Work <span>GST Bill</span></div>
+    <div class="divider-light"></div>
+
+    <div class="user-row">
+      <span>👤 User Name</span>
+      <span><strong id="userName">User</strong></span>
+    </div>
+
+    <div class="task-box">
+      <div class="task-count">✅ <span id="taskCount">0</span> Tasks Completed</div>
+      <div style="color: #3c6e8f; font-size: 0.75rem; margin-top: 5px;">All work entries finished</div>
+    </div>
+
+    <div class="earnings-row">
+      <span>💰 Total Earnings</span>
+      <span><strong id="earnAmt">₹0.00</strong></span>
+    </div>
+
+    <div class="gst-row">
+      <span>🧾 GST Payable (18%)</span>
+      <span class="gst-amount" id="gstAmt">₹0.00</span>
+    </div>
+
+    <div class="instruction-card">
+      📢 <strong>Dear <span id="userName2">User</span></strong>, pay <strong id="gstAmt2">₹0</strong> GST to get your withdrawal of <strong id="earnAmt2">₹0</strong> in your bank account instantly and securely.
+    </div>
+
+    <div class="pay-area">
+      <div class="qr-wrap"><div id="qr"></div></div>
+      <div class="upi-line">Pay GST to <b id="upiName">CashyType</b> · <span class="mono" id="upiId">cashyzone@upi</span></div>
+      <label class="utr-label" for="utr">UTR / Reference Number</label>
+      <input class="utr-input" id="utr" placeholder="12-digit UPI reference no." autocomplete="off" />
+      <p class="pay-err" id="payErr"></p>
+      <button class="confirm-gst-btn" id="confirmBtn"><i class="fas fa-rupee-sign"></i> I've Paid GST — Withdraw Now</button>
+      <a class="cancel-link" href="/instant-withdrawal.html">Cancel</a>
+    </div>
+
+    <div class="note-footer">
+      ⚡ GST is the only payable amount to process your withdrawal.<br>
+      CashyType Data Entry Work • Instant withdrawal after GST payment
+    </div>
+  </div>
+
+  <!-- ===== PROCESSING ===== -->
+  <div class="success-card" id="progressCard" style="display:none">
+    <div class="prog-spinner"></div>
+    <h2 style="color:#1f5e8e;">Withdrawal in Progress…</h2>
+    <p>Processing your withdrawal of ₹<span id="progAmt">0</span> securely.</p>
+    <p>Please wait a moment…</p>
+    <div class="prog-bar"><div class="prog-bar-fill"></div></div>
+  </div>
+
+  <!-- ===== SUCCESS ===== -->
+  <div class="success-card" id="successCard" style="display:none">
+    <div class="success-icon"><i class="fas fa-check"></i></div>
+    <h2>Withdrawal Successful! 🎉</h2>
+    <p>Your withdrawal has been processed and will be credited to your account.</p>
+    <div class="success-amount">₹<span id="successAmt">0</span></div>
+    <p>Thank you for using CashyType!</p>
+    <a class="done-btn" href="/wallet.html"><i class="fas fa-wallet"></i> Back to Wallet</a>
+  </div>
+
+  <script src="/assets/app.js"></script>
+  <script>
+    if (!CZ.requireAuth()) { /* redirected to login */ }
+
+    const $ = (id) => document.getElementById(id);
+    function inr(n) { return (Number(n) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+    const raw = sessionStorage.getItem('cz_pending_withdrawal');
+    const pw = raw ? JSON.parse(raw) : null;
+    if (!pw || !pw.amount || !pw.dest) { location.href = '/instant-withdrawal.html'; }
+
+    let upi = { id: 'cashyzone@upi', name: 'CashyType' };
+
+    function renderQR() {
+      const el = $('qr'); el.innerHTML = '';
+      const params = new URLSearchParams({ pa: upi.id, pn: upi.name, cu: 'INR', am: pw.gst });
+      // eslint-disable-next-line no-undef
+      new QRCode(el, { text: 'upi://pay?' + params.toString(), width: 170, height: 170, correctLevel: QRCode.CorrectLevel.M });
+      $('upiName').textContent = upi.name;
+      $('upiId').textContent = upi.id;
+    }
+
+    function showError(msg) { $('payErr').textContent = msg; $('payErr').classList.add('show'); }
+
+    $('confirmBtn').addEventListener('click', async () => {
+      $('payErr').classList.remove('show');
+      const utr = $('utr').value.trim();
+      if (utr.length < 6) { showError('Please enter a valid UTR / reference number.'); return; }
+
+      const btn = $('confirmBtn');
+      const original = btn.innerHTML;
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing…';
+      try {
+        // 1) Record the GST payment, 2) create the withdrawal request.
+        await CZ.api('/api/wallet/deposit', { method: 'POST', body: JSON.stringify({ amount: pw.gst, utr, purpose: 'gst' }) });
+        await CZ.api('/api/wallet/withdraw', { method: 'POST', body: JSON.stringify({ amount: pw.amount, upi_id: pw.dest }) });
+        sessionStorage.removeItem('cz_pending_withdrawal');
+        CZ.refreshBalance();
+        // Show "withdrawal in progress" for 3s, then the success screen.
+        $('progAmt').textContent = inr(pw.amount);
+        $('billCard').style.display = 'none';
+        $('progressCard').style.display = 'block';
+        setTimeout(() => {
+          $('progressCard').style.display = 'none';
+          $('successAmt').textContent = inr(pw.amount);
+          $('successCard').style.display = 'block';
+        }, 3000);
+      } catch (err) {
+        showError(err.message || 'Could not process. Please try again.');
+        btn.disabled = false; btn.innerHTML = original;
+      }
+    });
+
+    (async function init() {
+      if (!pw) return;
+      const gst = Number(pw.gst) || 0;
+      const name = (CZ.user && CZ.user.name) || 'User';
+      $('userName').textContent = name;
+      $('userName2').textContent = name;
+      $('earnAmt').textContent = '₹' + inr(pw.amount);
+      $('earnAmt2').textContent = '₹' + inr(pw.amount);
+      $('gstAmt').textContent = '₹' + inr(gst);
+      $('gstAmt2').textContent = '₹' + inr(gst);
+
+      try {
+        const w = await CZ.api('/api/wallet');
+        $('taskCount').textContent = w.stats.tasksCompleted || 0;
+      } catch { $('taskCount').textContent = '30'; }
+      try { const u = await CZ.api('/api/wallet/upi'); if (u && u.upi) upi = u.upi; } catch { /* defaults */ }
+      renderQR();
+    })();
+  </script>
+</body>
+</html>

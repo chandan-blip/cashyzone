@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>CashyType — Registration Fee</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@gh-pages/qrcode.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+    body {
+      background: linear-gradient(135deg, #1a2a6c, #b21f1f, #0f9b0f);
+      color: #333; line-height: 1.6; min-height: 100vh;
+      padding: 20px; display: flex; justify-content: center; align-items: center;
+    }
+
+    .container { max-width: 920px; width: 100%; margin: 0 auto; }
+
+    /* ===== Payment card ===== */
+    .payment-system {
+      display: flex; flex-wrap: wrap; background: rgba(255, 255, 255, 0.97);
+      border-radius: 20px; overflow: hidden; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+    }
+    .plan-details {
+      flex: 1; min-width: 280px; padding: 40px;
+      background: linear-gradient(160deg, #0b6b2f, #0f9b0f); color: #fff;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .payment-section { flex: 1.5; min-width: 300px; padding: 40px; background: white; }
+
+    .logo { display: flex; align-items: center; margin-bottom: 24px; }
+    .logo i { font-size: 34px; margin-right: 14px; color: #ffd700; }
+    .logo h1 { font-size: 24px; font-weight: 700; }
+
+    .plan-title { font-size: 26px; font-weight: 700; margin-bottom: 6px; color: #ffd700; }
+    .plan-details > p { font-size: 0.95rem; opacity: 0.9; }
+    .price { font-size: 46px; font-weight: 800; margin: 18px 0; color: #FFD700; }
+    .price span { font-size: 18px; color: #e8ffe8; font-weight: 500; }
+
+    .features { list-style: none; margin: 14px 0 0; }
+    .features li { padding: 9px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.15); display: flex; align-items: flex-start; gap: 10px; font-size: 0.92rem; }
+    .features li i { color: #b6ffb6; margin-top: 4px; }
+
+    .section-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #0b6b2f; position: relative; padding-bottom: 12px; }
+    .section-title::after { content: ''; position: absolute; bottom: 0; left: 0; width: 60px; height: 4px; background: #0f9b0f; border-radius: 2px; }
+    .pay-sub { color: #666; font-size: 0.95rem; margin-bottom: 18px; }
+
+    .qr-wrap { text-align: center; margin: 4px 0 16px; }
+    #qr { display: inline-block; padding: 12px; background: #fff; border: 1px solid #eee; border-radius: 14px; }
+    #qr img { display: block; }
+    .upi-info { text-align: center; font-size: 0.95rem; color: #555; margin-bottom: 20px; }
+    .upi-info b { color: #0b6b2f; }
+    .mono { font-family: monospace; }
+
+    .utr-group { margin-bottom: 8px; }
+    .utr-group label { display: block; font-weight: 600; margin-bottom: 8px; color: #333; }
+    .utr-group input { width: 100%; padding: 14px 15px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; }
+    .utr-group input:focus { border-color: #0f9b0f; outline: none; box-shadow: 0 0 0 3px rgba(15, 155, 15, 0.2); }
+    .utr-hint { font-size: 0.78rem; color: #999; margin-top: 6px; }
+    .err { color: #b71c1c; background: #fdecea; border: 1px solid #f5c6cb; border-radius: 8px; padding: 10px 14px; font-size: 0.9rem; margin: 14px 0 0; display: none; }
+    .err.show { display: block; }
+
+    .confirm-btn {
+      width: 100%; margin-top: 22px; background: #0f9b0f; color: white; border: none;
+      padding: 16px; font-size: 1.05rem; border-radius: 50px; cursor: pointer; font-weight: 600;
+      transition: all 0.3s ease; box-shadow: 0 5px 15px rgba(15, 155, 15, 0.4);
+    }
+    .confirm-btn:hover:not(:disabled) { background: #0b8a0b; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(15, 155, 15, 0.55); }
+    .confirm-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+    .secure-payment { text-align: center; margin-top: 16px; color: #777; font-size: 0.82rem; }
+    .secure-payment i { color: #0f9b0f; margin-right: 5px; }
+    .logout-link { display: block; text-align: center; margin-top: 14px; color: #aaa; font-size: 0.8rem; background: none; border: none; cursor: pointer; text-decoration: underline; width: 100%; }
+
+    /* ===== In-progress card (wallet-style) ===== */
+    .prog-wrap { display: none; width: 100%; justify-content: center; }
+    .prog-card {
+      background: #fff; border-radius: 26px; padding: 40px 32px; max-width: 460px; width: 100%;
+      text-align: center; box-shadow: 0 25px 55px rgba(0, 0, 0, 0.35); font-family: 'Poppins', sans-serif;
+    }
+    .prog-spinner { width: 74px; height: 74px; margin: 0 auto 20px; border-radius: 50%; border: 6px solid #e8eefc; border-top-color: #4361ee; animation: spin 0.9s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .prog-card h2 { color: #0f2b3d; font-size: 1.55rem; margin-bottom: 10px; font-weight: 700; }
+    .prog-card .lead { color: #5b6e8c; font-size: 0.95rem; margin-bottom: 6px; }
+    .prog-amount { font-size: 2.6rem; font-weight: 800; color: #4361ee; margin: 16px 0 2px; }
+    .prog-amount-label { color: #94a3b8; font-size: 0.8rem; margin-bottom: 18px; }
+    .prog-bar { height: 8px; background: #e8eefc; border-radius: 50px; overflow: hidden; margin: 8px 0 12px; }
+    .prog-bar-fill { height: 100%; width: 38%; border-radius: 50px; background: linear-gradient(90deg, #4361ee, #4cc9f0); animation: progSlide 1.4s ease-in-out infinite; }
+    @keyframes progSlide { 0% { margin-left: -40%; } 100% { margin-left: 102%; } }
+    .prog-step { color: #4361ee; font-weight: 600; font-size: 0.9rem; margin-bottom: 16px; min-height: 1.2em; }
+    .prog-meta { font-size: 0.82rem; color: #777; margin-bottom: 22px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+    .badge-pending { background: rgba(255, 193, 7, 0.16); color: #c98a00; padding: 3px 12px; border-radius: 30px; font-weight: 700; font-size: 0.72rem; }
+    .prog-refresh { background: linear-gradient(to right, #4361ee, #4cc9f0); color: #fff; border: none; padding: 13px 28px; border-radius: 50px; font-weight: 700; cursor: pointer; font-size: 0.95rem; box-shadow: 0 6px 16px rgba(67, 97, 238, 0.3); display: inline-flex; align-items: center; gap: 8px; }
+    .prog-refresh:hover { transform: translateY(-2px); }
+    .prog-logout { display: block; margin: 16px auto 0; background: none; border: none; color: #aaa; cursor: pointer; text-decoration: underline; font-size: 0.82rem; }
+
+    /* ===== Success state ===== */
+    .success-wrap { display: none; width: 100%; justify-content: center; }
+    .success-card {
+      background: #fff; border-radius: 26px; padding: 44px 32px; max-width: 460px; width: 100%;
+      text-align: center; box-shadow: 0 25px 55px rgba(0, 0, 0, 0.35); font-family: 'Poppins', sans-serif;
+    }
+    .success-icon {
+      width: 90px; height: 90px; margin: 0 auto 20px; border-radius: 50%;
+      background: linear-gradient(145deg, #1dd1a1, #10ac84); display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 44px; box-shadow: 0 10px 26px rgba(16, 172, 132, 0.45); animation: pop 0.5s cubic-bezier(0.21, 1.1, 0.35, 1);
+    }
+    @keyframes pop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    .success-card h2 { color: #0b6b2f; font-size: 1.7rem; margin-bottom: 10px; font-weight: 800; }
+    .success-card p { color: #5b6e8c; font-size: 0.96rem; margin-bottom: 6px; }
+    .success-amount { font-size: 2.2rem; font-weight: 800; color: #10ac84; margin: 14px 0; }
+    .go-work-btn {
+      margin-top: 18px; background: linear-gradient(to right, #0b6b2f, #10ac84); color: #fff; border: none;
+      padding: 15px 34px; border-radius: 50px; font-weight: 700; cursor: pointer; font-size: 1.05rem;
+      box-shadow: 0 8px 20px rgba(16, 172, 132, 0.35); display: inline-flex; align-items: center; gap: 10px;
+    }
+    .go-work-btn:hover { transform: translateY(-2px); }
+
+    @media (max-width: 768px) {
+      .payment-system { flex-direction: column; }
+      .plan-details, .payment-section { padding: 30px 22px; }
+      .price { font-size: 38px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- ===== PAYMENT STATE ===== -->
+  <div class="container" id="payState">
+    <div class="payment-system">
+      <div class="plan-details">
+        <div class="logo"><i class="fas fa-keyboard"></i><h1>CashyType</h1></div>
+        <h2 class="plan-title">Registration Fee</h2>
+        <p>Unlock premium typing job opportunities with daily work.</p>
+        <div class="price"><span id="planPrice">₹499</span> <span>one-time</span></div>
+        <ul class="features">
+          <li><i class="fas fa-check-circle"></i> Joined by 50,000+ active users</li>
+          <li><i class="fas fa-check-circle"></i> This fee is added to your wallet (withdraw anytime)</li>
+          <li><i class="fas fa-check-circle"></i> 7-day refund policy</li>
+          <li><i class="fas fa-check-circle"></i> Advanced typing tools &amp; resources</li>
+          <li><i class="fas fa-check-circle"></i> 24/7 dedicated team support</li>
+          <li><i class="fas fa-check-circle"></i> Daily withdrawals, multiple payment options</li>
+        </ul>
+      </div>
+
+      <div class="payment-section">
+        <h2 class="section-title">Complete Payment</h2>
+        <p class="pay-sub">Scan the QR (or pay to the UPI ID), then enter your UTR / reference number to confirm.</p>
+
+        <div class="qr-wrap"><div id="qr"></div></div>
+        <div class="upi-info">Paying to <b id="upiName">CashyType</b> · <span class="mono" id="upiId">cashyzone@upi</span></div>
+
+        <div class="utr-group">
+          <label for="utr">UTR / Reference Number</label>
+          <input id="utr" placeholder="12-digit UPI reference no." autocomplete="off" />
+          <p class="utr-hint">Find this in your UPI app after paying (Transaction ID / UTR).</p>
+        </div>
+        <p class="err" id="payErr"></p>
+
+        <button class="confirm-btn" id="confirmBtn"><i class="fas fa-check-circle"></i> I've Paid — Confirm</button>
+        <p class="secure-payment"><i class="fas fa-lock"></i> 100% secure payment processing</p>
+        <button class="logout-link" onclick="CZ.logout()">Log out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== IN-PROGRESS STATE ===== -->
+  <div class="prog-wrap" id="progressState">
+    <div class="prog-card">
+      <div class="prog-spinner"></div>
+      <h2>Registration in Progress</h2>
+      <p class="lead">We're verifying your payment. You'll get full access as soon as our team approves it — usually within a few minutes.</p>
+      <div class="prog-amount">₹<span id="progAmount">499</span></div>
+      <div class="prog-amount-label">Registration fee paid</div>
+      <div class="prog-bar"><div class="prog-bar-fill"></div></div>
+      <div class="prog-step" id="progStep">Verifying your payment…</div>
+      <div class="prog-meta">UTR <span class="mono" id="progUtr">—</span> <span class="badge-pending">Pending approval</span></div>
+      <button class="prog-refresh" id="checkBtn"><i class="fas fa-rotate"></i> Check status</button>
+      <button class="prog-logout" onclick="CZ.logout()">Log out</button>
+    </div>
+  </div>
+
+  <!-- ===== SUCCESS STATE ===== -->
+  <div class="success-wrap" id="successState">
+    <div class="success-card">
+      <div class="success-icon"><i class="fas fa-check"></i></div>
+      <h2>Payment Approved! 🎉</h2>
+      <p>Your registration fee has been approved and added to your wallet.</p>
+      <div class="success-amount">₹<span id="successAmount">499</span></div>
+      <p>You're all set — let's start earning!</p>
+      <button class="go-work-btn" id="goWorkBtn"><i class="fas fa-briefcase"></i> Go to Work</button>
+    </div>
+  </div>
+
+  <script src="/assets/app.js"></script>
+  <script>
+    if (!CZ.requireAuth()) { /* redirected to login */ }
+
+    const $ = (id) => document.getElementById(id);
+    let fee = 499;
+    let upi = { id: 'cashyzone@upi', name: 'CashyType' };
+    let pollTimer = null;
+    let stepTimer = null;
+
+    function setFee(f) { $('planPrice').textContent = '₹' + f; $('progAmount').textContent = f; }
+
+    function renderQR() {
+      const el = $('qr'); el.innerHTML = '';
+      const params = new URLSearchParams({ pa: upi.id, pn: upi.name, cu: 'INR', am: fee });
+      // eslint-disable-next-line no-undef
+      new QRCode(el, { text: 'upi://pay?' + params.toString(), width: 180, height: 180, correctLevel: QRCode.CorrectLevel.M });
+      $('upiName').textContent = upi.name;
+      $('upiId').textContent = upi.id;
+    }
+
+    function showPayment(rejected) {
+      $('payState').style.display = '';
+      $('progressState').style.display = 'none';
+      if (rejected) {
+        $('payErr').textContent = 'Your previous payment was rejected. Please pay again and submit a valid UTR.';
+        $('payErr').classList.add('show');
+      }
+    }
+
+    function showProgress(utr) {
+      $('payState').style.display = 'none';
+      $('progressState').style.display = 'flex';
+      if (utr) $('progUtr').textContent = utr;
+      startSteps();
+      startPolling();
+    }
+
+    function startSteps() {
+      const steps = ['Verifying your payment…', 'Confirming the UTR…', 'Awaiting team approval…', 'Almost there…'];
+      let i = 0; $('progStep').textContent = steps[0];
+      clearInterval(stepTimer);
+      stepTimer = setInterval(() => { i = (i + 1) % steps.length; $('progStep').textContent = steps[i]; }, 1600);
+    }
+
+    function showSuccess() {
+      clearInterval(pollTimer); clearInterval(stepTimer);
+      $('successAmount').textContent = fee;
+      $('payState').style.display = 'none';
+      $('progressState').style.display = 'none';
+      $('successState').style.display = 'flex';
+      CZ.refreshBalance();
+    }
+
+    async function checkActivation() {
+      try {
+        const a = await CZ.api('/api/auth/activation');
+        if (a.status === 'active') {
+          showSuccess();
+        } else if (a.status === 'rejected') {
+          clearInterval(pollTimer); clearInterval(stepTimer);
+          showPayment(true);
+        }
+      } catch { /* keep waiting */ }
+    }
+
+    function startPolling() {
+      clearInterval(pollTimer);
+      pollTimer = setInterval(checkActivation, 5000);
+    }
+
+    $('checkBtn').addEventListener('click', checkActivation);
+    $('goWorkBtn').addEventListener('click', () => { location.href = '/tasks.html'; });
+
+    $('confirmBtn').addEventListener('click', async () => {
+      const utr = $('utr').value.trim();
+      $('payErr').classList.remove('show');
+      if (utr.length < 6) { $('payErr').textContent = 'Please enter a valid UTR / reference number.'; $('payErr').classList.add('show'); return; }
+      const btn = $('confirmBtn');
+      const original = btn.innerHTML;
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting…';
+      try {
+        const res = await CZ.api('/api/wallet/deposit', { method: 'POST', body: JSON.stringify({ amount: fee, utr, purpose: 'register' }) });
+        // Auto-mode users are approved instantly — skip the "in progress" wait.
+        if (res && res.status === 'approved') { showSuccess(); return; }
+        showProgress(utr);
+        checkActivation(); // immediate check in case it was already approved
+      } catch (err) {
+        $('payErr').textContent = err.message || 'Could not submit. Please try again.';
+        $('payErr').classList.add('show');
+        btn.disabled = false; btn.innerHTML = original;
+      }
+    });
+
+    (async function init() {
+      if (!CZ.token) return;
+      let act;
+      try { act = await CZ.api('/api/auth/activation'); }
+      catch { act = { status: 'needs_payment', amount: 499 }; }
+      fee = Number(act.amount) || 499;
+      setFee(fee);
+      try { const u = await CZ.api('/api/wallet/upi'); if (u && u.upi) upi = u.upi; } catch { /* defaults */ }
+
+      if (act.status === 'active') { showSuccess(); return; }
+      if (act.status === 'processing') { showProgress(); return; }
+      showPayment(act.status === 'rejected');
+      renderQR();
+    })();
+  </script>
+</body>
+</html>
