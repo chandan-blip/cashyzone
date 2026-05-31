@@ -13,7 +13,13 @@ router.use(authRequired);
 // Wallet overview: balance, transactions, and pending deposit/withdrawal requests.
 router.get('/', async (req, res, next) => {
   try {
-    const [u] = await pool.query('SELECT balance, auto_mode, created_at FROM users WHERE id = ?', [req.user.id]);
+    const [u] = await pool.query(
+      `SELECT balance, auto_mode, created_at,
+              total_income, task_completed, total_perchased, task_earning, bonus_money,
+              withdrawal, transactions_count
+         FROM users WHERE id = ?`,
+      [req.user.id]
+    );
     const [tx] = await pool.query(
       'SELECT id, type, amount, description, created_at FROM transactions WHERE user_id = ? ORDER BY id DESC LIMIT 50',
       [req.user.id]
@@ -27,31 +33,17 @@ router.get('/', async (req, res, next) => {
       [req.user.id]
     );
 
-    // Aggregate income figures for the balance cards.
-    const [[earned]] = await pool.query(
-      "SELECT COALESCE(SUM(amount),0) AS s FROM transactions WHERE user_id = ? AND type = 'earning'",
-      [req.user.id]
-    );
-    const [[deposited]] = await pool.query(
-      "SELECT COALESCE(SUM(amount),0) AS s FROM transactions WHERE user_id = ? AND type = 'deposit'",
-      [req.user.id]
-    );
-    const [[withdrawn]] = await pool.query(
-      "SELECT COALESCE(SUM(amount),0) AS s FROM transactions WHERE user_id = ? AND type = 'withdraw'",
-      [req.user.id]
-    );
-    const [[bonus]] = await pool.query(
-      "SELECT COALESCE(SUM(amount),0) AS s FROM transactions WHERE user_id = ? AND type = 'bonus'",
-      [req.user.id]
-    );
-    const [[tasksDone]] = await pool.query(
-      "SELECT COUNT(*) AS n FROM task_purchases WHERE user_id = ? AND status = 'completed'",
-      [req.user.id]
-    );
-    const [[purchased]] = await pool.query(
-      "SELECT COALESCE(SUM(amount),0) AS s FROM transactions WHERE user_id = ? AND type = 'purchase'",
-      [req.user.id]
-    );
+    // Activity figures come straight from the denormalised counters on the
+    // users row (kept in sync as the user transacts).
+    const totalIncome = Number(u[0]?.total_income ?? 0);
+    const taskEarning = Number(u[0]?.task_earning ?? 0);
+    const bonusMoney = Number(u[0]?.bonus_money ?? 0);
+    const totalPurchased = Number(u[0]?.total_perchased ?? 0);
+    const tasksCompleted = Number(u[0]?.task_completed ?? 0);
+    const withdrawal = Number(u[0]?.withdrawal ?? 0);
+    const transactionsCount = Number(u[0]?.transactions_count ?? 0);
+
+    // Pending-deposit total has no counter column, so it is still aggregated.
     const [[pendingDep]] = await pool.query(
       "SELECT COALESCE(SUM(amount),0) AS s FROM deposits WHERE user_id = ? AND status = 'pending'",
       [req.user.id]
@@ -68,12 +60,13 @@ router.get('/', async (req, res, next) => {
         withdrawMinTasks: settings.get('withdraw_min_tasks'),
       },
       stats: {
-        totalIncome: Number(deposited.s) + Number(purchased.s) + Number(bonus.s),
-        taskIncome: Number(earned.s),
-        bonusIncome: Number(bonus.s),
-        withdrawn: Number(withdrawn.s),
-        tasksCompleted: tasksDone.n,
-        totalPurchases: Number(purchased.s),
+        totalIncome,
+        taskIncome: taskEarning,
+        bonusIncome: bonusMoney,
+        withdrawn: withdrawal,
+        tasksCompleted,
+        totalPurchases: totalPurchased,
+        transactionsCount,
         pendingDeposits: Number(pendingDep.s),
       },
       transactions: tx,
@@ -121,7 +114,10 @@ router.post('/deposit', async (req, res, next) => {
 
     // Auto-approved deposits credit the wallet + log the ledger entry immediately.
     if (autoDeposit) {
-      await conn.query('UPDATE users SET balance = balance + ? WHERE id = ?', [amount, req.user.id]);
+      await conn.query(
+        'UPDATE users SET balance = balance + ?, total_income = total_income + ?, transactions_count = transactions_count + 1 WHERE id = ?',
+        [amount, amount, req.user.id]
+      );
       const desc = purpose === 'kyc' ? `KYC fee (UTR ${utr})`
         : purpose === 'gst' ? `GST payment (UTR ${utr})`
         : `Deposit approved (UTR ${utr})`;
@@ -224,6 +220,10 @@ router.post('/withdraw', async (req, res, next) => {
       await conn.query(
         'INSERT INTO transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)',
         [req.user.id, 'withdraw', amount, `Withdrawal paid to ${upiId}`]
+      );
+      await conn.query(
+        'UPDATE users SET withdrawal = withdrawal + ?, transactions_count = transactions_count + 1 WHERE id = ?',
+        [amount, req.user.id]
       );
     }
 

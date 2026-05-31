@@ -178,7 +178,10 @@ router.post('/:id/buy', authRequired, async (req, res, next) => {
       });
     }
 
-    await conn.query('UPDATE users SET balance = balance - ? WHERE id = ?', [task.price, req.user.id]);
+    await conn.query(
+      'UPDATE users SET balance = balance - ?, total_perchased = total_perchased + ?, transactions_count = transactions_count + 1 WHERE id = ?',
+      [task.price, task.price, req.user.id]
+    );
     await conn.query(
       'INSERT INTO task_purchases (user_id, task_id, price, reward, status) VALUES (?, ?, ?, ?, ?)',
       [req.user.id, task.id, task.price, task.reward, 'purchased']
@@ -247,7 +250,10 @@ router.post('/:id/claim', authRequired, async (req, res, next) => {
       "UPDATE task_purchases SET status = 'completed', completed_at = NOW(), progress = NULL WHERE id = ?",
       [rows[0].id]
     );
-    await conn.query('UPDATE users SET balance = balance + ? WHERE id = ?', [reward, req.user.id]);
+    await conn.query(
+      'UPDATE users SET balance = balance + ?, task_completed = task_completed + 1, task_earning = task_earning + ?, total_income = total_income + ?, transactions_count = transactions_count + 1 WHERE id = ?',
+      [reward, reward, reward, req.user.id]
+    );
     await conn.query(
       'INSERT INTO transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)',
       [req.user.id, 'earning', reward, `Task reward: ${task.title}`]

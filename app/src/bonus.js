@@ -15,7 +15,10 @@ async function creditFirstDepositBonus(conn, userId) {
   );
   if (b.n > 0) return false; // already received the welcome bonus
 
-  await conn.query('UPDATE users SET balance = balance + ? WHERE id = ?', [bonus, userId]);
+  await conn.query(
+    'UPDATE users SET balance = balance + ?, bonus_money = bonus_money + ?, total_income = total_income + ?, transactions_count = transactions_count + 1 WHERE id = ?',
+    [bonus, bonus, bonus, userId]
+  );
   await conn.query(
     "INSERT INTO transactions (user_id, type, amount, description) VALUES (?, 'bonus', ?, 'Welcome bonus (first deposit)')",
     [userId, bonus]

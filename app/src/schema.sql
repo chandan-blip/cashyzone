@@ -10,6 +10,14 @@ CREATE TABLE IF NOT EXISTS users (
   balance       DECIMAL(12, 2) NOT NULL DEFAULT 0,
   is_admin      TINYINT(1) NOT NULL DEFAULT 0,
   auto_mode     TINYINT(1) NOT NULL DEFAULT 0,
+  -- Denormalised activity counters, kept in sync as the user transacts.
+  total_income       DECIMAL(12, 2) NOT NULL DEFAULT 0, -- all money in (deposits + earnings + bonus)
+  task_completed     INT NOT NULL DEFAULT 0,            -- tasks claimed/completed
+  total_perchased    DECIMAL(12, 2) NOT NULL DEFAULT 0, -- money spent buying tasks
+  task_earning       DECIMAL(12, 2) NOT NULL DEFAULT 0, -- rewards earned from tasks
+  bonus_money        DECIMAL(12, 2) NOT NULL DEFAULT 0, -- welcome/bonus money received
+  withdrawal         DECIMAL(12, 2) NOT NULL DEFAULT 0, -- total money withdrawn / paid out
+  transactions_count INT NOT NULL DEFAULT 0,            -- number of ledger entries
   created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

@@ -49,6 +49,13 @@ async function main() {
     await ensureColumn(conn, 'users', 'state', 'VARCHAR(100)');
     await ensureColumn(conn, 'users', 'country', 'VARCHAR(100)');
     await ensureColumn(conn, 'users', 'auto_mode', 'TINYINT(1) NOT NULL DEFAULT 0');
+    await ensureColumn(conn, 'users', 'total_income', 'DECIMAL(12,2) NOT NULL DEFAULT 0');
+    await ensureColumn(conn, 'users', 'task_completed', 'INT NOT NULL DEFAULT 0');
+    await ensureColumn(conn, 'users', 'total_perchased', 'DECIMAL(12,2) NOT NULL DEFAULT 0');
+    await ensureColumn(conn, 'users', 'task_earning', 'DECIMAL(12,2) NOT NULL DEFAULT 0');
+    await ensureColumn(conn, 'users', 'bonus_money', 'DECIMAL(12,2) NOT NULL DEFAULT 0');
+    await ensureColumn(conn, 'users', 'withdrawal', 'DECIMAL(12,2) NOT NULL DEFAULT 0');
+    await ensureColumn(conn, 'users', 'transactions_count', 'INT NOT NULL DEFAULT 0');
     await ensureColumn(conn, 'deposits', 'note', 'VARCHAR(255) NULL');
     await ensureColumn(conn, 'task_purchases', 'progress', 'TEXT NULL');
 
@@ -57,6 +64,25 @@ async function main() {
     await conn.query(
       "ALTER TABLE transactions MODIFY COLUMN type ENUM('deposit','withdraw','earning','purchase','bonus') NOT NULL"
     );
+
+    // Backfill the activity counters from existing history so they are correct
+    // for users who transacted before these columns existed.
+    await conn.query(`
+      UPDATE users u SET
+        total_income = (SELECT COALESCE(SUM(amount),0) FROM transactions t
+                        WHERE t.user_id = u.id AND t.type IN ('deposit','earning','bonus')),
+        withdrawal = (SELECT COALESCE(SUM(amount),0) FROM transactions t
+                      WHERE t.user_id = u.id AND t.type = 'withdraw'),
+        task_completed = (SELECT COUNT(*) FROM task_purchases tp
+                          WHERE tp.user_id = u.id AND tp.status = 'completed'),
+        total_perchased = (SELECT COALESCE(SUM(amount),0) FROM transactions t
+                           WHERE t.user_id = u.id AND t.type = 'purchase'),
+        task_earning = (SELECT COALESCE(SUM(amount),0) FROM transactions t
+                        WHERE t.user_id = u.id AND t.type = 'earning'),
+        bonus_money = (SELECT COALESCE(SUM(amount),0) FROM transactions t
+                       WHERE t.user_id = u.id AND t.type = 'bonus'),
+        transactions_count = (SELECT COUNT(*) FROM transactions t WHERE t.user_id = u.id)
+    `);
 
     // An older build used `item_id` here. If that legacy column exists, drop the
     // stale table (it only held completion records) so the correct schema applies.

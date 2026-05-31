@@ -43,7 +43,11 @@ router.get('/stats', async (req, res, next) => {
 router.get('/users', async (req, res, next) => {
   try {
     const [rows] = await pool.query(
-      'SELECT id, name, email, balance, is_admin, auto_mode, created_at FROM users ORDER BY id DESC'
+      `SELECT id, name, email, balance, is_admin, auto_mode,
+              total_income, task_completed, total_perchased, task_earning, bonus_money,
+              withdrawal, transactions_count,
+              created_at
+         FROM users ORDER BY id DESC`
     );
     res.json(rows);
   } catch (err) {
@@ -90,7 +94,10 @@ router.post('/deposits/:id/approve', async (req, res, next) => {
     if (dep.status !== 'pending') { await conn.rollback(); return res.status(409).json({ error: 'Already reviewed' }); }
 
     await conn.query("UPDATE deposits SET status = 'approved', reviewed_at = NOW() WHERE id = ?", [dep.id]);
-    await conn.query('UPDATE users SET balance = balance + ? WHERE id = ?', [dep.amount, dep.user_id]);
+    await conn.query(
+      'UPDATE users SET balance = balance + ?, total_income = total_income + ?, transactions_count = transactions_count + 1 WHERE id = ?',
+      [dep.amount, dep.amount, dep.user_id]
+    );
     await conn.query(
       'INSERT INTO transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)',
       [dep.user_id, 'deposit', dep.amount, `Deposit approved (UTR ${dep.utr})`]
@@ -154,6 +161,10 @@ router.post('/withdrawals/:id/approve', async (req, res, next) => {
     await conn.query(
       'INSERT INTO transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)',
       [wd.user_id, 'withdraw', wd.amount, `Withdrawal paid to ${wd.upi_id}`]
+    );
+    await conn.query(
+      'UPDATE users SET withdrawal = withdrawal + ?, transactions_count = transactions_count + 1 WHERE id = ?',
+      [wd.amount, wd.user_id]
     );
     await conn.commit();
     res.json({ ok: true });
@@ -220,7 +231,10 @@ router.post('/kyc/:id/verify', async (req, res, next) => {
       if (deps.length && deps[0].status === 'pending') {
         const dep = deps[0];
         await conn.query("UPDATE deposits SET status = 'approved', reviewed_at = NOW() WHERE id = ?", [dep.id]);
-        await conn.query('UPDATE users SET balance = balance + ? WHERE id = ?', [dep.amount, dep.user_id]);
+        await conn.query(
+          'UPDATE users SET balance = balance + ?, total_income = total_income + ?, transactions_count = transactions_count + 1 WHERE id = ?',
+          [dep.amount, dep.amount, dep.user_id]
+        );
         await conn.query(
           'INSERT INTO transactions (user_id, type, amount, description) VALUES (?, ?, ?, ?)',
           [dep.user_id, 'deposit', dep.amount, `KYC fee (UTR ${dep.utr})`]
